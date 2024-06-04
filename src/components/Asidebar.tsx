@@ -35,9 +35,14 @@ const optionsTime = [
   { value: "11:00", label: "11:00 AM" },
   { value: "12:00", label: "12:00 AM" },
   { value: "13:00", label: "13:00 PM" },
+  { value: "14:00", label: "14:00 PM" },
+  { value: "15:00", label: "15:00 PM" },
 ];
 
-function Asidebar({ mobile, isOpen, toggleSidebar }: Props) {
+interface ContentAsideType {
+  isOpen: boolean;
+}
+const ContentAside = ({ isOpen }: ContentAsideType) => {
   const [date, setDate] = useState<Date>(new Date());
 
   const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -61,7 +66,123 @@ function Asidebar({ mobile, isOpen, toggleSidebar }: Props) {
   const onChange = (date: any) => {
     setDate(date);
   };
+  return (
+    <section
+      className={`p-6 mt-6 flex flex-col gap-6  ${isOpen ? "block" : "hidden"}`}
+    >
+      <div className="border-b border-gray-500 pb-2">
+        <ProfileHeader
+          email="testwr01@mailinator.com"
+          picture="https://picsum.photos/200"
+        />
+      </div>
+      <section>
+        <h4 className="text-base text-gray-50 font-semibold mb-5">
+          Welcome! Schedule Your Appointment
+        </h4>
 
+        <div className="flex flex-col gap-4">
+          <article className="flex flex-col items-start">
+            <label
+              htmlFor="branch"
+              className="text-gray-300 font-medium text-base mb-1"
+            >
+              Select the branch
+            </label>
+            <CustomSelect
+              id="branch"
+              onChange={handleChange}
+              options={optionsBranch}
+            />
+          </article>
+
+          <article className="flex flex-col items-start mb-3">
+            <label
+              htmlFor="customer service"
+              className="text-gray-300 font-medium text-base mb-1"
+            >
+              Customer service
+            </label>
+            <CustomSelect
+              id="customerService"
+              onChange={handleChange}
+              options={optionsCustomerService}
+            />
+          </article>
+
+          <article className="flex flex-col items-start">
+            <div className="flex items-center justify-between w-full mb-1">
+              <label
+                htmlFor="customer service"
+                className="text-gray-300 font-medium text-base mb-1"
+              >
+                Professionals
+              </label>
+
+              <div className="flex -space-x-3">
+                <img
+                  className="w-7 h-7 rounded-full border-2 overflow-hidden"
+                  src="https://picsum.photos/300"
+                />
+                <img
+                  className="w-7 h-7 rounded-full border-2 overflow-hidden"
+                  src="https://picsum.photos/100"
+                />
+                <img
+                  className="w-7 h-7 rounded-full border-2 overflow-hidden"
+                  src="https://picsum.photos/50"
+                />
+              </div>
+            </div>
+            <CustomSelect
+              id="professional"
+              onChange={handleChange}
+              options={optionsProfessional}
+            />
+          </article>
+
+          <article className="text-gray-800">
+            <Calendar
+              onChange={onChange}
+              value={date}
+              minDate={firstDayOfMonth}
+              maxDate={lastDayOfMonth}
+              tileDisabled={({ date }) => {
+                return (
+                  date.getMonth() !== new Date().getMonth() ||
+                  (date < new Date() && date.getDate() !== new Date().getDate())
+                );
+              }}
+            />
+          </article>
+
+          <article className="flex flex-col items-start mb-3">
+            <label
+              htmlFor="customer service"
+              className="text-gray-300 font-medium text-base mb-1"
+            >
+              Available times
+            </label>
+            <CustomSelect
+              id="times"
+              onChange={handleChange}
+              options={optionsTime}
+            />
+          </article>
+
+          <button
+            className="button font-semibold text-base bg-primary-400"
+            type="button"
+          >
+            Schedule Now
+          </button>
+        </div>
+      </section>
+    </section>
+  );
+};
+
+function Asidebar({ mobile, isOpen, toggleSidebar }: Props) {
   if (mobile) {
     return (
       <nav
@@ -72,7 +193,9 @@ function Asidebar({ mobile, isOpen, toggleSidebar }: Props) {
         <button onClick={toggleSidebar} className="absolute top-4 right-4">
           <FaTimes className="text-white" />
         </button>
-        <section className="flex flex-col text-white">aside mobile</section>
+        <section className="flex flex-col text-white">
+          <ContentAside isOpen={isOpen} />
+        </section>
       </nav>
     );
   }
@@ -93,121 +216,7 @@ function Asidebar({ mobile, isOpen, toggleSidebar }: Props) {
           <FaChevronRight className="text-white" />
         )}
       </button>
-      <section
-        className={`p-6 mt-6 flex flex-col gap-6  ${
-          isOpen ? "block" : "hidden"
-        }`}
-      >
-        <div className="border-b border-gray-500 pb-2">
-          <ProfileHeader
-            email="testwr01@mailinator.com"
-            picture="https://picsum.photos/200"
-          />
-        </div>
-        <section>
-          <h4 className="text-base text-gray-50 font-semibold mb-5">
-            Welcome! Schedule Your Appointment
-          </h4>
-
-          <div className="flex flex-col gap-4">
-            <article className="flex flex-col items-start">
-              <label
-                htmlFor="branch"
-                className="text-gray-300 font-medium text-base mb-1"
-              >
-                Select the branch
-              </label>
-              <CustomSelect
-                id="branch"
-                onChange={handleChange}
-                options={optionsBranch}
-              />
-            </article>
-
-            <article className="flex flex-col items-start mb-3">
-              <label
-                htmlFor="customer service"
-                className="text-gray-300 font-medium text-base mb-1"
-              >
-                Customer service
-              </label>
-              <CustomSelect
-                id="customerService"
-                onChange={handleChange}
-                options={optionsCustomerService}
-              />
-            </article>
-
-            <article className="flex flex-col items-start">
-              <div className="flex items-center justify-between w-full mb-1">
-                <label
-                  htmlFor="customer service"
-                  className="text-gray-300 font-medium text-base mb-1"
-                >
-                  Professionals
-                </label>
-
-                <div className="flex -space-x-3">
-                  <img
-                    className="w-7 h-7 rounded-full border-2 overflow-hidden"
-                    src="https://picsum.photos/300"
-                  />
-                  <img
-                    className="w-7 h-7 rounded-full border-2 overflow-hidden"
-                    src="https://picsum.photos/100"
-                  />
-                  <img
-                    className="w-7 h-7 rounded-full border-2 overflow-hidden"
-                    src="https://picsum.photos/50"
-                  />
-                </div>
-              </div>
-              <CustomSelect
-                id="professional"
-                onChange={handleChange}
-                options={optionsProfessional}
-              />
-            </article>
-
-            <article className="text-gray-800">
-              <Calendar
-                onChange={onChange}
-                value={date}
-                minDate={firstDayOfMonth}
-                maxDate={lastDayOfMonth}
-                tileDisabled={({ date }) => {
-                  return (
-                    date.getMonth() !== new Date().getMonth() ||
-                    (date < new Date() &&
-                      date.getDate() !== new Date().getDate())
-                  );
-                }}
-              />
-            </article>
-
-            <article className="flex flex-col items-start mb-3">
-              <label
-                htmlFor="customer service"
-                className="text-gray-300 font-medium text-base mb-1"
-              >
-                Available times
-              </label>
-              <CustomSelect
-                id="times"
-                onChange={handleChange}
-                options={optionsTime}
-              />
-            </article>
-
-            <button
-              className="button font-semibold text-base bg-primary-400"
-              type="button"
-            >
-              Schedule Now
-            </button>
-          </div>
-        </section>
-      </section>
+      <ContentAside isOpen={isOpen} />
     </nav>
   );
 }

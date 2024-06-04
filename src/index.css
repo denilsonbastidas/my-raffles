@@ -17,6 +17,6 @@
 .button,
 input[type="submit"] {
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 100%;
 }
