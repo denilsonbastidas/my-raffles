@@ -1,4 +1,6 @@
+import CalendarComponent from "./Calendar";
+
 function TableCalender() {
-  return <section>table calender....</section>;
+  return <section><CalendarComponent/></section>;
 }
 export default TableCalender;

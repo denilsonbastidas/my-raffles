@@ -64,6 +64,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onChange = (date: any) => {
+    console.log(date);
     setDate(date);
   };
   return (

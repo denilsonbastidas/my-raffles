@@ -23,12 +23,12 @@ function Dashboard() {
                 </p>
               </div>
             </div>
-            <FaChevronLeft className="text-gray-700 cursor-pointer" />
+            {/* <FaChevronLeft className="text-gray-700 cursor-pointer" />
             <FaChevronRight className="text-gray-700 cursor-pointer" />
 
             <p className="text-2xl font-semibold text-gray-700">
               Jueves, 06 mayo 2024
-            </p>
+            </p> */}
           </article>
 
           <article>
