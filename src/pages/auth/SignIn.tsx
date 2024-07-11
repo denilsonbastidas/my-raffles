@@ -1,10 +1,8 @@
 import { Field, Formik, Form } from "formik";
+import PhoneInput from "react-phone-number-input";
 import { Link } from "react-router-dom";
+import { SignInType } from "../../utils/types";
 
-interface SignInType {
-  email: string;
-  password: string;
-}
 function SignIn() {
   const submitSignInForm = (value: SignInType) => {
     console.log(value);
@@ -20,17 +18,31 @@ function SignIn() {
         <Formik
           validateOnMount
           initialValues={{
-            email: "",
+            phone: "",
             password: "",
           }}
           onSubmit={submitSignInForm}
         >
-          {() => (
+          {({ setFieldValue, handleChange, handleBlur, values }) => (
             <Form id="siginin-form" method="post">
               <label className="text-gray-500 text-base font-normal">
-                Email
+                Phone Number
               </label>
-              <Field type="email" name="email" className="input mb-2" />
+
+              <PhoneInput
+                countrySelectProps={{ unicodeFlags: true }}
+                defaultCountry="VE"
+                international={false}
+                name="phone"
+                className="input mb-4"
+                placeholder="Enter your phone"
+                onChange={(e) => {
+                  setFieldValue("phone", e);
+                  e?.length && handleChange(e);
+                }}
+                value={values.phone}
+                onBlur={(e) => handleBlur(e)}
+              />
 
               <label className="text-gray-500 text-base font-normal">
                 Password
