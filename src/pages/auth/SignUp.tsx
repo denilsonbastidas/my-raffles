@@ -1,16 +1,45 @@
-import { Field, Form, Formik } from "formik";
+import { Field, Form, Formik, ErrorMessage } from "formik";
 import { Link } from "react-router-dom";
-import PhoneInput from "react-phone-number-input";
+import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import { signUp } from "../../services";
+import { SignUpType } from "../../utils/types";
+import { useState } from "react";
+import Skeleton from "react-loading-skeleton";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import * as Yup from "yup";
 
-interface SignUpType {
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-}
+const signUpValidationSchema = Yup.object().shape({
+  fullName: Yup.string().required("Full Name is required"),
+  phone: Yup.string()
+  .test(
+    'validatePhoneNumber',
+    'Invalid phone number',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+    (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value),
+  )
+  .required('Phone Number is required'),
+  password: Yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters long"),
+});
+
 function SignUp() {
-  const submitSignUpForm = (value: SignUpType) => {
-    console.log(value);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const submitSignUpForm = async (value: SignUpType) => {
+    setLoading(true);
+    const responseSignUp = await signUp(
+      value.fullName,
+      value.phone,
+      value.password
+    );
+    setLoading(false);
+    if (responseSignUp.message === "Success") {
+      toast.success("Registered User!");
+      navigate("/signin");
+    }
   };
   return (
     <div className="min-h-[calc(100vh-69px)] md:flex md:items-center md:justify-center">
@@ -24,10 +53,10 @@ function SignUp() {
           validateOnMount
           initialValues={{
             fullName: "",
-            email: "",
             phone: "",
             password: "",
           }}
+          validationSchema={signUpValidationSchema}
           onSubmit={submitSignUpForm}
         >
           {({ setFieldValue, handleChange, handleBlur, values }) => (
@@ -36,12 +65,11 @@ function SignUp() {
                 Full Name
               </label>
               <Field type="text" name="fullName" className="input mb-2" />
-
-              <label className="text-gray-500 text-base font-normal">
-                Email
-              </label>
-              <Field type="email" name="email" className="input mb-2" />
-
+              <ErrorMessage
+                name="fullName"
+                component="div"
+                className="error-message"
+              />
               <label className="text-gray-500 text-base font-normal">
                 Phone Number
               </label>
@@ -60,18 +88,32 @@ function SignUp() {
                 value={values.phone}
                 onBlur={(e) => handleBlur(e)}
               />
+               <ErrorMessage
+                name="phone"
+                component="div"
+                className="error-message"
+              />
 
               <label className="text-gray-500 text-base font-normal">
                 Password
               </label>
               <Field type="password" name="password" className="input mb-2" />
+              <ErrorMessage
+                name="password"
+                component="div"
+                className="error-message"
+              />
 
-              <button
-                className="mb-4 mt-2 w-full bg-gray-900 rounded-lg font-medium border-none p-3 text-center text-white"
-                type="submit"
-              >
-                Get Started
-              </button>
+              {loading ? (
+                <Skeleton height={45} />
+              ) : (
+                <button
+                  className="mb-4 mt-2 w-full bg-gray-900 rounded-lg font-medium border-none p-3 text-center text-white"
+                  type="submit"
+                >
+                  Get Started
+                </button>
+              )}
             </Form>
           )}
         </Formik>

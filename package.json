@@ -18,15 +18,20 @@
     "@fullcalendar/resource-timegrid": "^6.1.14",
     "@fullcalendar/resource-timeline": "^6.1.14",
     "@fullcalendar/timegrid": "^6.1.14",
+    "axios": "^1.7.2",
     "formik": "^2.4.6",
     "react": "^18.2.0",
     "react-calendar": "^5.0.0",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
+    "react-loading-skeleton": "^3.4.0",
     "react-phone-number-input": "^3.4.3",
     "react-router-dom": "^6.23.1",
-    "react-select": "^5.8.0"
+    "react-select": "^5.8.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@types/node": "^20.14.10",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
