@@ -44,9 +44,9 @@ function SignUp() {
   return (
     <div className="min-h-[calc(100vh-69px)] md:flex md:items-center md:justify-center">
       <div className="mx-auto rounded-2xl w-full max-w-lg p-4 md:my-10 md:p-8 md:border border-gray-200">
-        <h2 className="sign-text  text-4xl font-bold">Sign Up</h2>
+        <h2 className="sign-text  text-4xl font-bold">Crear una cuenta</h2>
         <div className="py-4 text-gray-500 text-base font-normal">
-          Let's get started with your new account.
+          Comencemos con su nueva cuenta.
         </div>
 
         <Formik
@@ -62,7 +62,7 @@ function SignUp() {
           {({ setFieldValue, handleChange, handleBlur, values }) => (
             <Form id="siginup-form" method="post">
               <label className="text-gray-500 text-base font-normal">
-                Full Name
+                Nombre completo
               </label>
               <Field type="text" name="fullName" className="input mb-2" />
               <ErrorMessage
@@ -71,7 +71,7 @@ function SignUp() {
                 className="error-message"
               />
               <label className="text-gray-500 text-base font-normal">
-                Phone Number
+                Número de telefono
               </label>
 
               <PhoneInput
@@ -80,7 +80,7 @@ function SignUp() {
                 international={false}
                 name="phone"
                 className="input mb-4"
-                placeholder="Enter your phone"
+                placeholder="Ingrese su teléfono"
                 onChange={(e) => {
                   setFieldValue("phone", e);
                   e?.length && handleChange(e);
@@ -95,7 +95,7 @@ function SignUp() {
               />
 
               <label className="text-gray-500 text-base font-normal">
-                Password
+                Contraseña
               </label>
               <Field type="password" name="password" className="input mb-2" />
               <ErrorMessage
@@ -111,7 +111,7 @@ function SignUp() {
                   className="mb-4 mt-2 w-full bg-gray-900 rounded-lg font-medium border-none p-3 text-center text-white"
                   type="submit"
                 >
-                  Get Started
+                  Registrarte
                 </button>
               )}
             </Form>
@@ -121,9 +121,9 @@ function SignUp() {
         <div>
           <Link to="/signin">
             <div className="mt-8 text-gray-500">
-              Already have an account?{" "}
+              Ya tienes una cuenta?{" "}
               <span className="font-bold text-gray-900 hover:underline">
-                Sign In
+                Iniciar sesión 
               </span>
             </div>
           </Link>

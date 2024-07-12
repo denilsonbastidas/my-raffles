@@ -1,6 +1,8 @@
 import FullCalendar from "@fullcalendar/react";
 import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import esLocale from '@fullcalendar/core/locales/es';
+
 
 const formatDate = (date: Date) => {
   const year = date.getFullYear();
@@ -99,7 +101,7 @@ export function CalendarComponent() {
   return (
     <div>
       <h1 className="text-base text-gray-800 font-semibold">
-        Appointment Calendar
+        Calendario de citas
       </h1>
       <FullCalendar
         plugins={[resourceTimeGridPlugin, interactionPlugin]}
@@ -121,6 +123,7 @@ export function CalendarComponent() {
         eventDrop={handleEventDrop}
         eventResize={handleEventResize}
         allDaySlot={false}
+        locale={esLocale}
       />
     </div>
   );
