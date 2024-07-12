@@ -1,5 +1,6 @@
-import axios from "axios";
 import { API_ENDPOINT } from "./utils/constants";
+// import globalAxiosApi from "./utils/axios";
+import axios from "axios";
 
 export const signUp = async (
   fullName: string,
