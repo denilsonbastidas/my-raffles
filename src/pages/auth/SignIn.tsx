@@ -10,7 +10,7 @@ function SignIn() {
   return (
     <div className="min-h-[calc(100vh-69px)] md:flex md:items-center md:justify-center">
       <div className="mx-auto rounded-2xl w-full max-w-lg p-4 md:my-10 md:p-8 md:border border-gray-200">
-        <h2 className="sign-text  text-4xl font-bold">Inicio de session</h2>
+        <h2 className="sign-text  text-4xl font-bold">Iniciar sesión</h2>
         <div className="py-4 text-gray-500 text-base font-normal">
         Bienvenido, introduce tus datos.
         </div>
@@ -26,7 +26,7 @@ function SignIn() {
           {({ setFieldValue, handleChange, handleBlur, values }) => (
             <Form id="siginin-form" method="post">
               <label className="text-gray-500 text-base font-normal">
-                Numero de telefono
+                Número de telefono
               </label>
 
               <PhoneInput
@@ -35,7 +35,7 @@ function SignIn() {
                 international={false}
                 name="phone"
                 className="input mb-4"
-                placeholder="Ingresa tu telefono"
+                placeholder="Ingrese su teléfono"
                 onChange={(e) => {
                   setFieldValue("phone", e);
                   e?.length && handleChange(e);
@@ -62,7 +62,7 @@ function SignIn() {
                 className="mb-4 mt-2 w-full bg-gray-900 rounded-lg font-medium border-none p-3 text-center text-white"
                 type="submit"
               >
-                Iniciar session
+                Iniciar de sesión
               </button>
             </Form>
           )}
