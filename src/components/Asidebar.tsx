@@ -79,7 +79,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
       </div>
       <section>
         <h4 className="text-base text-gray-50 font-semibold mb-5">
-          Welcome! Schedule Your Appointment
+          Bienvenido, Agende su cita aqui 
         </h4>
 
         <div className="flex flex-col gap-4">
@@ -88,7 +88,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
               htmlFor="branch"
               className="text-gray-300 font-medium text-base mb-1"
             >
-              Select the branch
+              Seleccione la sucursal
             </label>
             <CustomSelect
               id="branch"
@@ -102,7 +102,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
               htmlFor="customer service"
               className="text-gray-300 font-medium text-base mb-1"
             >
-              Customer service
+              Servicio requerido
             </label>
             <CustomSelect
               id="customerService"
@@ -117,7 +117,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
                 htmlFor="customer service"
                 className="text-gray-300 font-medium text-base mb-1"
               >
-                Professionals
+                Profesionales 
               </label>
 
               <div className="flex -space-x-3">
@@ -162,7 +162,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
               htmlFor="customer service"
               className="text-gray-300 font-medium text-base mb-1"
             >
-              Available times
+              Horarios disponibles
             </label>
             <CustomSelect
               id="times"
@@ -175,7 +175,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
             className="button font-semibold text-base bg-primary-400"
             type="button"
           >
-            Schedule Now
+            Agendar Ahora
           </button>
         </div>
       </section>

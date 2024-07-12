@@ -36,7 +36,7 @@ function Dashboard() {
               type="button"
               className="button bg-gray-900 text-white font-medium text-base"
             >
-              My dates
+              Mis citas
             </button>
           </article>
         </section>
