@@ -12,13 +12,13 @@ import * as Yup from "yup";
 const signUpValidationSchema = Yup.object().shape({
   fullName: Yup.string().required("Full Name is required"),
   phone: Yup.string()
-  .test(
-    'validatePhoneNumber',
-    'Invalid phone number',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value),
-  )
-  .required('Phone Number is required'),
+    .test(
+      "validatePhoneNumber",
+      "Invalid phone number",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value)
+    )
+    .required("Phone Number is required"),
   password: Yup.string()
     .required("Password is required")
     .min(6, "Password must be at least 6 characters long"),
@@ -88,7 +88,7 @@ function SignUp() {
                 value={values.phone}
                 onBlur={(e) => handleBlur(e)}
               />
-               <ErrorMessage
+              <ErrorMessage
                 name="phone"
                 component="div"
                 className="error-message"
@@ -123,7 +123,7 @@ function SignUp() {
             <div className="mt-8 text-gray-500">
               Ya tienes una cuenta?{" "}
               <span className="font-bold text-gray-900 hover:underline">
-                Iniciar sesión 
+                Iniciar sesión
               </span>
             </div>
           </Link>

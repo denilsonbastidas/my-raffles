@@ -79,7 +79,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
       </div>
       <section>
         <h4 className="text-base text-gray-50 font-semibold mb-5">
-          Bienvenido, Agende su cita aqui 
+          Bienvenido, Agende su cita aqui
         </h4>
 
         <div className="flex flex-col gap-4">
@@ -117,7 +117,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
                 htmlFor="customer service"
                 className="text-gray-300 font-medium text-base mb-1"
               >
-                Profesionales 
+                Profesionales
               </label>
 
               <div className="flex -space-x-3">

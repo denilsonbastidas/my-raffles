@@ -1,18 +1,47 @@
-import { Field, Formik, Form } from "formik";
-import PhoneInput from "react-phone-number-input";
+import { Field, Formik, Form, ErrorMessage } from "formik";
+import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { SignInType } from "../../utils/types";
+import toast from "react-hot-toast";
+import * as Yup from "yup";
+import { signIn } from "../../services";
+
+const signInValidationSchema = Yup.object().shape({
+  phone: Yup.string()
+    .test(
+      "validatePhoneNumber",
+      "Invalid phone number",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value),
+    )
+    .required("Phone Number is required"),
+  password: Yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters long"),
+});
 
 function SignIn() {
-  const submitSignInForm = (value: SignInType) => {
-    console.log(value);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const submitSignInForm = async (value: SignInType) => {
+    setLoading(true);
+    const responseSignIn = await signIn(value.phone, value.password);
+    setLoading(false);
+
+    if (responseSignIn.message === "Success") {
+      navigate("/dashboard");
+      localStorage.setItem("token", responseSignIn.data.access_token);
+    }
   };
   return (
     <div className="min-h-[calc(100vh-69px)] md:flex md:items-center md:justify-center">
       <div className="mx-auto rounded-2xl w-full max-w-lg p-4 md:my-10 md:p-8 md:border border-gray-200">
         <h2 className="sign-text  text-4xl font-bold">Iniciar sesión</h2>
         <div className="py-4 text-gray-500 text-base font-normal">
-        Bienvenido, introduce tus datos.
+          Bienvenido, introduce tus datos.
         </div>
 
         <Formik
@@ -21,6 +50,7 @@ function SignIn() {
             phone: "",
             password: "",
           }}
+          validationSchema={signInValidationSchema}
           onSubmit={submitSignInForm}
         >
           {({ setFieldValue, handleChange, handleBlur, values }) => (
@@ -43,12 +73,20 @@ function SignIn() {
                 value={values.phone}
                 onBlur={(e) => handleBlur(e)}
               />
-
+              <ErrorMessage
+                name="phone"
+                component="div"
+                className="error-message"
+              />
               <label className="text-gray-500 text-base font-normal">
                 Contraseña
               </label>
               <Field type="password" name="password" className="input mb-2" />
-
+              <ErrorMessage
+                name="password"
+                component="div"
+                className="error-message"
+              />
               <div className="flex justify-between">
                 <div
                   aria-hidden="true"
