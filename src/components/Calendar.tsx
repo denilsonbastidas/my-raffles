@@ -99,33 +99,41 @@ export function CalendarComponent() {
   };
 
   return (
-    <div>
-      <h1 className="text-base text-gray-800 font-semibold">
+    <div className="p-4">
+    <div className="sticky top-0 bg-white z-10">
+      <h1 className="text-base text-gray-800 font-semibold mb-4">
         Calendario de citas
       </h1>
-      <FullCalendar
-        plugins={[resourceTimeGridPlugin, interactionPlugin]}
-        initialView="resourceTimeGridDay"
-        resources={resources}
-        events={events}
-        eventContent={renderEventContent}
-        resourceLabelContent={(resource) =>
-          renderResourceHeader(resource.resource)
-        }
-        headerToolbar={{
-          left: "prev,next today",
-          center: "title",
-          right: "resourceTimeGridDay",
-        }}
-        resourceAreaHeaderContent="Profesionales"
-        editable={true}
-        droppable={true}
-        eventDrop={handleEventDrop}
-        eventResize={handleEventResize}
-        allDaySlot={false}
-        locale={esLocale}
-      />
     </div>
+    <div className="overflow-x-auto">
+      <div className="min-w-[600px]">
+        <FullCalendar
+          plugins={[resourceTimeGridPlugin, interactionPlugin]}
+          initialView="resourceTimeGridDay"
+          resources={resources}
+          events={events}
+          eventContent={renderEventContent}
+          resourceLabelContent={(resource) =>
+            renderResourceHeader(resource.resource)
+          }
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "resourceTimeGridDay",
+          }}
+          resourceAreaHeaderContent="Profesionales"
+          editable={true}
+          droppable={true}
+          eventDrop={handleEventDrop}
+          eventResize={handleEventResize}
+          allDaySlot={false}
+          locale={esLocale}
+          height="auto"
+          contentHeight="auto"
+        />
+      </div>
+    </div>
+  </div>
   );
 }
 

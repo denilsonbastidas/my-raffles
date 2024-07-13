@@ -25,3 +25,25 @@ export const signUp = async (
   }
   return null;
 };
+
+export const signIn = async (
+
+  phone: string,
+  password: string
+) => {
+  try {
+    const response = await axios.request({
+      url: `${API_ENDPOINT}/auth/login`,
+      method: "post",
+      data: {
+        username: "prueba123",
+        phone: parseFloat(phone),
+        password,
+      },
+    });
+    return response.data ?? null;
+  } catch (error) {
+    console.log(error);
+  }
+  return null;
+};
