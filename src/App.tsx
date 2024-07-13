@@ -1,5 +1,5 @@
-import 'react-phone-number-input/style.css';
-import 'react-loading-skeleton/dist/skeleton.css';
+import "react-phone-number-input/style.css";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import { Route, Routes, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";

@@ -5,7 +5,7 @@ import axios from "axios";
 export const signUp = async (
   fullName: string,
   phone: string,
-  password: string
+  password: string,
 ) => {
   try {
     const response = await axios.request({
@@ -26,11 +26,7 @@ export const signUp = async (
   return null;
 };
 
-export const signIn = async (
-
-  phone: string,
-  password: string
-) => {
+export const signIn = async (phone: string, password: string) => {
   try {
     const response = await axios.request({
       url: `${API_ENDPOINT}/auth/login`,
