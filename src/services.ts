@@ -5,7 +5,7 @@ import axios from "axios";
 export const signUp = async (
   fullName: string,
   phone: string,
-  password: string,
+  password: string
 ) => {
   try {
     const response = await axios.request({
@@ -13,8 +13,7 @@ export const signUp = async (
       method: "post",
       data: {
         name: fullName,
-        username: "test",
-        phone: parseFloat(phone),
+        phone,
         password,
         permitlogy: 0,
       },
@@ -22,8 +21,8 @@ export const signUp = async (
     return response.data ?? null;
   } catch (error) {
     console.log(error);
+    throw error;
   }
-  return null;
 };
 
 export const signIn = async (phone: string, password: string) => {
@@ -32,14 +31,13 @@ export const signIn = async (phone: string, password: string) => {
       url: `${API_ENDPOINT}/auth/login`,
       method: "post",
       data: {
-        username: "prueba123",
-        phone: parseFloat(phone),
+        phone,
         password,
       },
     });
     return response.data ?? null;
   } catch (error) {
     console.log(error);
+    throw error;
   }
-  return null;
 };

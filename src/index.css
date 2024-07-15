@@ -52,13 +52,41 @@ input[type="email"] {
   border-radius: 8px;
 }
 
-.PhoneInput input[type='tel'] {
+.PhoneInput input[type="tel"] {
   border-style: none;
 }
 
-.PhoneInput input[type='tel']:focus-visible {
+.PhoneInput input[type="tel"]:focus-visible {
   outline: 0;
 }
-.error-message{
-  color: #F04438;
+.error-message {
+  color: #f04438;
+}
+.animate-spin {
+  animation: animate-spin 1s ease infinite;
+}
+@keyframes animate-spin {
+  0% {
+    opacity: 0;
+    transform: rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  20% {
+    transform: rotate(-22deg);
+  }
+  40% {
+    transform: rotate(0deg);
+  }
+  60% {
+    transform: rotate(-22deg);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(180deg);
+    opacity: 0;
+  }
 }

@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { SignInType } from "../../utils/types";
-import toast from "react-hot-toast";
 import * as Yup from "yup";
 import { signIn } from "../../services";
+import Skeleton from "react-loading-skeleton";
 
 const signInValidationSchema = Yup.object().shape({
   phone: Yup.string()
@@ -14,7 +14,7 @@ const signInValidationSchema = Yup.object().shape({
       "validatePhoneNumber",
       "Invalid phone number",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value),
+      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value)
     )
     .required("Phone Number is required"),
   password: Yup.string()
@@ -25,15 +25,19 @@ const signInValidationSchema = Yup.object().shape({
 function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const submitSignInForm = async (value: SignInType) => {
-    setLoading(true);
-    const responseSignIn = await signIn(value.phone, value.password);
-    setLoading(false);
-
-    if (responseSignIn.message === "Success") {
-      navigate("/dashboard");
+    try {
+      setLoading(true);
+      const responseSignIn = await signIn(value.phone, value.password);
       localStorage.setItem("token", responseSignIn.data.access_token);
+      navigate("/dashboard");
+      setLoading(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setErrorMessage(err.response.data.message);
+      setLoading(false);
     }
   };
   return (
@@ -96,12 +100,17 @@ function SignIn() {
                 </div>
               </div>
 
-              <button
-                className="mb-4 mt-2 w-full bg-gray-900 rounded-lg font-medium border-none p-3 text-center text-white"
-                type="submit"
-              >
-                Iniciar de sesión
-              </button>
+              {loading ? (
+                <Skeleton height={45} />
+              ) : (
+                <button
+                  className="mb-4 mt-2 w-full bg-gray-900 rounded-lg font-medium border-none p-3 text-center text-white"
+                  type="submit"
+                >
+                  Iniciar de sesión
+                </button>
+              )}
+              <div className="error-message">{errorMessage}</div>
             </Form>
           )}
         </Formik>

@@ -27,18 +27,19 @@ const signUpValidationSchema = Yup.object().shape({
 function SignUp() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const submitSignUpForm = async (value: SignUpType) => {
-    setLoading(true);
-    const responseSignUp = await signUp(
-      value.fullName,
-      value.phone,
-      value.password
-    );
-    setLoading(false);
-    if (responseSignUp.message === "Success") {
+    try {
+      setLoading(true);
+      await signUp(value.fullName, value.phone, value.password);
       toast.success("Registered User!");
       navigate("/signin");
+      setLoading(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setLoading(false);
+      setErrorMessage(err.response.data.message);
     }
   };
   return (
@@ -114,6 +115,7 @@ function SignUp() {
                   Registrarte
                 </button>
               )}
+               <div className="error-message">{errorMessage}</div>
             </Form>
           )}
         </Formik>
