@@ -1,12 +1,16 @@
 // import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Layout from "../components/Layout";
-import TableCalender from "../components/TableCalender";
+import Layout from '../components/Layout';
+import TableCalender from '../components/TableCalender';
 
 function Dashboard() {
   return (
     <Layout>
       <div className=" p-8">
-        <section className="flex justify-between items-center mb-4">
+        <section
+          className="flex
+        
+        justify-between items-center mb-4"
+        >
           <article className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <img

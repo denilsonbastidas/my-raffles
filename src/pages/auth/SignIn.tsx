@@ -1,7 +1,7 @@
 import { Field, Formik, Form, ErrorMessage } from "formik";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 import { useState } from "react";
 import { SignInType } from "../../utils/types";
 import * as Yup from "yup";
@@ -14,7 +14,7 @@ const signInValidationSchema = Yup.object().shape({
       "validatePhoneNumber",
       "Invalid phone number",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value)
+      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value),
     )
     .required("Phone Number is required"),
   password: Yup.string()
@@ -59,7 +59,10 @@ function SignIn() {
         >
           {({ setFieldValue, handleChange, handleBlur, values }) => (
             <Form id="siginin-form" method="post">
-              <label className="text-gray-500 text-base font-normal">
+              <label
+                htmlFor="phone"
+                className="text-gray-500 text-base font-normal"
+              >
                 Número de telefono
               </label>
 
@@ -82,7 +85,10 @@ function SignIn() {
                 component="div"
                 className="error-message"
               />
-              <label className="text-gray-500 text-base font-normal">
+              <label
+                htmlFor="password"
+                className="text-gray-500 text-base font-normal"
+              >
                 Contraseña
               </label>
               <Field type="password" name="password" className="input mb-2" />

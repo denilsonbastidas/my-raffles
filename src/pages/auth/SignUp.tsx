@@ -1,12 +1,12 @@
 import { Field, Form, Formik, ErrorMessage } from "formik";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
 import { signUp } from "../../services";
 import { SignUpType } from "../../utils/types";
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+
 import * as Yup from "yup";
 
 const signUpValidationSchema = Yup.object().shape({
@@ -15,8 +15,8 @@ const signUpValidationSchema = Yup.object().shape({
     .test(
       "validatePhoneNumber",
       "Invalid phone number",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (value: any) => Boolean(value.length) && isPossiblePhoneNumber(value),
     )
     .required("Phone Number is required"),
   password: Yup.string()
@@ -33,10 +33,11 @@ function SignUp() {
     try {
       setLoading(true);
       await signUp(value.fullName, value.phone, value.password);
+      setLoading(false);
       toast.success("Registered User!");
       navigate("/signin");
       setLoading(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setLoading(false);
       setErrorMessage(err.response.data.message);
@@ -62,7 +63,10 @@ function SignUp() {
         >
           {({ setFieldValue, handleChange, handleBlur, values }) => (
             <Form id="siginup-form" method="post">
-              <label className="text-gray-500 text-base font-normal">
+              <label
+                htmlFor="fullName"
+                className="text-gray-500 text-base font-normal"
+              >
                 Nombre completo
               </label>
               <Field type="text" name="fullName" className="input mb-2" />
@@ -71,7 +75,10 @@ function SignUp() {
                 component="div"
                 className="error-message"
               />
-              <label className="text-gray-500 text-base font-normal">
+              <label
+                htmlFor="phone"
+                className="text-gray-500 text-base font-normal"
+              >
                 Número de telefono
               </label>
 
@@ -95,7 +102,10 @@ function SignUp() {
                 className="error-message"
               />
 
-              <label className="text-gray-500 text-base font-normal">
+              <label
+                htmlFor="password"
+                className="text-gray-500 text-base font-normal"
+              >
                 Contraseña
               </label>
               <Field type="password" name="password" className="input mb-2" />
@@ -115,7 +125,7 @@ function SignUp() {
                   Registrarte
                 </button>
               )}
-               <div className="error-message">{errorMessage}</div>
+              <div className="error-message">{errorMessage}</div>
             </Form>
           )}
         </Formik>
