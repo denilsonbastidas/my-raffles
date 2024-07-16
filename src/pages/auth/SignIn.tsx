@@ -7,6 +7,7 @@ import { SignInType } from "../../utils/types";
 import * as Yup from "yup";
 import { signIn } from "../../services";
 import Skeleton from "react-loading-skeleton";
+import { useAuth } from "../../contexts/AuthContext";
 
 const signInValidationSchema = Yup.object().shape({
   phone: Yup.string()
@@ -23,6 +24,7 @@ const signInValidationSchema = Yup.object().shape({
 });
 
 function SignIn() {
+  const { setIsAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -32,6 +34,7 @@ function SignIn() {
       setLoading(true);
       const responseSignIn = await signIn(value.phone, value.password);
       localStorage.setItem("token", responseSignIn.data.access_token);
+      setIsAuthenticated(true);
       navigate("/dashboard");
       setLoading(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,6 +43,7 @@ function SignIn() {
       setLoading(false);
     }
   };
+
   return (
     <div className="min-h-[calc(100vh-69px)] md:flex md:items-center md:justify-center">
       <div className="mx-auto w-full max-w-lg rounded-2xl border-gray-200 p-4 md:my-10 md:border md:p-8">

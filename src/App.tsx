@@ -6,19 +6,11 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
-import useAuth from "./hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useAuth } from "./contexts/AuthContext";
 import Loading from "./components/Loading";
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const isAuthenticated = useAuth();
-
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return <Loading />;

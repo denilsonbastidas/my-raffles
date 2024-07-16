@@ -1,11 +1,11 @@
 import { API_ENDPOINT } from "./utils/constants";
-// import globalAxiosApi from "./utils/axios";
+import globalAxiosApi from "./utils/axios";
 import axios from "axios";
 
 export const signUp = async (
   fullName: string,
   phone: string,
-  password: string
+  password: string,
 ) => {
   try {
     const response = await axios.request({
@@ -34,6 +34,18 @@ export const signIn = async (phone: string, password: string) => {
         phone,
         password,
       },
+    });
+    return response.data ?? null;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+export const validationToken = async () => {
+  try {
+    const response = await globalAxiosApi.request({
+      url: `${API_ENDPOINT}/token/validate`,
+      method: "get",
     });
     return response.data ?? null;
   } catch (error) {
