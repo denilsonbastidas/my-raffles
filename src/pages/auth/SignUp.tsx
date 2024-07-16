@@ -45,9 +45,9 @@ function SignUp() {
   };
   return (
     <div className="min-h-[calc(100vh-69px)] md:flex md:items-center md:justify-center">
-      <div className="mx-auto rounded-2xl w-full max-w-lg p-4 md:my-10 md:p-8 md:border border-gray-200">
-        <h2 className="sign-text  text-4xl font-bold">Crear una cuenta</h2>
-        <div className="py-4 text-gray-500 text-base font-normal">
+      <div className="mx-auto w-full max-w-lg rounded-2xl border-gray-200 p-4 md:my-10 md:border md:p-8">
+        <h2 className="sign-text text-4xl font-bold">Crear una cuenta</h2>
+        <div className="py-4 text-base font-normal text-gray-500">
           Comencemos con su nueva cuenta.
         </div>
 
@@ -119,7 +119,7 @@ function SignUp() {
                 <Skeleton height={45} />
               ) : (
                 <button
-                  className="mb-4 mt-2 w-full bg-gray-900 rounded-lg font-medium border-none p-3 text-center text-white"
+                  className="mb-4 mt-2 w-full rounded-lg border-none bg-gray-900 p-3 text-center font-medium text-white"
                   type="submit"
                 >
                   Registrarte

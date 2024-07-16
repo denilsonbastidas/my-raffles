@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import Asidebar from './Asidebar';
+import React, { useState } from "react";
+import Asidebar from "./Asidebar";
 
 type Props = {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ export default function Layout({ children }: Props) {
       <div
         id="content-wrapper"
         className={`flex-1 overflow-y-auto transition-all duration-300 ${
-          isSidebarOpen ? 'ml-96' : 'ml-16'
+          isSidebarOpen ? "ml-96" : "ml-16"
         }`}
       >
         {children}

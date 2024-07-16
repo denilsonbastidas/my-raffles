@@ -1,28 +1,24 @@
 // import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Layout from '../components/Layout';
-import TableCalender from '../components/TableCalender';
+import Layout from "../components/Layout";
+import TableCalender from "../components/TableCalender";
 
 function Dashboard() {
   return (
     <Layout>
-      <div className=" p-8">
-        <section
-          className="flex
-        
-        justify-between items-center mb-4"
-        >
+      <div className="p-8">
+        <section className="mb-4 flex items-center justify-between">
           <article className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <img
                 src="/logoCompany.svg"
-                className="rounded-full overflow-hidden w-16 h-16"
-                alt="company image"
+                className="h-16 w-16 overflow-hidden rounded-full"
+                alt="company "
               />
               <div>
-                <h3 className="text-base text-gray-800 font-medium">
+                <h3 className="text-base font-medium text-gray-800">
                   Barberia el Bosque
                 </h3>
-                <p className="text-sm text-gray-500 font-normal">
+                <p className="text-sm font-normal text-gray-500">
                   Av. las delicias
                 </p>
               </div>
@@ -38,7 +34,7 @@ function Dashboard() {
           <article>
             <button
               type="button"
-              className="button bg-gray-900 text-white font-medium text-base"
+              className="button bg-gray-900 text-base font-medium text-white"
             >
               Mis citas
             </button>

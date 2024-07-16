@@ -77,7 +77,7 @@ const renderResourceHeader = (resource: any) => {
       <img
         src="src/assets/user.jpg"
         alt={resource.title}
-        className="border w-12 h-12 rounded-full"
+        className="h-12 w-12 rounded-full border"
       />
       <span>{resource.title}</span>
     </div>
@@ -99,8 +99,8 @@ export function CalendarComponent() {
 
   return (
     <div className="p-4">
-      <div className="sticky top-0 bg-white z-10">
-        <h1 className="text-base text-gray-800 font-semibold mb-4">
+      <div className="sticky top-0 z-10 bg-white">
+        <h1 className="mb-4 text-base font-semibold text-gray-800">
           Calendario de citas
         </h1>
       </div>

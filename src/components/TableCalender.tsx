@@ -1,4 +1,4 @@
-import CalendarComponent from "./Calendar";
+import { CalendarComponent } from "./Calendar";
 
 function TableCalender() {
   return (

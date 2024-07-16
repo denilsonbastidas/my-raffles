@@ -25,7 +25,7 @@ function CustomSelect({ options, onChange, id }: Props) {
   return (
     <Select
       defaultValue={options[0]}
-      className="text-gray-800 w-full"
+      className="w-full text-gray-800"
       value={selectedOption}
       onChange={handleChange}
       options={options}
