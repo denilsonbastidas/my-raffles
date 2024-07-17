@@ -3,12 +3,12 @@ import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useState } from "react";
-import { SignInType } from "../../utils/types";
+import { SignInType } from "@/utils/types";
 import * as Yup from "yup";
-import { signIn } from "../../services";
+import { signIn } from "@/services";
 import Skeleton from "react-loading-skeleton";
-import { useAuth } from "../../contexts/AuthContext";
-import HeaderAuth from "../../components/HeaderAuth";
+import { useAuth } from "@/contexts/AuthContext";
+import HeaderAuth from "@/components/HeaderAuth";
 
 const signInValidationSchema = Yup.object().shape({
   phone: Yup.string()

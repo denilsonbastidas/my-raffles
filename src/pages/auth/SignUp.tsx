@@ -1,14 +1,14 @@
 import { Field, Form, Formik, ErrorMessage } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
-import { signUp } from "../../services";
-import { SignUpType } from "../../utils/types";
+import { signUp } from "@/services";
+import { SignUpType } from "@/utils/types";
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import toast from "react-hot-toast";
 
 import * as Yup from "yup";
-import HeaderAuth from "../../components/HeaderAuth";
+import HeaderAuth from "@/components/HeaderAuth";
 
 const signUpValidationSchema = Yup.object().shape({
   fullName: Yup.string().required("Full Name is required"),
