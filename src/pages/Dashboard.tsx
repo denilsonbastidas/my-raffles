@@ -1,5 +1,6 @@
-import Layout from "../components/Layout";
-import TableCalender from "../components/TableCalender";
+// import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import Layout from "@/components/Layout";
+import TableCalender from "@/components/TableCalender";
 
 function Dashboard() {
   return (
