@@ -6,7 +6,7 @@ function Dashboard() {
   return (
     <Layout>
       <div className="p-8">
-        <section className="mb-4 flex items-center justify-between">
+        <section className="mb-4 flex flex-wrap items-center gap-2 justify-between">
           <article className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <img
@@ -31,10 +31,10 @@ function Dashboard() {
             </p> */}
           </article>
 
-          <article>
+          <article className="w-full md:w-auto">
             <button
               type="button"
-              className="button bg-gray-900 text-base font-medium text-white"
+              className="button w-full bg-gray-900 text-base font-medium text-white"
             >
               Mis citas
             </button>

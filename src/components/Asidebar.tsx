@@ -59,6 +59,7 @@ const ContentAside = ({ isOpen }: ContentAsideType) => {
       ...prevValues,
       [id]: option,
     }));
+    console.log(selectedValues);
     console.log(`Selected ${id}:`, option);
   };
 
