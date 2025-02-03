@@ -4,12 +4,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          100: "#FF6700", // orange
-          200: "#ECFDF5", // green
-          300: "#D1FAE5", // green
-          400: "#059669", // green
-        },
         gray: {
           50: "#F9FAFB",
           100: "#E5E7EB",
@@ -22,15 +16,6 @@ export default {
           700: "#344054",
           800: "#1D2939",
           900: "#101828",
-        },
-        error: {
-          50: "#FEF3F2",
-          100: "#FEF2F2",
-          200: "#FECDCA",
-          300: "#FDA29B",
-          400: "#EF4444",
-          500: "#F04438",
-          700: "#B42318",
         },
       },
     },
