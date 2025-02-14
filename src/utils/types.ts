@@ -1,5 +1,5 @@
-// export interface SignUpType {
-//   fullName: string;
-//   phone: string;
-//   password: string;
-// }
+export interface RaffleType {
+  description: string;
+  images: string[];
+  ticketPrice: number;
+}

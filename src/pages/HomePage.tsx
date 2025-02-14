@@ -1,10 +1,11 @@
 import Footer from "@/components/Footer";
 import HeaderPage from "@/components/Header";
 import PaymentMethods from "@/components/PaymentMethods";
-import { submitTicket } from "@/services";
-import { EXCHANGE_RATE, PRICE_PER_NUMBER } from "@/utils/contants";
+import { getRaffle, submitTicket } from "@/services";
+import { EXCHANGE_RATE } from "@/utils/contants";
+import { RaffleType } from "@/utils/types";
 import { useFormik } from "formik";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
@@ -14,11 +15,25 @@ function HomePage() {
   const MAX_VALUE = 100;
   const predefinedValues = [2, 5, 10, 20, 50, 100];
 
+  const [raffleActually, setRaffleActually] = useState<RaffleType>({
+    description: "",
+    images: [""],
+    ticketPrice: 0,
+  });
+
   const [totalUSD, setTotalUSD] = useState(0);
   const [totalBS, setTotalBS] = useState(0);
 
+  useEffect(() => {
+    const fetchGetRaffle = async () => {
+      const responseRaffle: RaffleType[] = await getRaffle();
+      setRaffleActually(responseRaffle[0]);
+    };
+    fetchGetRaffle();
+  }, []);
+
   const updateTotal = (quantity: number) => {
-    const totalUSD = quantity * PRICE_PER_NUMBER;
+    const totalUSD = quantity * raffleActually.ticketPrice;
     const totalBS = totalUSD * EXCHANGE_RATE;
     setTotalUSD(totalUSD);
     setTotalBS(totalBS);
@@ -97,7 +112,11 @@ function HomePage() {
 
   return (
     <section className="mt-6">
-      <HeaderPage />
+      <HeaderPage
+        description={raffleActually.description}
+        images={raffleActually.images}
+        ticketPrice={raffleActually.ticketPrice}
+      />
 
       <div className="flex flex-col text-center items-center mt-6">
         <h3 className="text-3xl font-semibold">

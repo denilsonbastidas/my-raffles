@@ -23,5 +23,4 @@ export const banksData = [
     nameZelle: "denilson zelle",
   },
 ];
-export const PRICE_PER_NUMBER = 1;
 export const EXCHANGE_RATE = 66;

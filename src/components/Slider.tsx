@@ -4,14 +4,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const images = [
-  "https://picsum.photos/id/1015/800/500",
-  "https://picsum.photos/id/1019/800/500",
-  "https://picsum.photos/id/1020/800/500",
-  "https://picsum.photos/id/1024/800/500",
-];
-
-export default function ImageSlider() {
+interface Props {
+  imagesSlider: string[];
+}
+export default function ImageSlider({ imagesSlider }: Props) {
   return (
     <div className="w-full max-w-2xl mx-auto">
       <Swiper
@@ -22,7 +18,7 @@ export default function ImageSlider() {
         pagination={{ clickable: true }}
         className="rounded-lg overflow-hidden"
       >
-        {images.map((src, index) => (
+        {imagesSlider.map((src, index) => (
           <SwiperSlide key={index}>
             <img src={src} alt={`Slide ${index}`} className="w-full h-auto" />
           </SwiperSlide>
