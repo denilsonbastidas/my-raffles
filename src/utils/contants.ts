@@ -23,4 +23,4 @@ export const banksData = [
     nameZelle: "denilson zelle",
   },
 ];
-export const EXCHANGE_RATE = 66;
+export const EXCHANGE_RATE = 80;

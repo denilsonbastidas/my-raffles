@@ -14,7 +14,6 @@ function HeaderPage({ description, images, ticketPrice }: Props) {
           Estas a un Paso de Ganar con Denilson Bastidas
         </h4>
       </div>
-
       <div className="flex flex-col text-center mb-3">
         <p className="text-4xl font-semibold text-gray-100 mb-2">
           {description}
@@ -23,7 +22,6 @@ function HeaderPage({ description, images, ticketPrice }: Props) {
           Por tan sólo {ticketPrice?.toString()}$ por ticket.
         </p>
       </div>
-
       {/* slider */}
       <ImageSlider imagesSlider={images} />
     </div>
