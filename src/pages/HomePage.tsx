@@ -144,9 +144,9 @@ function HomePage() {
 
       <div className="flex-grow">
         <HeaderPage
-          description={raffleActually.description}
-          images={raffleActually.images}
-          ticketPrice={raffleActually.ticketPrice}
+          description={raffleActually?.description}
+          images={raffleActually?.images}
+          ticketPrice={raffleActually?.ticketPrice}
         />
 
         {raffleActually?.visible ? (
@@ -159,7 +159,7 @@ function HomePage() {
               className="flex flex-col items-center"
             >
               <label className="text-gray-300">
-                Mínimo {raffleActually.minValue} y Máximo {MAX_VALUE} Números
+                Mínimo {raffleActually?.minValue} y Máximo {MAX_VALUE} Números
                 por Compra
               </label>
 
@@ -170,7 +170,7 @@ function HomePage() {
                 onChange={handleInputChange}
                 onBlur={formik.handleBlur}
                 className="mt-2 p-2 border rounded text-black text-center"
-                min={raffleActually.minValue}
+                min={raffleActually?.minValue}
                 max={MAX_VALUE}
               />
 

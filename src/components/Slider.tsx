@@ -9,7 +9,7 @@ interface Props {
 }
 export default function ImageSlider({ imagesSlider }: Props) {
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto">
       <Swiper
         modules={[Navigation, Pagination]}
         spaceBetween={10}
@@ -18,7 +18,7 @@ export default function ImageSlider({ imagesSlider }: Props) {
         pagination={{ clickable: true }}
         className="rounded-lg overflow-hidden"
       >
-        {imagesSlider.map((src, index) => (
+        {imagesSlider?.map((src, index) => (
           <SwiperSlide key={index}>
             <img src={src} alt={`Slide ${index}`} className="w-full h-auto" />
           </SwiperSlide>
