@@ -26,6 +26,11 @@ function HomePage() {
 
   const [totalUSD, setTotalUSD] = useState(0);
   const [totalBS, setTotalBS] = useState(0);
+  const [selectedBank, setSelectedBank] = useState<string>();
+
+  useEffect(() => {
+    formik.setFieldValue("paymentMethod", selectedBank);
+  }, [selectedBank]);
 
   useEffect(() => {
     const fetchGetRaffle = async () => {
@@ -40,6 +45,12 @@ function HomePage() {
     const totalBS = totalUSD * EXCHANGE_RATE;
     setTotalUSD(totalUSD);
     setTotalBS(totalBS);
+
+    if (selectedBank === "binance" || selectedBank === "zelle") {
+      formik.setFieldValue("amountPaid", totalUSD);
+      return;
+    }
+    formik.setFieldValue("amountPaid", totalBS);
   };
 
   const formik = useFormik({
@@ -48,6 +59,8 @@ function HomePage() {
       fullName: "",
       email: "",
       phone: "",
+      paymentMethod: selectedBank,
+      amountPaid: "",
       reference: "",
       voucher: "",
     },
@@ -185,7 +198,11 @@ function HomePage() {
               </div>
 
               <div className="mb-4">
-                <PaymentMethods totalBs={totalBS} totalUSD={totalUSD} />
+                <PaymentMethods
+                  onSelectedBank={(type: string) => setSelectedBank(type)}
+                  totalBs={totalBS}
+                  totalUSD={totalUSD}
+                />
               </div>
 
               <div className="grid grid-cols-1 gap-4 w-full">

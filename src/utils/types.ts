@@ -17,6 +17,8 @@ export interface TicketType {
   phone: string;
   reference: string;
   voucher: string;
+  paymentMethod: string;
+  amountPaid: string;
   approved: string;
   _id: string;
   approvalCodes: string[];

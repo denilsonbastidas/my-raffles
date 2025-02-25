@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PaymentInfoCard from "./PaymentInfoCard";
 import { banksData } from "@/utils/contants";
 
 interface Props {
   totalUSD: number;
   totalBs: number;
+  onSelectedBank: (type: string) => void;
 }
-const PaymentMethods = ({ totalBs, totalUSD }: Props) => {
+const PaymentMethods = ({ totalBs, totalUSD, onSelectedBank }: Props) => {
   const [selectedBank, setSelectedBank] = useState(banksData[0]);
+
+  useEffect(() => {
+    onSelectedBank(banksData[0].type);
+  }, []);
 
   return (
     <div className="flex flex-col items-center">
@@ -22,7 +27,10 @@ const PaymentMethods = ({ totalBs, totalUSD }: Props) => {
             type="button"
             key={bank.bank}
             className="p-2 rounded-full w-14 h-14 flex justify-center items-center bg-white shadow-md"
-            onClick={() => setSelectedBank(bank)}
+            onClick={() => {
+              setSelectedBank(bank);
+              onSelectedBank(bank.type);
+            }}
           >
             <img src={bank.logo} alt={bank.bank} className="w-10 h-10" />
           </button>

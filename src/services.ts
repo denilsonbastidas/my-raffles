@@ -84,3 +84,13 @@ export const raffleVisibility = async () => {
     throw new Error("Error raffleVisibility");
   }
 };
+
+// export const getParallelDollar = async () => {
+//   try {
+//     const { data } = await axios.get("https://pydolarve.org/api/v1/dollar");
+//     return data?.monitors;
+//   } catch (error) {
+//     console.error("Error getParallelDollar:", error);
+//     throw new Error("Error getParallelDollar");
+//   }
+// };

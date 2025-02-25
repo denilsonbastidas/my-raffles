@@ -38,7 +38,7 @@ const PaymentInfoCard = ({
         <img src={logo} alt={bank} className="w-12 h-12 rounded-full" />
       </div>
 
-      {type === "venezuela" ? (
+      {type === "BDV" ? (
         <div className="text-center space-y-2">
           <p className="flex gap-2 items-center">
             <span className="font-bold">BDV:</span> {bdv}
@@ -97,7 +97,7 @@ const PaymentInfoCard = ({
         </div>
       ) : null}
       <h3 className="mt-4 text-lg font-bold">Total a Pagar:</h3>
-      {type === "venezuela" ? (
+      {type === "BDV" ? (
         <p className="text-2xl font-bold">{totalBs} Bs.</p>
       ) : null}
 

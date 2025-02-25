@@ -167,6 +167,12 @@ function Panel() {
                 Referencia
               </th>
               <th className="border border-gray-300 px-4 text-black py-2">
+                Metodo
+              </th>
+              <th className="border border-gray-300 px-4 text-black py-2">
+                Monto
+              </th>
+              <th className="border border-gray-300 px-4 text-black py-2">
                 Voucher
               </th>
               <th className="border border-gray-300 px-4 text-black py-2">
@@ -189,8 +195,17 @@ function Panel() {
                 <td className="border border-gray-300 px-4 py-2">
                   {ticket.numberTickets}
                 </td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border underline border-gray-300 px-4 py-2">
                   {ticket.reference}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {ticket.paymentMethod}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {ticket.amountPaid
+                    .toString()
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                  {ticket.paymentMethod === "BDV" ? "Bs" : "$"}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
                   <a

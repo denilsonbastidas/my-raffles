@@ -1,6 +1,6 @@
 export const banksData = [
   {
-    type: "venezuela",
+    type: "BDV",
     bank: "Banco de Venezuela",
     logo: "bancoVenezuela.jpg",
     bdv: "0102",
