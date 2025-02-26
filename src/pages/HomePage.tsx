@@ -1,8 +1,7 @@
 import Footer from "@/components/Footer";
 import HeaderPage from "@/components/Header";
 import PaymentMethods from "@/components/PaymentMethods";
-import { getRaffle, submitTicket } from "@/services";
-import { EXCHANGE_RATE } from "@/utils/contants";
+import { getParallelDollar, getRaffle, submitTicket } from "@/services";
 import { RaffleType } from "@/utils/types";
 import { useFormik } from "formik";
 import { useEffect, useRef, useState } from "react";
@@ -23,6 +22,7 @@ function HomePage() {
     visible: false,
     minValue: 0,
   });
+  const [exchangeRateVzla, setExchangeRateVzla] = useState<number>(0);
 
   const [totalUSD, setTotalUSD] = useState(0);
   const [totalBS, setTotalBS] = useState(0);
@@ -31,6 +31,14 @@ function HomePage() {
   useEffect(() => {
     formik.setFieldValue("paymentMethod", selectedBank);
   }, [selectedBank]);
+
+  useEffect(() => {
+    const fetchParallelDollar = async () => {
+      const responseParallelDollar = await getParallelDollar();
+      setExchangeRateVzla(responseParallelDollar?.priceEnparalelovzla);
+    };
+    fetchParallelDollar();
+  }, []);
 
   useEffect(() => {
     const fetchGetRaffle = async () => {
@@ -42,7 +50,7 @@ function HomePage() {
 
   const updateTotal = (quantity: number) => {
     const totalUSD = quantity * raffleActually.ticketPrice;
-    const totalBS = totalUSD * EXCHANGE_RATE;
+    const totalBS = totalUSD * exchangeRateVzla;
     setTotalUSD(totalUSD);
     setTotalBS(totalBS);
 
@@ -271,7 +279,8 @@ function HomePage() {
                 <div>
                   <p className="font-semibold text-start">
                     {" "}
-                    <span className="text-red-500 ">*</span> N° de Comprobante:
+                    <span className="text-red-500 ">*</span> N° de Comprobante
+                    (Ultimos 6 digitos):
                   </p>
                   <input
                     type="text"
@@ -279,7 +288,7 @@ function HomePage() {
                     value={formik.values.reference}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    placeholder="2345 o Zelle Mario castro"
+                    placeholder="234533 o Zelle Mario castro"
                     className="mt-1 p-2 w-full border rounded text-black"
                   />
                   {formik.touched.reference && formik.errors.reference ? (

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { EXCHANGE_RATE } from "./utils/contants";
 
 const API_URL = "http://localhost:5000";
 
@@ -85,12 +86,21 @@ export const raffleVisibility = async () => {
   }
 };
 
-// export const getParallelDollar = async () => {
-//   try {
-//     const { data } = await axios.get("https://pydolarve.org/api/v1/dollar");
-//     return data?.monitors;
-//   } catch (error) {
-//     console.error("Error getParallelDollar:", error);
-//     throw new Error("Error getParallelDollar");
-//   }
-// };
+export const getParallelDollar = async () => {
+  const fallbackData = {
+    priceEnparalelovzla: EXCHANGE_RATE, // !!! backup value !!!
+  };
+
+  try {
+    const { data } = await axios.get("https://pydolarve.org/api/v1/dollar");
+    if (data?.monitors?.enparalelovzla?.price) {
+      const adjustedPrice =
+        Math.round(data?.monitors?.enparalelovzla?.price) + 2;
+      return { priceEnparalelovzla: adjustedPrice };
+    }
+    return fallbackData;
+  } catch (error) {
+    console.error("Error getParallelDollar:", error);
+    return fallbackData; // Retornar respaldo en caso de error
+  }
+};

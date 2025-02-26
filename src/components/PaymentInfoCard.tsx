@@ -98,7 +98,9 @@ const PaymentInfoCard = ({
       ) : null}
       <h3 className="mt-4 text-lg font-bold">Total a Pagar:</h3>
       {type === "BDV" ? (
-        <p className="text-2xl font-bold">{totalBs} Bs.</p>
+        <p className="text-2xl font-bold">
+          {totalBs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} Bs.
+        </p>
       ) : null}
 
       {type === "zelle" ? (
