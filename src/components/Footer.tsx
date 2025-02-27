@@ -6,7 +6,7 @@ const Footer = () => {
 
       <div className="flex justify-center gap-4 my-3">
         <a
-          href="https://www.facebook.com/denilsonmcgrady"
+          href="https://www.facebook.com/profile.php?id=61573705346985"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-blue-600 text-white rounded-full p-3"
