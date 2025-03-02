@@ -32,7 +32,12 @@ const PaymentMethods = ({ totalBs, totalUSD, onSelectedBank }: Props) => {
               onSelectedBank(bank.type);
             }}
           >
-            <img src={bank.logo} alt={bank.bank} className="w-10 h-10" />
+            <img
+              src={bank.logo}
+              alt={bank.bank}
+              className="w-10 h-10"
+              loading="lazy"
+            />
           </button>
         ))}
       </div>

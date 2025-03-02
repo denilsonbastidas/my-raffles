@@ -20,7 +20,12 @@ export default function ImageSlider({ imagesSlider }: Props) {
       >
         {imagesSlider?.map((src, index) => (
           <SwiperSlide key={index}>
-            <img src={src} alt={`Slide ${index}`} className="w-full h-auto" />
+            <img
+              src={src}
+              alt={`Slide ${index}`}
+              className="w-full h-auto"
+              loading="lazy"
+            />
           </SwiperSlide>
         ))}
       </Swiper>

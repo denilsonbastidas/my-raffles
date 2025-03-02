@@ -35,7 +35,12 @@ const PaymentInfoCard = ({
       <p className="text-sm mb-2">{bank}</p>
 
       <div className="flex justify-center items-center my-2">
-        <img src={logo} alt={bank} className="w-12 h-12 rounded-full" />
+        <img
+          src={logo}
+          alt={bank}
+          className="w-12 h-12 rounded-full"
+          loading="lazy"
+        />
       </div>
 
       {type === "BDV" ? (

@@ -147,6 +147,7 @@ function HomePage() {
           src="logo.webp"
           alt="logo denilson bastidas"
           className="w-28 h-28 border-2 rounded-full"
+          loading="lazy"
         />
       </div>
 
@@ -352,6 +353,7 @@ function HomePage() {
               src="logo.webp"
               alt="logo denilson bastidas"
               className="w-52 h-52 rounded-full"
+              loading="lazy"
             />
             <a
               href="https://www.instagram.com/denilsonbastidas"
