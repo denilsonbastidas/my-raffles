@@ -95,7 +95,7 @@ export const getParallelDollar = async () => {
     const { data } = await axios.get("https://pydolarve.org/api/v1/dollar");
     if (data?.monitors?.enparalelovzla?.price) {
       const adjustedPrice =
-        Math.round(data?.monitors?.enparalelovzla?.price) + 2;
+        Math.round(data?.monitors?.enparalelovzla?.price) + 3;
       return { priceEnparalelovzla: adjustedPrice };
     }
     return fallbackData;

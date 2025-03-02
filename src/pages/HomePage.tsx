@@ -278,9 +278,7 @@ function HomePage() {
 
                 <div>
                   <p className="font-semibold text-start">
-                    {" "}
                     <span className="text-red-500 ">*</span> N° de Comprobante
-                    (Ultimos 6 digitos):
                   </p>
                   <input
                     type="text"
@@ -301,7 +299,7 @@ function HomePage() {
 
               <div className="mt-4 w-full">
                 <p className="font-bold flex items-center gap-2">
-                  <span className="text-red-500 ">*</span> COMPROBANTE DE PAGO:
+                  <span className="text-red-500 ">*</span>COMPROBANTE DE PAGO:
                 </p>
                 <p className="text-gray-300 text-sm mb-2">
                   Foto o Captura de Pantalla
