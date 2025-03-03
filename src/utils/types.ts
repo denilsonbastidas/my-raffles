@@ -1,4 +1,5 @@
 export interface RaffleType {
+  name: string;
   description: string;
   images: string[];
   ticketPrice: number;

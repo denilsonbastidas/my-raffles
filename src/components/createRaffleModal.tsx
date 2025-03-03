@@ -4,6 +4,7 @@ import { submitCreateRaffle } from "../services"
 
 export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
     const [raffleData, setRaffleData] = useState<RaffleType>({
+        name: "",
         description: "",
         images: [],
         ticketPrice: 0,
@@ -60,7 +61,18 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
                 <h2 className="text-xl font-bold mb-4 text-black">Crear Nueva Rifa</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="text-black font-bold" htmlFor="description">Nombre de la rifa</label>
+                        <label className="text-black font-bold" htmlFor="name">Nombre de la rifa</label>
+                        <textarea
+                            name="name"
+                            placeholder="Descripción"
+                            value={raffleData.name}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded text-black"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="text-black font-bold" htmlFor="description">descripcion</label>
                         <textarea
                             name="description"
                             placeholder="Descripción"

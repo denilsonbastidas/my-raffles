@@ -16,12 +16,14 @@ function HomePage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [raffleActually, setRaffleActually] = useState<RaffleType>({
+    name: "",
     description: "",
     images: [""],
     ticketPrice: 0,
     visible: false,
     minValue: 0,
   });
+
   const [exchangeRateVzla, setExchangeRateVzla] = useState<number>(0);
 
   const [totalUSD, setTotalUSD] = useState(0);
@@ -214,6 +216,7 @@ function HomePage() {
 
       <div className="flex-grow">
         <HeaderPage
+          name={raffleActually?.name}
           description={raffleActually?.description}
           images={raffleActually?.images}
           ticketPrice={raffleActually?.ticketPrice}
