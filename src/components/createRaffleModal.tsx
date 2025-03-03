@@ -33,7 +33,7 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
                     reader.onerror = (error) => reject(error);
                 });
             });
-    
+
             Promise.all(promises).then((base64Images) => {
                 setRaffleData((prev) => ({
                     ...prev,
@@ -91,6 +91,8 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
                             onChange={handleChange}
                             className="w-full p-2 border rounded text-black"
                             required
+                            min="0"
+                            step="any"
                         />
                     </div>
                     <div>
