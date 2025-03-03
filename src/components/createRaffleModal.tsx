@@ -90,9 +90,9 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
                             value={raffleData.ticketPrice}
                             onChange={handleChange}
                             className="w-full p-2 border rounded text-black"
-                            required
-                            min="0"
-                            step="any"
+                            required 
+                            min="0" 
+                            step="any" 
                         />
                     </div>
                     <div>
