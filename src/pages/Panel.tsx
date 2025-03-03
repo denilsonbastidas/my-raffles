@@ -1,8 +1,10 @@
+import { CreateRaffleModal } from "@/components/createRaffleModal";
+import ImageModal from "@/components/imgModal";
 import {
   getTickets,
   raffleVisibility,
   tikketApprove,
-  tikketDenied,
+  tikketDenied
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
 import { TicketType } from "@/utils/types";
@@ -18,6 +20,14 @@ function Panel() {
   const [filter, setFilter] = useState<"all" | "pending">("pending");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [soldNumber, setSoldNumber] = useState<number>(0);
+  const [modalCreateRaffle, setModalCreateRaffle] = useState(false);
+  const [imgModalOpen, setImgModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
+  const handleOpenModal = (image: string) => {
+    setSelectedImage(image);
+    setImgModalOpen(true);
+  };
 
   useEffect(() => {
     fetchAuth(navigate);
@@ -35,8 +45,8 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-          code.toLowerCase().includes(search.toLowerCase()),
-        )
+        code.toLowerCase().includes(search.toLowerCase()),
+      )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
@@ -152,6 +162,12 @@ function Panel() {
 
         <div className="flex flex-col flex-wrap md:flex-row items-center gap-4 md:gap-7 w-full md:w-auto">
           <button
+            onClick={() => setModalCreateRaffle(true)}
+            className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto"
+          >
+            Crear nueva rifa
+          </button>
+          <button
             onClick={() => clickedRaffleVisibility()}
             className="bg-red-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto"
           >
@@ -174,6 +190,7 @@ function Panel() {
           </p>
         </div>
       </div>
+
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-300 text-sm md:text-base">
@@ -237,10 +254,10 @@ function Panel() {
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
                   <a
-                    href={`${ticket.voucher}`}
                     className="text-blue-500 underline"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => handleOpenModal(ticket.voucher)}
                   >
                     Ver imagen
                   </a>
@@ -289,6 +306,14 @@ function Panel() {
           </tbody>
         </table>
       </div>
+
+      {
+        modalCreateRaffle && (
+          <CreateRaffleModal isOpen={modalCreateRaffle} onClose={() => setModalCreateRaffle(false)} ></CreateRaffleModal>
+        )
+      }
+
+      {imgModalOpen && <ImageModal imageUrl={selectedImage} onClose={() => setImgModalOpen(false)} />}
     </div>
   );
 }

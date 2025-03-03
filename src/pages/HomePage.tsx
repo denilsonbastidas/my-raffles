@@ -74,31 +74,33 @@ function HomePage() {
     },
     validationSchema: Yup.object({
       numberTickets: Yup.number()
-        .min(
-          raffleActually?.minValue,
-          `Debe seleccionar al menos ${raffleActually?.minValue} números`,
-        )
+        .min(raffleActually?.minValue, `Debe seleccionar al menos ${raffleActually?.minValue} números`)
         .max(MAX_VALUE, `No puede seleccionar más de ${MAX_VALUE} números`)
         .required("Este campo es obligatorio"),
       fullName: Yup.string().required("Este campo es obligatorio"),
-      email: Yup.string()
-        .email("Debe ser un correo válido")
-        .required("Este campo es obligatorio"),
+      email: Yup.string().email("Debe ser un correo válido").required("Este campo es obligatorio"),
       phone: Yup.string().required("Este campo es obligatorio"),
       reference: Yup.string().required("Este campo es obligatorio"),
-      voucher: Yup.mixed().required("Debe subir un comprobante de pago"),
+      voucher: Yup.string().required("Debe subir un comprobante de pago"),
     }),
 
     onSubmit: async (values, { resetForm }) => {
       setIsSubmitting(true);
+
       try {
+        console.log("Enviando datos:", values);
+
+        values.paymentMethod = selectedBank;
+
         await submitTicket(values);
+
         Swal.fire({
           title: "¡Gracias por realizar tu compra!",
           text: "Una vez confirmado tu pago te enviaremos los tickets y/o Números de tu compra",
           icon: "success",
           confirmButtonText: "Aceptar",
         });
+
         resetForm();
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -116,7 +118,53 @@ function HomePage() {
         setIsSubmitting(false);
       }
     },
-  });
+  })
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          let width = img.width;
+          let height = img.height;
+
+          if (width > 600 || height > 600) {
+            const aspectRatio = width / height;
+            if (width > height) {
+              width = 600;
+              height = Math.round(600 / aspectRatio);
+            } else {
+              height = 600;
+              width = Math.round(600 * aspectRatio);
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const base64String = canvas.toDataURL("image/jpeg", 0.8);
+            resolve(base64String);
+          } else {
+            reject(new Error("No se pudo obtener el contexto del canvas."));
+          }
+        };
+
+        img.onerror = (error) => reject(error);
+      };
+
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(e.target.value, 10);
@@ -138,6 +186,19 @@ function HomePage() {
   const handlePredefinedSelection = (value: number) => {
     formik.setFieldValue("numberTickets", value);
     updateTotal(value);
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      try {
+        const base64 = await convertFileToBase64(file);
+        formik.setFieldValue("voucher", base64);
+      } catch (error) {
+        console.error("Error al procesar la imagen:", error);
+      }
+    }
   };
 
   return (
@@ -164,7 +225,11 @@ function HomePage() {
               COMPRA TUS NUMEROS DE LA RIFA
             </h3>
             <form
-              onSubmit={formik.handleSubmit}
+              onSubmit={(e) => {
+                e.preventDefault();
+                console.log("🔄 Enviando formulario...");
+                formik.handleSubmit(e);
+              }}
               className="flex flex-col items-center"
             >
               <label className="text-gray-300">
@@ -309,9 +374,7 @@ function HomePage() {
                   type="file"
                   name="voucher"
                   ref={fileInputRef}
-                  onChange={(event) =>
-                    formik.setFieldValue("voucher", event.target.files?.[0])
-                  }
+                  onChange={handleFileChange}
                   className="p-2 w-full border rounded bg-white text-black"
                 />
                 {formik.touched.voucher && formik.errors.voucher ? (
@@ -331,12 +394,12 @@ function HomePage() {
                 <button
                   type="submit"
                   className="mt-6 w-full font-bold bg-green-600 p-2 rounded"
-                  disabled={isSubmitting}
                 >
                   Comprar Tickets
                 </button>
               )}
             </form>
+
             <p className="text-md  text-gray-300 my-8 w-full text-center md:w-1/2">
               Recuerde que debe esperar un lapso de 24 a 36 horas
               aproximadamente mientras nuestro equipo verifica y valida su

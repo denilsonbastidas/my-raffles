@@ -7,6 +7,7 @@ import "swiper/css/pagination";
 interface Props {
   imagesSlider: string[];
 }
+
 export default function ImageSlider({ imagesSlider }: Props) {
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -21,7 +22,7 @@ export default function ImageSlider({ imagesSlider }: Props) {
         {imagesSlider?.map((src, index) => (
           <SwiperSlide key={index}>
             <img
-              src={src}
+              src={src.split("uploads/")[1]}
               alt={`Slide ${index}`}
               className="w-full h-auto"
               loading="lazy"
