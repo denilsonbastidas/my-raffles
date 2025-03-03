@@ -7,7 +7,7 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
         name: "",
         description: "",
         images: [],
-        ticketPrice: 0,
+        ticketPrice: "",
         visible: true,
         minValue: 1,
     });
@@ -16,9 +16,12 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+
         setRaffleData((prev) => ({
             ...prev,
-            [name]: name === "ticketPrice" || name === "minValue" ? Number(value) : value,
+            [name]: name === "ticketPrice" || name === "minValue"
+                ? value.replace(",", ".")
+                : value,
         }));
     };
 
@@ -90,9 +93,9 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
                             value={raffleData.ticketPrice}
                             onChange={handleChange}
                             className="w-full p-2 border rounded text-black"
-                            required 
-                            min="0" 
-                            step="any" 
+                            required
+                            min="0"
+                            step="0.01"
                         />
                     </div>
                     <div>
