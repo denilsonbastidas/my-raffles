@@ -19,7 +19,7 @@ function HomePage() {
     name: "",
     description: "",
     images: [""],
-    ticketPrice: 0,
+    ticketPrice: "",
     visible: false,
     minValue: 0,
   });
@@ -51,7 +51,7 @@ function HomePage() {
   }, []);
 
   const updateTotal = (quantity: number) => {
-    const totalUSD = quantity * raffleActually.ticketPrice;
+    const totalUSD = quantity * parseFloat(raffleActually.ticketPrice);
     const totalBS = totalUSD * exchangeRateVzla;
     setTotalUSD(totalUSD);
     setTotalBS(totalBS);
@@ -219,7 +219,7 @@ function HomePage() {
           name={raffleActually?.name}
           description={raffleActually?.description}
           images={raffleActually?.images}
-          ticketPrice={raffleActually?.ticketPrice}
+          ticketPrice={parseFloat(raffleActually?.ticketPrice)}
         />
 
         {raffleActually?.visible ? (
