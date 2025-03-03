@@ -37,12 +37,11 @@ export const CreateRaffleModal = ({ isOpen, onClose }: { isOpen: boolean; onClos
             Promise.all(promises).then((base64Images) => {
                 setRaffleData((prev) => ({
                     ...prev,
-                    images: base64Images,
+                    images: [...prev.images, ...base64Images],
                 }));
             }).catch(error => console.error("Error al convertir imágenes:", error));
         }
     };
-    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
