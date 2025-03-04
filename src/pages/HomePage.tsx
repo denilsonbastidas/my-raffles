@@ -76,11 +76,16 @@ function HomePage() {
     },
     validationSchema: Yup.object({
       numberTickets: Yup.number()
-        .min(raffleActually?.minValue, `Debe seleccionar al menos ${raffleActually?.minValue} números`)
+        .min(
+          raffleActually?.minValue,
+          `Debe seleccionar al menos ${raffleActually?.minValue} números`,
+        )
         .max(MAX_VALUE, `No puede seleccionar más de ${MAX_VALUE} números`)
         .required("Este campo es obligatorio"),
       fullName: Yup.string().required("Este campo es obligatorio"),
-      email: Yup.string().email("Debe ser un correo válido").required("Este campo es obligatorio"),
+      email: Yup.string()
+        .email("Debe ser un correo válido")
+        .required("Este campo es obligatorio"),
       phone: Yup.string().required("Este campo es obligatorio"),
       reference: Yup.string().required("Este campo es obligatorio"),
       voucher: Yup.string().required("Debe subir un comprobante de pago"),
@@ -120,7 +125,7 @@ function HomePage() {
         setIsSubmitting(false);
       }
     },
-  })
+  });
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -190,7 +195,9 @@ function HomePage() {
     updateTotal(value);
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
 
     if (file) {

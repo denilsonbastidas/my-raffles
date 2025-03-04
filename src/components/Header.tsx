@@ -16,14 +16,12 @@ function HeaderPage({ name, description, images, ticketPrice }: Props) {
         </h4>
       </div>
       <div className="flex flex-col text-center mb-3">
-        <p className="text-4xl font-semibold text-gray-100 mb-2">
-          {name}
-        </p>
+        <p className="text-4xl font-semibold text-gray-100 mb-2">{name}</p>
         <p className="text-xl font-semibold text-gray-100 mb-2">
           {description}
         </p>
         <p className="text-xl font-medium text-blue-200">
-          Por tan sólo {ticketPrice?.toString()}$ por ticket.
+          Por tan sólo {ticketPrice?.toString() ?? 0}$ por ticket.
         </p>
       </div>
       {/* slider */}
