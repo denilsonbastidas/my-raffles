@@ -4,7 +4,7 @@ import {
   getTickets,
   raffleVisibility,
   tikketApprove,
-  tikketDenied
+  tikketDenied,
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
 import { TicketType } from "@/utils/types";
@@ -45,8 +45,8 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-        code.toLowerCase().includes(search.toLowerCase()),
-      )
+          code.toLowerCase().includes(search.toLowerCase()),
+        )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
@@ -191,7 +191,6 @@ function Panel() {
         </div>
       </div>
 
-
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-300 text-sm md:text-base">
           <thead className="bg-gray-100">
@@ -253,14 +252,13 @@ function Panel() {
                   {ticket.paymentMethod === "BDV" ? "Bs" : "$"}
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
-                  <a
+                  <button
                     className="text-blue-500 underline"
-                    target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => handleOpenModal(ticket.voucher)}
                   >
                     Ver imagen
-                  </a>
+                  </button>
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2 flex flex-col md:flex-row gap-2 justify-evenly">
                   {ticket.approved ? (
@@ -307,13 +305,19 @@ function Panel() {
         </table>
       </div>
 
-      {
-        modalCreateRaffle && (
-          <CreateRaffleModal isOpen={modalCreateRaffle} onClose={() => setModalCreateRaffle(false)} ></CreateRaffleModal>
-        )
-      }
+      {modalCreateRaffle && (
+        <CreateRaffleModal
+          isOpen={modalCreateRaffle}
+          onClose={() => setModalCreateRaffle(false)}
+        ></CreateRaffleModal>
+      )}
 
-      {imgModalOpen && <ImageModal imageUrl={selectedImage} onClose={() => setImgModalOpen(false)} />}
+      {imgModalOpen && (
+        <ImageModal
+          imageUrl={selectedImage}
+          onClose={() => setImgModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

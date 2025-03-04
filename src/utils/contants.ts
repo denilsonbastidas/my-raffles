@@ -19,8 +19,8 @@ export const banksData = [
     type: "zelle",
     bank: "Zelle",
     logo: "zelleLogo.png",
-    email: "denilsonzelle@gmail.com",
-    nameZelle: "denilson zelle",
+    email: "ashelyravelo@gmail.com",
+    nameZelle: "Ashley Ravelo",
   },
 ];
 export const EXCHANGE_RATE = 84;

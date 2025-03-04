@@ -4,6 +4,7 @@ import { RaffleType } from "./utils/types";
 
 const API_URL = "https://my-raffles-back-production.up.railway.app";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const submitTicket = async (values: any) => {
   try {
     const response = await axios.post(`${API_URL}/api/tickets`, values, {
