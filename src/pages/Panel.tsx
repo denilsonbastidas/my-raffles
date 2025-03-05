@@ -14,6 +14,8 @@ import Skeleton from "react-loading-skeleton";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { MdOutlineForwardToInbox } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
+import EditEmailModal from "@/components/editEmailModal";
 
 function Panel() {
   const navigate = useNavigate();
@@ -23,8 +25,14 @@ function Panel() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [soldNumber, setSoldNumber] = useState<number>(0);
   const [modalCreateRaffle, setModalCreateRaffle] = useState(false);
+  const [modalEditEmail, setModalEditEmail] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [resendEmailLoading, setResendEmailLoading] = useState<boolean>(false);
+  const [currentTikketSelected, setCurrentTikketSelected] = useState<{
+    email: string;
+    id: string;
+  }>({ email: "", id: "" });
 
   const handleOpenModal = (image: string) => {
     setSelectedImage(image);
@@ -138,7 +146,7 @@ function Panel() {
 
     if (result.isConfirmed) {
       try {
-        // setLoadingId(id);
+        setResendEmailLoading(true);
         await resendEmail(id);
         Swal.fire({
           title: "¡Ticket! reviando",
@@ -148,7 +156,7 @@ function Panel() {
       } catch (error) {
         console.log(error);
       } finally {
-        // setLoadingId(null);
+        setResendEmailLoading(false);
       }
     }
   };
@@ -161,17 +169,37 @@ function Panel() {
   }, [tickets]);
 
   const clickedRaffleVisibility = async () => {
-    try {
-      await raffleVisibility();
-      Swal.fire({
-        title: "Success",
-        text: "Acabas de ocultar/mostrar la Rifa verifica en el Home Page",
-        icon: "success",
-        confirmButtonText: "Okey",
-      });
-    } catch (error) {
-      console.log(error);
+    const result = await Swal.fire({
+      title: "¿Desea ocultar/mostrar la rifa actual?",
+      text: "Una vez aceptado, verifica la accion en la pagina principal.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, Aceptar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#3085d6",
+    });
+    if (result.isConfirmed) {
+      try {
+        await raffleVisibility();
+        Swal.fire({
+          title: "Success",
+          text: "Acabas de ocultar/mostrar la Rifa verifica en el Home Page",
+          icon: "success",
+          confirmButtonText: "Okey",
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
+  };
+
+  const handleEmailUpdated = (id: string, newEmail: string) => {
+    setTickets((prevTickets) =>
+      prevTickets.map((ticket) =>
+        ticket._id === id ? { ...ticket, email: newEmail } : ticket,
+      ),
+    );
   };
 
   return (
@@ -224,7 +252,7 @@ function Panel() {
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-300 text-sm md:text-base">
-          <thead className="bg-gray-100">
+          <thead className="text-gray-900 bg-gray-100">
             <tr>
               <th className="border border-gray-300 px-2 md:px-4 py-2">
                 Nombre
@@ -262,7 +290,21 @@ function Panel() {
                   {ticket.fullName}
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
-                  {ticket.email}
+                  <div className="inline-flex items-center gap-8">
+                    {ticket.email}
+                    <FaEdit
+                      onClick={() => {
+                        setModalEditEmail(true);
+                        setCurrentTikketSelected({
+                          email: ticket.email,
+                          id: ticket._id,
+                        });
+                      }}
+                      size={20}
+                      className="cursor-pointer"
+                      title="Editar Email"
+                    />
+                  </div>
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
                   {ticket.phone}
@@ -291,34 +333,43 @@ function Panel() {
                     Ver imagen
                   </button>
                 </td>
-                <td className="border border-gray-300 px-2 md:px-4 py-2 flex flex-col md:flex-row gap-2 justify-evenly">
+
+                <td className="border border-gray-300 px-2 md:px-4 py-2">
                   {ticket.approved ? (
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center py-2 justify-center gap-3">
                       <span
                         title="Aprobado"
                         className="text-green-600 font-semibold"
                       >
                         ✔
                       </span>
-                      <MdOutlineForwardToInbox
-                        onClick={() => submitResendEmail(ticket._id)}
-                        size={24}
-                        className="text-blue-500 cursor-pointer hover:text-blue-700"
-                        title="Reenviar email"
-                      />
+                      {resendEmailLoading ? (
+                        <Skeleton
+                          width={20}
+                          className="animate-pulse w-full rounded-full"
+                          height={20}
+                        />
+                      ) : (
+                        <MdOutlineForwardToInbox
+                          onClick={() => submitResendEmail(ticket._id)}
+                          size={24}
+                          className="text-blue-500 cursor-pointer hover:text-blue-700"
+                          title="Reenviar email"
+                        />
+                      )}
                     </div>
                   ) : (
-                    <div className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
+                    <div className="flex flex-col py-2 md:flex-row justify-center items-center gap-2 w-full">
                       {loadingId === ticket._id ? (
                         <Skeleton
-                          className="animate-pulse"
                           width={100}
+                          className="animate-pulse w-full max-w-[120px]"
                           height={30}
                         />
                       ) : (
                         <button
                           onClick={() => submitTikketApprove(ticket._id)}
-                          className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1 rounded"
+                          className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
                         >
                           Aprobar
                         </button>
@@ -326,14 +377,14 @@ function Panel() {
 
                       {loadingId === ticket._id ? (
                         <Skeleton
-                          className="animate-pulse"
                           width={100}
+                          className="animate-pulse w-full max-w-[120px]"
                           height={30}
                         />
                       ) : (
                         <button
                           onClick={() => submitTikketDenied(ticket._id)}
-                          className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded"
+                          className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
                         >
                           Rechazar
                         </button>
@@ -352,6 +403,15 @@ function Panel() {
           isOpen={modalCreateRaffle}
           onClose={() => setModalCreateRaffle(false)}
         ></CreateRaffleModal>
+      )}
+
+      {modalEditEmail && (
+        <EditEmailModal
+          currentTikketSelected={currentTikketSelected}
+          isOpen={modalEditEmail}
+          onClose={() => setModalEditEmail(false)}
+          onEmailUpdated={handleEmailUpdated}
+        />
       )}
 
       {imgModalOpen && (

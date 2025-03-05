@@ -125,3 +125,18 @@ export const resendEmail = async (id: string) => {
     throw new Error("Error resendEmail");
   }
 };
+
+export const updatedEmail = async (id: string, newEmail: string) => {
+  try {
+    const { data } = await axios.put(
+      `${API_URL}/api/tickets/update-email/${id}`,
+      {
+        newEmail,
+      },
+    );
+    return data;
+  } catch (error) {
+    console.error("Error updatedEmail:", error);
+    throw new Error("Error updatedEmail");
+  }
+};
