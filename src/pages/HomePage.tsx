@@ -237,7 +237,6 @@ function HomePage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                console.log("🔄 Enviando formulario...");
                 formik.handleSubmit(e);
               }}
               className="flex flex-col items-center"

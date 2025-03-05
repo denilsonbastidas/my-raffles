@@ -79,7 +79,7 @@ export const CreateRaffleModal = ({
             </label>
             <input
               name="name"
-              placeholder="Descripción"
+              placeholder="Nombre de la rifa"
               value={raffleData.name}
               onChange={handleChange}
               className="w-full p-2 border rounded text-black"

@@ -3,6 +3,7 @@ import ImageModal from "@/components/imgModal";
 import {
   getTickets,
   raffleVisibility,
+  resendEmail,
   tikketApprove,
   tikketDenied,
 } from "@/services";
@@ -12,6 +13,7 @@ import { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { MdOutlineForwardToInbox } from "react-icons/md";
 
 function Panel() {
   const navigate = useNavigate();
@@ -118,6 +120,35 @@ function Panel() {
         console.log(error);
       } finally {
         setLoadingId(null);
+      }
+    }
+  };
+
+  const submitResendEmail = async (id: string) => {
+    const result = await Swal.fire({
+      title: "¿Desea renviar Tickets a este registro?",
+      text: "Una vez aprobado, se renviaran nuevamente los boletos.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, Renviar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#3085d6",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // setLoadingId(id);
+        await resendEmail(id);
+        Swal.fire({
+          title: "¡Ticket! reviando",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        });
+      } catch (error) {
+        console.log(error);
+      } finally {
+        // setLoadingId(null);
       }
     }
   };
@@ -262,9 +293,20 @@ function Panel() {
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2 flex flex-col md:flex-row gap-2 justify-evenly">
                   {ticket.approved ? (
-                    <span className="text-green-600 font-semibold">
-                      ✔ Aprobado
-                    </span>
+                    <div className="flex items-center justify-between gap-3">
+                      <span
+                        title="Aprobado"
+                        className="text-green-600 font-semibold"
+                      >
+                        ✔
+                      </span>
+                      <MdOutlineForwardToInbox
+                        onClick={() => submitResendEmail(ticket._id)}
+                        size={24}
+                        className="text-blue-500 cursor-pointer hover:text-blue-700"
+                        title="Reenviar email"
+                      />
+                    </div>
                   ) : (
                     <div className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
                       {loadingId === ticket._id ? (

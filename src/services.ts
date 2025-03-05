@@ -115,3 +115,13 @@ export const getParallelDollar = async () => {
     return fallbackData; // Retornar respaldo en caso de error
   }
 };
+
+export const resendEmail = async (id: string) => {
+  try {
+    const { data } = await axios.post(`${API_URL}/api/tickets/resend/${id}`);
+    return data;
+  } catch (error) {
+    console.error("Error resendEmail:", error);
+    throw new Error("Error resendEmail");
+  }
+};

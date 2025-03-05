@@ -21,7 +21,7 @@ function HeaderPage({ name, description, images, ticketPrice }: Props) {
           {description}
         </p>
         <p className="text-xl font-medium text-blue-200">
-          Por tan sólo {ticketPrice?.toString() ?? 0}$ por ticket.
+          Por tan sólo {ticketPrice?.toString() || 0}$ por ticket.
         </p>
       </div>
       {/* slider */}
