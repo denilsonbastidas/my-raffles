@@ -1,6 +1,7 @@
 import { updatedEmail } from "@/services";
 import React, { useState } from "react";
 import Swal from "sweetalert2";
+import Skeleton from "react-loading-skeleton";
 
 interface EditEmailProps {
   currentTikketSelected: { email: string; id: string };
@@ -21,6 +22,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
     email: string;
     id: string;
   }>(currentTikketSelected);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +40,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
     }
 
     try {
+      setLoading(true);
       await updatedEmail(selectedTikket.id, selectedTikket.email);
       Swal.fire({
         title: "Email Actualizado!",
@@ -48,6 +51,8 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
       onClose();
     } catch (error) {
       console.error("Error actualizar Email:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,12 +83,22 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
             required
           />
 
-          <button
-            type="submit"
-            className="px-4 py-2 w-full bg-blue-500 text-white rounded"
-          >
-            Enviar
-          </button>
+          {loading ? (
+            <div className="flex justify-center">
+              <Skeleton
+                width={500}
+                className="animate-pulse max-w-[350px] md:max-w-full"
+                height={40}
+              />
+            </div>
+          ) : (
+            <button
+              type="submit"
+              className="px-4 py-2 w-full bg-blue-500 text-white rounded"
+            >
+              Enviar
+            </button>
+          )}
         </form>
       </div>
     </div>
