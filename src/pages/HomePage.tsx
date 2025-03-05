@@ -32,6 +32,11 @@ function HomePage() {
 
   useEffect(() => {
     formik.setFieldValue("paymentMethod", selectedBank);
+    if (selectedBank === "binance" || selectedBank === "zelle") {
+      formik.setFieldValue("amountPaid", totalUSD);
+      return;
+    }
+    formik.setFieldValue("amountPaid", totalBS);
   }, [selectedBank]);
 
   useEffect(() => {
