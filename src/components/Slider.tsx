@@ -24,7 +24,7 @@ export default function ImageSlider({ imagesSlider }: Props) {
             <img
               src={src.split("uploads/")[1]}
               alt={`Slide ${index}`}
-              className="w-full h-auto"
+              className="w-full h-[500px] object-contain mx-auto"
               loading="lazy"
             />
           </SwiperSlide>

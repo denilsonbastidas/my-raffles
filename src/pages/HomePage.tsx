@@ -422,6 +422,9 @@ function HomePage() {
           </div>
         ) : (
           <div className="h-96 flex flex-col gap-4 text-center items-center justify-center">
+            <p className="text-lg font-bold text-red-500 md:text-4xl">
+              Números Agotados.
+            </p>
             <p className="text-lg font-bold md:text-4xl">
               Ya esta todo listo, Para mayor información pendiente de las
               historias en Instagram.
