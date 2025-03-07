@@ -19,7 +19,7 @@ export const banksData = [
     type: "zelle",
     bank: "Zelle",
     logo: "zelleLogo.png",
-    email: "ashelyravelo@gmail.com",
+    email: "+1 (786) 681-6185",
     nameZelle: "Ashley Ravelo",
   },
 ];

@@ -85,7 +85,7 @@ const PaymentInfoCard = ({
       {type === "zelle" ? (
         <div className="text-center space-y-2">
           <p className="flex gap-2 items-center">
-            <span className="font-bold">Email:</span> {email}
+            <span className="font-bold">Telefono:</span> {email}
             <LuClipboard
               className="w-5 h-5 cursor-pointer"
               onClick={() => copyToClipboard(email ?? "")}
