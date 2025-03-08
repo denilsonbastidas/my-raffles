@@ -337,7 +337,8 @@ function HomePage() {
                     <div>
                       <p className="font-semibold text-start">
                         {" "}
-                        <span className="text-red-500 ">*</span> Email:
+                        <span className="text-red-500 ">*</span> Correo
+                        electrónico (se recomienda Gmail):
                       </p>
                       <input
                         type="email"
