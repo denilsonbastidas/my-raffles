@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import * as Yup from "yup";
 
 function HomePage() {
+  const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const MAX_VALUE = 100;
   const predefinedValues = [2, 5, 10, 20, 50, 100];
@@ -205,6 +206,7 @@ function HomePage() {
 
   const handlePredefinedSelection = (value: number) => {
     formik.setFieldValue("numberTickets", value);
+    inputRef.current?.focus();
     updateTotal(value);
   };
 
@@ -271,6 +273,7 @@ function HomePage() {
                   </label>
 
                   <input
+                    ref={inputRef}
                     type="number"
                     name="numberTickets"
                     value={formik.values.numberTickets}
