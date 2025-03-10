@@ -287,6 +287,7 @@ function Panel() {
             {filteredTickets.map((ticket, index) => (
               <tr key={index} className="text-center">
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
+                  <span className="font-bold px-1">{index + 1}.</span>{" "}
                   {ticket.fullName}
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
