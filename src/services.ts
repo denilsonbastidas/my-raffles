@@ -99,7 +99,7 @@ export const raffleVisibility = async () => {
 
 export const getParallelDollar = async () => {
   const fallbackData = {
-    priceEnparalelovzla: EXCHANGE_RATE, // !!! backup value !!!
+    priceEnparalelovzla: EXCHANGE_RATE + 3, // !!! backup value !!!
   };
 
   try {
