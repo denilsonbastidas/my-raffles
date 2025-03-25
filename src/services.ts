@@ -99,14 +99,14 @@ export const raffleVisibility = async () => {
 
 export const getParallelDollar = async () => {
   const fallbackData = {
-    priceEnparalelovzla: EXCHANGE_RATE + 3, // !!! backup value !!!
+    priceEnparalelovzla: EXCHANGE_RATE + 2, // !!! backup value !!!
   };
 
   try {
     const { data } = await axios.get("https://pydolarve.org/api/v1/dollar");
     if (data?.monitors?.enparalelovzla?.price) {
       const adjustedPrice =
-        Math.round(data?.monitors?.enparalelovzla?.price) + 3;
+        Math.round(data?.monitors?.enparalelovzla?.price) + 2;
       return { priceEnparalelovzla: adjustedPrice };
     }
     return fallbackData;
