@@ -90,10 +90,6 @@ function HomePage() {
     },
     validationSchema: Yup.object({
       numberTickets: Yup.number()
-        .min(
-          raffleActually?.minValue,
-          `Debe seleccionar al menos ${raffleActually?.minValue} números`,
-        )
         .max(MAX_VALUE, `No puede seleccionar más de ${MAX_VALUE} números`)
         .required("Este campo es obligatorio"),
       fullName: Yup.string().required("Este campo es obligatorio"),
@@ -187,21 +183,44 @@ function HomePage() {
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = parseInt(e.target.value, 10);
+  // borrar si todo bien
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   let value = parseInt(e.target.value, 10);
 
-    if (isNaN(value)) {
+  //   if (isNaN(value)) {
+  //     formik.setFieldValue("numberTickets", "");
+  //     setTotalUSD(0);
+  //     setTotalBS(0);
+  //     return;
+  //   }
+
+  //   if (value < raffleActually.minValue) value = raffleActually.minValue;
+  //   if (value > MAX_VALUE) value = MAX_VALUE;
+
+  //   formik.setFieldValue("numberTickets", value);
+  //   updateTotal(value);
+  // };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+
+    // Permitir vacío (por si el usuario está borrando)
+    if (rawValue === "") {
       formik.setFieldValue("numberTickets", "");
       setTotalUSD(0);
       setTotalBS(0);
       return;
     }
 
-    if (value < raffleActually.minValue) value = raffleActually.minValue;
-    if (value > MAX_VALUE) value = MAX_VALUE;
+    // Solo continuar si es un número válido
+    if (/^\d+$/.test(rawValue)) {
+      let value = parseInt(rawValue, 10);
 
-    formik.setFieldValue("numberTickets", value);
-    updateTotal(value);
+      if (value > MAX_VALUE) value = MAX_VALUE;
+
+      formik.setFieldValue("numberTickets", rawValue);
+      updateTotal(value);
+    }
   };
 
   const handlePredefinedSelection = (value: number) => {
