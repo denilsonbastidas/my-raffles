@@ -337,13 +337,14 @@ function Panel() {
 
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
                   {ticket.approved ? (
-                    <div className="flex items-center py-2 justify-center gap-3">
-                      <span
-                        title="Aprobado"
-                        className="text-green-600 font-semibold"
+                    <div className="flex items-center py-2 justify-center gap-4">
+                      <button
+                        onClick={() => submitTikketDenied(ticket._id)}
+                        title="Eliminar registro de ticket"
+                        className="text-red-600 cursor-pointer text-2xl font-semibold bg-transparent border-none p-0"
                       >
-                        ✔
-                      </span>
+                        X
+                      </button>
                       {resendEmailLoading ? (
                         <Skeleton
                           width={20}
