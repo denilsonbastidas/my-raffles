@@ -23,4 +23,4 @@ export const banksData = [
     nameZelle: "Ashley Ravelo",
   },
 ];
-export const EXCHANGE_RATE = 103;
+export const EXCHANGE_RATE = 100;
