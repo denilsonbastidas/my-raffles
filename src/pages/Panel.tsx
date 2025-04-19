@@ -1,6 +1,7 @@
 import { CreateRaffleModal } from "@/components/createRaffleModal";
 import ImageModal from "@/components/imgModal";
 import {
+  getSoldNumbers,
   getTickets,
   raffleVisibility,
   resendEmail,
@@ -45,11 +46,19 @@ function Panel() {
 
   useEffect(() => {
     const fetchGetTikkets = async () => {
-      const responseTikkets: TicketType[] = await getTickets();
-      setTickets(responseTikkets);
+      const responseTikkets: TicketType[] = await getTickets(filter);
+      if (responseTikkets) setTickets(responseTikkets);
     };
 
     fetchGetTikkets();
+  }, [filter]);
+
+  useEffect(() => {
+    const fethSoldNumbers = async () => {
+      const responseSoldNumbers = await getSoldNumbers();
+      setSoldNumber(responseSoldNumbers?.totalSold);
+    };
+    fethSoldNumbers();
   }, []);
 
   const filteredTickets = tickets.filter((ticket) => {
@@ -161,13 +170,6 @@ function Panel() {
     }
   };
 
-  useEffect(() => {
-    const allSoldNumbers = tickets
-      .filter((ticket) => ticket.approved)
-      .flatMap((ticket) => ticket.approvalCodes);
-    setSoldNumber(allSoldNumbers.length);
-  }, [tickets]);
-
   const clickedRaffleVisibility = async () => {
     const result = await Swal.fire({
       title: "¿Desea ocultar/mostrar la rifa actual?",
@@ -240,7 +242,6 @@ function Panel() {
             <option value="all">Todos</option>
             <option value="pending">Pendientes</option>
           </select>
-
           <p className="text-sm md:text-base font-semibold text-white text-center md:text-left">
             Total Números Vendidos:{" "}
             <span className="text-green-600">
@@ -249,7 +250,6 @@ function Panel() {
           </p>
         </div>
       </div>
-
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-300 text-sm md:text-base">
           <thead className="text-gray-900 bg-gray-100">

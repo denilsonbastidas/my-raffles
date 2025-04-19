@@ -45,9 +45,14 @@ export const getRaffle = async () => {
   }
 };
 
-export const getTickets = async () => {
+export const getTickets = async (filter: "all" | "pending" = "pending") => {
   try {
-    const { data } = await axios.get(`${API_URL}/api/tickets`);
+    const url =
+      filter === "all"
+        ? `${API_URL}/api/tickets?status=all`
+        : `${API_URL}/api/tickets`;
+
+    const { data } = await axios.get(url);
     return data;
   } catch (error) {
     console.error("Error getTickets:", error);
@@ -138,5 +143,15 @@ export const updatedEmail = async (id: string, newEmail: string) => {
   } catch (error) {
     console.error("Error updatedEmail:", error);
     throw new Error("Error updatedEmail");
+  }
+};
+
+export const getSoldNumbers = async () => {
+  try {
+    const { data } = await axios.get(`${API_URL}/api/tickets/sold-numbers`);
+    return data;
+  } catch (error) {
+    console.error("Error getRaffle:", error);
+    return null;
   }
 };
