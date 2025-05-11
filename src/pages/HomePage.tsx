@@ -105,17 +105,62 @@ function HomePage() {
       setIsSubmitting(true);
 
       try {
-        console.log("Enviando datos:", values);
-
         values.paymentMethod = selectedBank;
 
         await submitTicket(values);
 
+        // Swal.fire({
+        //   title: "¡Gracias por realizar tu compra!",
+        //   text: "Una vez confirmado tu pago te enviaremos los tickets y/o Números de tu compra",
+        //   icon: "success",
+        //   confirmButtonText: "Aceptar",
+        // });
+
         Swal.fire({
-          title: "¡Gracias por realizar tu compra!",
-          text: "Una vez confirmado tu pago te enviaremos los tickets y/o Números de tu compra",
-          icon: "success",
+          html: `
+  <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; width: 95%; margin: auto; border: 1px solid #e0e0e0; padding: 1.5rem; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
+
+    <h2 style="color: #333;">¡Gracias por realizar tu compra! 🎉</h2>
+    <p style="color: #555; font-size: 0.95rem; margin-top: 1rem;">
+      Una vez confirmado tu pago, recibirás tus tickets en tu correo electrónico.
+    </p>
+
+    <div style="margin-top: 1.5rem; background: #f5f7fa; padding: 1rem; border-radius: 10px; text-align: left; font-size: 0.95rem; color: #333;">
+      <h3 style="color: #222; margin-bottom: 1rem; text-align: center;">📌 Detalles de tu compra:</h3>
+
+      <!-- Contenedor de datos responsivo -->
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; word-break: break-word;">
+
+        <div><strong>Nombre:</strong> ${values.fullName}</div>
+        <div><strong>Email:</strong> ${values.email}</div>
+        <div><strong>Teléfono:</strong> ${values.phone}</div>
+        <div><strong>Boletos comprados:</strong> ${values.numberTickets}</div>
+        <div><strong>Método de pago:</strong> ${values.paymentMethod}</div>
+        <div><strong>Referencia:</strong> ${values.reference}</div>
+        <div><strong>Monto pagado:</strong> ${values.amountPaid}${values.paymentMethod === "BDV" ? " Bs" : " $"}</div>
+
+      </div>
+    </div>
+
+    <!-- Comprobante -->
+    <div style="margin-top: 2rem; text-align: center;">
+    <h3 style="font-size: 1rem; color: #444; margin-bottom: 0.5rem;"><strong>🧾 Comprobante de pago:</strong></h3>
+    <img src="${values.voucher}" alt="Comprobante de pago" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin: auto;" />
+    </div>
+    <!-- Nota final -->
+    <p style="margin-top: 2rem; font-size: 0.85rem; color: #666;">
+      ⏳ <strong>Recuerda:</strong> debes esperar entre 24 y 36 horas para verificar tu compra.<br />
+      Luego, recibirás tus tickets en tu correo electronico <strong>${values.email}</strong>.
+    </p>
+
+    <p style="margin-top: 2rem; font-size: 0.95rem; color: #444;">
+      <strong>Saludos,</strong><br />Equipo de Denilson Bastidas
+    </p>
+  </div>
+`,
+          showConfirmButton: true,
           confirmButtonText: "Aceptar",
+          width: 700,
         });
 
         resetForm();
