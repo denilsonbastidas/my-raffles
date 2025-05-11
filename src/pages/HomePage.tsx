@@ -149,7 +149,7 @@ function HomePage() {
     </div>
     <!-- Nota final -->
     <p style="margin-top: 2rem; font-size: 0.85rem; color: #666;">
-      ⏳ <strong>Recuerda:</strong> debes esperar entre 24 y 36 horas para verificar tu compra.<br />
+      ⏳ <strong>Recuerda:</strong> debes esperar entre 24 y 36 horas mientras verificamos tu compra.<br />
       Luego, recibirás tus tickets en tu correo electronico <strong>${values.email}</strong>.
     </p>
 
