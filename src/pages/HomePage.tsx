@@ -158,6 +158,7 @@ function HomePage() {
     </p>
   </div>
 `,
+          icon: "success",
           showConfirmButton: true,
           confirmButtonText: "Aceptar",
           width: 700,
