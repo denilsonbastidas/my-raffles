@@ -109,19 +109,12 @@ function HomePage() {
 
         await submitTicket(values);
 
-        // Swal.fire({
-        //   title: "¡Gracias por realizar tu compra!",
-        //   text: "Una vez confirmado tu pago te enviaremos los tickets y/o Números de tu compra",
-        //   icon: "success",
-        //   confirmButtonText: "Aceptar",
-        // });
-
         Swal.fire({
+          title: "¡Gracias por realizar tu compra!🎉",
           html: `
   <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; width: 95%; margin: auto; border: 1px solid #e0e0e0; padding: 1.5rem; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
 
-    <h2 style="color: #333;">¡Gracias por realizar tu compra! 🎉</h2>
-    <p style="color: #555; font-size: 0.95rem; margin-top: 1rem;">
+    <p style="color: #555; font-size: 0.95rem;">
       Una vez confirmado tu pago, recibirás tus tickets en tu correo electrónico.
     </p>
 
