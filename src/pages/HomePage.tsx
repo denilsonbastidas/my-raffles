@@ -112,7 +112,7 @@ function HomePage() {
         Swal.fire({
           title: "¡Gracias por realizar tu compra!🎉",
           html: `
-  <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; width: 100%; margin: auto; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
+  <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; width: 100%; padding: 8px;  margin: auto; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
 
     <p style="color: #555; font-size: 0.95rem;">
       Una vez confirmado tu pago, recibirás tus tickets en tu correo electrónico.
