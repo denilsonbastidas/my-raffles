@@ -112,7 +112,7 @@ function HomePage() {
         Swal.fire({
           title: "¡Gracias por realizar tu compra!🎉",
           html: `
-  <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; width: 95%; margin: auto; border: 1px solid #e0e0e0; padding: 1.5rem; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
+  <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; width: 100%; margin: auto; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
 
     <p style="color: #555; font-size: 0.95rem;">
       Una vez confirmado tu pago, recibirás tus tickets en tu correo electrónico.
@@ -124,8 +124,8 @@ function HomePage() {
       <!-- Contenedor de datos responsivo -->
       <div style="display: flex; flex-direction: column; gap: 0.5rem; word-break: break-word;">
 
-        <div><strong>Nombre:</strong> ${values.fullName}</div>
-        <div><strong>Email:</strong> ${values.email}</div>
+        <div style="white-space: normal; word-wrap: break-word;"> <strong>Nombre:</strong> <span style="display: inline-block;">${values.fullName}</span></div>
+        <div style="white-space: normal; word-wrap: break-word;"><strong>Email:</strong> <span style="display: inline-block;">${values.email}</span></div>
         <div><strong>Teléfono:</strong> ${values.phone}</div>
         <div><strong>Boletos comprados:</strong> ${values.numberTickets}</div>
         <div><strong>Método de pago:</strong> ${values.paymentMethod}</div>
@@ -141,7 +141,7 @@ function HomePage() {
     <img src="${values.voucher}" alt="Comprobante de pago" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin: auto;" />
     </div>
     <!-- Nota final -->
-    <p style="margin-top: 2rem; font-size: 0.85rem; color: #666;">
+    <p style="margin-top: 2rem; font-size: 0.90rem; color: #666;">
       ⏳ <strong>Recuerda:</strong> debes esperar entre 24 y 36 horas mientras verificamos tu compra.<br />
       Luego, recibirás tus tickets en tu correo electronico <strong>${values.email}</strong>.
     </p>
@@ -221,24 +221,6 @@ function HomePage() {
       reader.onerror = (error) => reject(error);
     });
   };
-
-  // borrar si todo bien
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   let value = parseInt(e.target.value, 10);
-
-  //   if (isNaN(value)) {
-  //     formik.setFieldValue("numberTickets", "");
-  //     setTotalUSD(0);
-  //     setTotalBS(0);
-  //     return;
-  //   }
-
-  //   if (value < raffleActually.minValue) value = raffleActually.minValue;
-  //   if (value > MAX_VALUE) value = MAX_VALUE;
-
-  //   formik.setFieldValue("numberTickets", value);
-  //   updateTotal(value);
-  // };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
