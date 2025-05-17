@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
+import { FiUploadCloud } from "react-icons/fi";
 
 function HomePage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -16,6 +17,7 @@ function HomePage() {
   const predefinedValues = [2, 5, 10, 20, 50, 100];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const [raffleActually, setRaffleActually] = useState<RaffleType>({
     name: "",
@@ -258,6 +260,7 @@ function HomePage() {
     if (file) {
       try {
         const base64 = await convertFileToBase64(file);
+        setPreview(base64 as string);
         formik.setFieldValue("voucher", base64);
       } catch (error) {
         console.error("Error al procesar la imagen:", error);
@@ -443,7 +446,8 @@ function HomePage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 w-full">
+                  {/* si todo bien borrar esto  */}
+                  {/* <div className="mt-4 w-full">
                     <p className="font-bold flex items-center gap-2">
                       <span className="text-red-500 ">*</span>COMPROBANTE DE
                       PAGO:
@@ -463,12 +467,58 @@ function HomePage() {
                         {formik.errors.voucher}
                       </div>
                     ) : null}
+                  </div> */}
+
+                  <div className="mt-4 w-full">
+                    <p className="font-bold flex items-center gap-2">
+                      <span className="text-red-500">*</span>COMPROBANTE DE
+                      PAGO:
+                    </p>
+                    <p className="text-gray-400 text-sm mb-2">
+                      Foto o Captura de Pantalla
+                    </p>
+
+                    <label
+                      htmlFor="voucher-upload"
+                      className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      {preview ? (
+                        <img
+                          src={preview}
+                          alt="Vista previa"
+                          className="max-h-48 object-contain rounded-lg"
+                        />
+                      ) : (
+                        <>
+                          <FiUploadCloud className="text-3xl text-gray-400 mb-2" />
+                          <p className="text-gray-500 underline">
+                            Haz clic para subir una imagen
+                          </p>
+                        </>
+                      )}
+                    </label>
+
+                    <input
+                      id="voucher-upload"
+                      type="file"
+                      name="voucher"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+
+                    {formik.touched.voucher && formik.errors.voucher && (
+                      <div className="text-red-500 text-sm mt-1 text-start">
+                        {formik.errors.voucher}
+                      </div>
+                    )}
                   </div>
 
                   {isSubmitting ? (
                     <Skeleton
                       height={45}
-                      width={380}
+                      width={350}
                       className="rounded mt-6 animate-pulse"
                     />
                   ) : (
