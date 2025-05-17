@@ -162,6 +162,7 @@ function HomePage() {
         resetForm();
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
+          setPreview(null);
         }
       } catch (error) {
         console.error("Error al enviar el formulario:", error);
