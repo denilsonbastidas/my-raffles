@@ -160,6 +160,8 @@ function HomePage() {
         });
 
         resetForm();
+        setTotalUSD(0);
+        setTotalBS(0);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
           setPreview(null);
