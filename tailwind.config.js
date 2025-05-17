@@ -18,6 +18,10 @@ export default {
           900: "#101828",
         },
       },
+      fontFamily: {
+        bebas: ['"Bebas Neue"', "sans-serif"],
+        anton: ['"Anton"', "sans-serif"],
+      },
     },
   },
   plugins: [],

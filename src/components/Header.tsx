@@ -8,25 +8,30 @@ interface Props {
 }
 function HeaderPage({ name, description, images, ticketPrice }: Props) {
   return (
-    <div className="flex flex-col w-full mx-auto justify-center items-center border-b border-gray-50 p-8 md:w-2/3">
-      <div className="flex flex-col mb-6 gap-1 text-center border-b py-1">
-        <h1 className="text-4xl text-blue-200 font-semibold">
-          Bienvenido Futuro Ganador
-        </h1>
-        <h4 className="text-md text-gray-200 font-bold">
-          Estas a un Paso de Ganar con Denilson Bastidas
-        </h4>
+    <div className="flex flex-col w-full mx-auto justify-center items-center border-b border-gray-700 p-8 md:w-2/3 bg-gradient-to-b from-gray-900 to-black rounded-b-3xl shadow-lg">
+      <div className="py-2 mb-2 mx-auto">
+        <img
+          src="logo.webp"
+          alt="logo denilson bastidas"
+          className="w-28 h-28 border-2 rounded-full"
+          loading="lazy"
+        />
       </div>
-      <div className="flex flex-col text-center mb-3">
-        <p className="text-4xl font-semibold text-gray-100 mb-2">{name}</p>
-        <p className="text-lg font-semibold text-gray-100 mb-2 md:text-xl">
+
+      <div className="flex flex-col text-center mb-6">
+        <p className="text-5xl md:text-6xl uppercase font-bebas font-bold text-white mb-2">
+          {name}
+        </p>
+        <p className="text-xl md:text-2xl uppercase font-bebas font-semibold text-gray-300 mb-2">
           {description}
         </p>
-        <p className="text-xl font-medium text-blue-200">
-          Por tan sólo {ticketPrice?.toString() || 0}$ por tickets.
+        <p className="text-xl font-anton uppercase font-semibold text-blue-300">
+          Por tan solo <span className="text-yellow-400">{ticketPrice}$</span>{" "}
+          por ticket.
         </p>
       </div>
-      {/* slider */}
+
+      {/* Slider */}
       <ImageSlider imagesSlider={images} />
     </div>
   );

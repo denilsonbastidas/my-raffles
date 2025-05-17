@@ -281,15 +281,6 @@ function HomePage() {
       )}
       {!isLoading && (
         <section className="min-h-screen flex flex-col">
-          <div className="py-2 mx-auto">
-            <img
-              src="logo.webp"
-              alt="logo denilson bastidas"
-              className="w-28 h-28 border-2 rounded-full"
-              loading="lazy"
-            />
-          </div>
-
           <div className="flex-grow">
             <HeaderPage
               name={raffleActually?.name}
@@ -300,9 +291,7 @@ function HomePage() {
 
             {raffleActually?.visible ? (
               <div className="flex flex-col text-center items-center mt-6">
-                <h3 className="text-3xl font-semibold">
-                  COMPRA TUS NUMEROS DE LA RIFA
-                </h3>
+                <h3 className="text-3xl font-semibold">COMPRAR TUS TICKETS</h3>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -312,7 +301,7 @@ function HomePage() {
                 >
                   <label className="text-gray-300">
                     Mínimo {raffleActually?.minValue} y Máximo {MAX_VALUE}{" "}
-                    Números por Compra
+                    Tickets por Compra
                   </label>
 
                   <input
@@ -335,7 +324,7 @@ function HomePage() {
                   ) : null}
 
                   <p className="mt-2 text-gray-300">
-                    Selecciona una cantidad de números
+                    Selecciona una cantidad de Tickets
                   </p>
 
                   <div className="grid grid-cols-6 gap-2 mb-8 mt-2 w-full max-w-xs">
@@ -469,7 +458,7 @@ function HomePage() {
                     ) : null}
                   </div> */}
 
-                  <div className="mt-4 w-full">
+                  <div className="mt-4 w-full max-w-md">
                     <p className="font-bold flex items-center gap-2">
                       <span className="text-red-500">*</span>COMPROBANTE DE
                       PAGO:
@@ -480,21 +469,21 @@ function HomePage() {
 
                     <label
                       htmlFor="voucher-upload"
-                      className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition"
+                      className="flex items-center justify-center w-full h-24 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition overflow-hidden"
                     >
                       {preview ? (
                         <img
                           src={preview}
                           alt="Vista previa"
-                          className="max-h-48 object-contain rounded-lg"
+                          className="w-full h-full object-contain rounded-lg"
                         />
                       ) : (
-                        <>
-                          <FiUploadCloud className="text-3xl text-gray-400 mb-2" />
+                        <div className="flex flex-col items-center gap-2">
+                          <FiUploadCloud className="text-3xl text-gray-400" />
                           <p className="text-gray-500 underline">
                             Haz clic para subir una imagen
                           </p>
-                        </>
+                        </div>
                       )}
                     </label>
 
@@ -534,7 +523,7 @@ function HomePage() {
                 <p className="text-md  text-gray-300 my-8 w-full text-center md:w-1/2">
                   Recuerde que debe esperar un lapso de 24 a 36 horas
                   aproximadamente mientras nuestro equipo verifica y valida su
-                  compra. Los números serán enviados a su correo electrónico.
+                  compra. Los tickets serán enviados a su correo electrónico.
                 </p>
               </div>
             ) : (
