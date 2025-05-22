@@ -146,6 +146,20 @@ export const updatedEmail = async (id: string, newEmail: string) => {
   }
 };
 
+export const checkApprovedTickets = async (email: string) => {
+  try {
+    const { data } = await axios.post(`${API_URL}/api/tickets/check`, {
+      email,
+    });
+    return data.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.error || "Error al verificar tickets",
+    );
+  }
+};
+
 export const getSoldNumbers = async () => {
   try {
     const { data } = await axios.get(`${API_URL}/api/tickets/sold-numbers`);

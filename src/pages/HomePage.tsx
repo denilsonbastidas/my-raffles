@@ -1,7 +1,12 @@
 import Footer from "@/components/Footer";
 import HeaderPage from "@/components/Header";
 import PaymentMethods from "@/components/PaymentMethods";
-import { getParallelDollar, getRaffle, submitTicket } from "@/services";
+import {
+  checkApprovedTickets,
+  getParallelDollar,
+  getRaffle,
+  submitTicket,
+} from "@/services";
 import { RaffleType } from "@/utils/types";
 import { useFormik } from "formik";
 import { useEffect, useRef, useState } from "react";
@@ -9,6 +14,7 @@ import Skeleton from "react-loading-skeleton";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 import { FiUploadCloud } from "react-icons/fi";
+import { PHONE_SUPPORT } from "@/utils/contants";
 
 function HomePage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -271,6 +277,166 @@ function HomePage() {
     }
   };
 
+  const showVerifiedTickect = async () => {
+    const { isConfirmed, value: email } = await Swal.fire({
+      title: "VERIFICA TUS TICKETS",
+      background: "#1e1e1e",
+      color: "#f0f0f0",
+      html: `
+      <div style="font-family: 'Segoe UI', sans-serif; font-size: 0.95rem; color: #e0e0e0;">
+        <div style="
+          background-color: #2c2c2c;
+          padding: 1rem;
+          border-radius: 10px;
+          border: 1px solid #444;
+          margin-bottom: 1.5rem;
+        ">
+          <p style="margin: 0 0 0.75rem;">
+            <strong style="display: block; margin-bottom: 0.5rem; color: #ffdd57;">
+              ⚠ SOPORTE TIENE 24 hrs PARA RESPONDERTE Y APROBAR TU COMPRA
+            </strong>
+            ¿No recibiste tus tickets por correo?
+            <strong style="color: #ffffff;"> ¡VERIFÍCALOS AQUÍ! </strong>
+          </p>
+          <p style="margin-bottom: 0.75rem;">
+            Ingresa el correo electrónico que usaste para la compra en el campo de abajo y haz clic en
+            <strong>"Verificar Tickets"</strong> para ver tus números de participación.
+          </p>
+          <p style="margin: 0;">
+            <strong>CONTÁCTANOS POR EL TLF DE SOPORTE:</strong><br/>
+            ${PHONE_SUPPORT}
+          </p>
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <label for="email" style="display: block; margin-bottom: 0.4rem; font-weight: 600;">
+            Email para Verificar Tickets
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Ingresa tu email"
+            style="
+              width: 100%;
+              padding: 0.6rem 0.75rem;
+              border: 1px solid #666;
+              border-radius: 6px;
+              font-size: 0.95rem;
+              background-color: #111;
+              color: #fff;
+              box-sizing: border-box;
+            "
+          />
+        </div>
+      </div>
+    `,
+      confirmButtonText: "Verificar Tickets",
+      cancelButtonText: "Cancelar",
+      showCancelButton: true,
+      focusConfirm: false,
+      preConfirm: async () => {
+        const input = document.getElementById("email") as HTMLInputElement;
+        const email = input?.value;
+        if (!email || !email.includes("@")) {
+          Swal.showValidationMessage("Por favor, ingresa un email válido");
+          return;
+        }
+
+        try {
+          const response = await checkApprovedTickets(email);
+
+          if (!response || response.length === 0) {
+            Swal.showValidationMessage(
+              "No se encontraron tickets aprobados con ese correo",
+            );
+            return;
+          }
+
+          return response;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          Swal.showValidationMessage(
+            error?.message || "Error al verificar los tickets",
+          );
+        }
+      },
+      width: 600,
+      icon: "info",
+      iconColor: "#00d1ff",
+      confirmButtonColor: "#1D2939",
+      cancelButtonColor: "#6c757d",
+    });
+
+    // si el usuario confirmó y hay tickets aprobados
+    if (isConfirmed && Array.isArray(email)) {
+      const tickets = email;
+
+      const ticketsHtml = tickets
+        .map(
+          (ticket) => `
+      <div style="
+        background-color: #2c2c2c;
+        padding: 1rem 1.2rem;
+        border-radius: 8px;
+        border: 1px solid #444;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #e0e0e0;
+      ">
+        <p style="margin: 0 0 0.5rem; font-size: 1.05rem;">
+          <strong style="color: #00d1ff;">Nombre:</strong> ${ticket.nombre}
+        </p>
+        <p style="margin: 0 0 0.5rem; font-size: 1.05rem;">
+          <strong style="color: #00d1ff;">Email:</strong> ${ticket.email}
+        </p>
+        <p style="margin: 0; font-size: 1rem;">
+          <strong style="color: #00d1ff;">Tickets:</strong>
+          <span style="
+            background-color: #00d1ff22;
+            color: #00d1ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-top: 4px;
+            ">
+            ${ticket.tickets.join(", ")}
+          </span>
+        </p>
+      </div>
+    `,
+        )
+        .join("");
+
+      Swal.fire({
+        title: "Tus Tickets Aprobados",
+        background: "#1e1e1e",
+        color: "#f0f0f0",
+        html: `
+    <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+      ${ticketsHtml}
+    </div>
+     <p style="
+        font-size: 0.8rem; 
+        color: #888; 
+        margin-top: 1rem; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+      ">
+        📸 Te recomendamos tomar captura o guardar esta información para referencia.
+      </p>
+  `,
+        confirmButtonText: "Cerrar",
+        width: 600,
+        icon: "success",
+        iconColor: "#00d1ff",
+        confirmButtonColor: "#1D2939",
+      });
+    }
+  };
+
   return (
     <div>
       {isLoading && (
@@ -438,29 +604,6 @@ function HomePage() {
                     </div>
                   </div>
 
-                  {/* si todo bien borrar esto  */}
-                  {/* <div className="mt-4 w-full">
-                    <p className="font-bold flex items-center gap-2">
-                      <span className="text-red-500 ">*</span>COMPROBANTE DE
-                      PAGO:
-                    </p>
-                    <p className="text-gray-300 text-sm mb-2">
-                      Foto o Captura de Pantalla
-                    </p>
-                    <input
-                      type="file"
-                      name="voucher"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="p-2 w-full border rounded bg-white text-black"
-                    />
-                    {formik.touched.voucher && formik.errors.voucher ? (
-                      <div className="text-red-500 text-start">
-                        {formik.errors.voucher}
-                      </div>
-                    ) : null}
-                  </div> */}
-
                   <div className="mt-4 w-full max-w-md">
                     <p className="font-bold flex items-center gap-2">
                       <span className="text-red-500">*</span>COMPROBANTE DE
@@ -523,7 +666,7 @@ function HomePage() {
                   )}
                 </form>
 
-                <p className="text-md  text-gray-300 my-8 w-full text-center md:w-1/2">
+                <p className="text-md  text-gray-300 my-4 w-full text-center md:w-1/2">
                   Recuerde que debe esperar un lapso de 24 a 36 horas
                   aproximadamente mientras nuestro equipo verifica y valida su
                   compra. Los tickets serán enviados a su correo electrónico.
@@ -554,6 +697,14 @@ function HomePage() {
                 </a>
               </div>
             )}
+            <div className="flex justify-center items-center my-6">
+              <button
+                onClick={showVerifiedTickect}
+                className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg shadow-2xl hover:bg-gray-800 hover:shadow-lg transition duration-300 ease-in-out"
+              >
+                Verifica Tus Tickets
+              </button>
+            </div>
           </div>
           <div>
             <Footer />

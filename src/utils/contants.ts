@@ -23,4 +23,5 @@ export const banksData = [
     nameZelle: "Ashley Ravelo",
   },
 ];
+export const PHONE_SUPPORT = "(0412)-4698178";
 export const EXCHANGE_RATE = 100;
