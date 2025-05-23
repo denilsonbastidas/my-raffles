@@ -131,12 +131,17 @@ export const resendEmail = async (id: string) => {
   }
 };
 
-export const updatedEmail = async (id: string, newEmail: string) => {
+export const updatedEmail = async (
+  id: string,
+  newEmail: string,
+  newPhone: string,
+) => {
   try {
     const { data } = await axios.put(
-      `${API_URL}/api/tickets/update-email/${id}`,
+      `${API_URL}/api/tickets/update-contact/${id}`,
       {
         newEmail,
+        newPhone,
       },
     );
     return data;

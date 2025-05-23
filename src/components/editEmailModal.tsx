@@ -4,10 +4,10 @@ import Swal from "sweetalert2";
 import Skeleton from "react-loading-skeleton";
 
 interface EditEmailProps {
-  currentTikketSelected: { email: string; id: string };
+  currentTikketSelected: { email: string; id: string; phone: string };
   isOpen: boolean;
   onClose: () => void;
-  onEmailUpdated: (id: string, newEmail: string) => void;
+  onEmailUpdated: (id: string, newEmail: string, newPhone: string) => void;
 }
 
 const EditEmailModal: React.FC<EditEmailProps> = ({
@@ -20,6 +20,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
 
   const [selectedTikket, setSelectedTikket] = useState<{
     email: string;
+    phone: string;
     id: string;
   }>(currentTikketSelected);
   const [loading, setLoading] = useState<boolean>(false);
@@ -41,16 +42,24 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
 
     try {
       setLoading(true);
-      await updatedEmail(selectedTikket.id, selectedTikket.email);
+      await updatedEmail(
+        selectedTikket.id,
+        selectedTikket.email,
+        selectedTikket.phone,
+      );
       Swal.fire({
-        title: "Email Actualizado!",
+        title: "Datos Actualizados!",
         icon: "success",
         confirmButtonText: "Aceptar",
       });
-      onEmailUpdated(selectedTikket.id, selectedTikket.email);
+      onEmailUpdated(
+        selectedTikket.id,
+        selectedTikket.email,
+        selectedTikket.phone,
+      );
       onClose();
     } catch (error) {
-      console.error("Error actualizar Email:", error);
+      console.error("Error actualizar Datos:", error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +76,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
         </button>
         <form onSubmit={handleSubmit} className="space-y-8">
           <label className="text-black font-bold" htmlFor="email">
-            Actualizar Email:
+            Actualizar Datos del cliente:
           </label>
           <input
             name="email"
@@ -75,8 +84,23 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
             value={selectedTikket.email}
             onChange={(e) =>
               setSelectedTikket({
+                ...selectedTikket,
                 email: e.target.value,
-                id: currentTikketSelected.id,
+              })
+            }
+            className="w-full p-2 border rounded text-black"
+            required
+          />
+
+          <input
+            type="tel"
+            name="phone"
+            placeholder="Numero de telefono"
+            value={selectedTikket.phone}
+            onChange={(e) =>
+              setSelectedTikket({
+                ...selectedTikket,
+                phone: e.target.value,
               })
             }
             className="w-full p-2 border rounded text-black"

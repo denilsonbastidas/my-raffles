@@ -33,7 +33,8 @@ function Panel() {
   const [currentTikketSelected, setCurrentTikketSelected] = useState<{
     email: string;
     id: string;
-  }>({ email: "", id: "" });
+    phone: string;
+  }>({ email: "", id: "", phone: "" });
 
   const handleOpenModal = (image: string) => {
     setSelectedImage(image);
@@ -196,10 +197,16 @@ function Panel() {
     }
   };
 
-  const handleEmailUpdated = (id: string, newEmail: string) => {
+  const handleEmailUpdated = (
+    id: string,
+    newEmail: string,
+    newPhone: string,
+  ) => {
     setTickets((prevTickets) =>
       prevTickets.map((ticket) =>
-        ticket._id === id ? { ...ticket, email: newEmail } : ticket,
+        ticket._id === id
+          ? { ...ticket, email: newEmail, phone: newPhone }
+          : ticket,
       ),
     );
   };
@@ -299,11 +306,12 @@ function Panel() {
                         setCurrentTikketSelected({
                           email: ticket.email,
                           id: ticket._id,
+                          phone: ticket.phone,
                         });
                       }}
                       size={20}
                       className="cursor-pointer"
-                      title="Editar Email"
+                      title="Editar Datos del cliente"
                     />
                   </div>
                 </td>
