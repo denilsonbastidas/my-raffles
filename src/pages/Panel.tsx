@@ -1,6 +1,7 @@
 import { CreateRaffleModal } from "@/components/createRaffleModal";
 import ImageModal from "@/components/imgModal";
 import {
+  checkTicket,
   getSoldNumbers,
   getTickets,
   raffleVisibility,
@@ -211,6 +212,82 @@ function Panel() {
     );
   };
 
+  const handleSearchTicket = async () => {
+    if (!search.trim()) return;
+
+    try {
+      const result = await checkTicket(search.trim());
+
+      if (result) {
+        Swal.fire({
+          title: `¡Ticket ${search.trim()} vendido!`,
+          html: `
+  <div style="
+    background-color: #f9fafb;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    font-family: 'Segoe UI', sans-serif;
+    color: #1f2937;
+    text-align: left;
+  ">
+    <h2 style="
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #111827;
+    ">🎉 Información del Ganador</h2>
+
+    <div style="margin-bottom: 10px;">
+      <span style="font-weight: 500; color: #6b7280;">Nombre:</span><br />
+      <span style="font-size: 16px;">${result.fullName}</span>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+      <span style="font-weight: 500; color: #6b7280;">Email:</span><br />
+      <span style="font-size: 16px;">${result.email}</span>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+      <span style="font-weight: 500; color: #6b7280;">Teléfono:</span><br />
+      <span style="font-size: 16px;">${result.phone}</span>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+      <span style="font-weight: 500; color: #6b7280;">Fecha de compra:</span><br />
+      <span style="font-size: 16px;">
+        ${new Date(result.createdAt).toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })}
+      </span>
+    </div>
+  </div>
+`,
+          icon: "success",
+        });
+      } else {
+        Swal.fire({
+          title: "No vendido",
+          text: "Este ticket aún no ha sido vendido.",
+          icon: "warning",
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
+
   return (
     <div className="p-6">
       <h2 className="text-2xl md:text-4xl uppercase font-bold mb-4 text-center md:text-left">
@@ -219,13 +296,31 @@ function Panel() {
 
       <div className="flex flex-col md:flex-row w-full justify-between items-center gap-4 md:gap-6 mb-4">
         <div className="w-full md:w-1/4">
-          <input
-            type="text"
-            placeholder="Buscar por número de boleto..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border text-black px-3 py-2 rounded"
-          />
+          {filter === "all" ? (
+            <input
+              type="text"
+              placeholder="Buscar por número de boleto..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border text-black px-3 py-2 rounded"
+            />
+          ) : (
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar boleto..."
+                className="w-full border text-black px-3 py-2 rounded"
+              />
+              <button
+                onClick={handleSearchTicket}
+                className="bg-gray-900 text-white font-semibold px-4 py-2 rounded w-full max-w-[120px]"
+              >
+                buscar
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col flex-wrap md:flex-row items-center gap-4 md:gap-7 w-full md:w-auto">

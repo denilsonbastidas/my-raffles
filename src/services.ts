@@ -165,6 +165,21 @@ export const checkApprovedTickets = async (email: string) => {
   }
 };
 
+export const checkTicket = async (ticket: string) => {
+  try {
+    const { data } = await axios.get(`${API_URL}/api/tickets/check`, {
+      params: { number: ticket },
+    });
+
+    return data.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.error || "Error al verificar tickets",
+    );
+  }
+};
+
 export const getSoldNumbers = async () => {
   try {
     const { data } = await axios.get(`${API_URL}/api/tickets/sold-numbers`);
