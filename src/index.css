@@ -40,3 +40,20 @@ input[type="email"] {
   font-family: sans-serif;
 }
 
+#tickets-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#tickets-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#tickets-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+#tickets-container::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}

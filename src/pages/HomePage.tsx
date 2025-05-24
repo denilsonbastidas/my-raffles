@@ -367,7 +367,6 @@ function HomePage() {
       cancelButtonColor: "#6c757d",
     });
 
-    // si el usuario confirmó y hay tickets aprobados
     if (isConfirmed && Array.isArray(email)) {
       const tickets = email;
 
@@ -415,7 +414,12 @@ function HomePage() {
         background: "#1e1e1e",
         color: "#f0f0f0",
         html: `
-    <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+    <div id="tickets-container" style="
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+  -webkit-overflow-scrolling: touch;
+">
       ${ticketsHtml}
     </div>
      <p style="
