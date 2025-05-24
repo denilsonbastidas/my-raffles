@@ -36,6 +36,9 @@ function Panel() {
     id: string;
     phone: string;
   }>({ email: "", id: "", phone: "" });
+  const [paymentMethod, setPaymentMethod] = useState<string | undefined>(
+    undefined,
+  );
 
   const handleOpenModal = (image: string) => {
     setSelectedImage(image);
@@ -48,12 +51,15 @@ function Panel() {
 
   useEffect(() => {
     const fetchGetTikkets = async () => {
-      const responseTikkets: TicketType[] = await getTickets(filter);
+      const responseTikkets: TicketType[] = await getTickets(
+        filter,
+        paymentMethod,
+      );
       if (responseTikkets) setTickets(responseTikkets);
     };
 
     fetchGetTikkets();
-  }, [filter]);
+  }, [filter, paymentMethod]);
 
   useEffect(() => {
     const fethSoldNumbers = async () => {
@@ -297,13 +303,39 @@ function Panel() {
       <div className="flex flex-col md:flex-row w-full justify-between items-center gap-4 md:gap-6 mb-4">
         <div className="w-full md:w-1/4">
           {filter === "all" ? (
-            <input
-              type="text"
-              placeholder="Buscar por número de boleto..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full border text-black px-3 py-2 rounded"
-            />
+            <div className="flex items-center gap-3 w-full">
+              <input
+                type="text"
+                placeholder="Buscar por número de boleto..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full border text-black px-3 py-2 rounded"
+              />
+
+              <div className="w-full flex flex-col">
+                <label
+                  htmlFor="paymentMethod"
+                  className="mr-2 text-sm font-semibold"
+                >
+                  Filtrar por método de pago:
+                </label>
+                <select
+                  id="paymentMethod"
+                  className="border text-black border-gray-300 rounded px-2 py-1"
+                  value={paymentMethod || ""}
+                  onChange={(e) =>
+                    setPaymentMethod(
+                      e.target.value === "" ? undefined : e.target.value,
+                    )
+                  }
+                >
+                  <option value="">Todos</option>
+                  <option value="BDV">BDV</option>
+                  <option value="zelle">Zelle</option>
+                  <option value="binance">Binance</option>
+                </select>
+              </div>
+            </div>
           ) : (
             <div className="flex items-center gap-3">
               <input

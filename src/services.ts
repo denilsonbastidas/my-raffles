@@ -45,13 +45,22 @@ export const getRaffle = async () => {
   }
 };
 
-export const getTickets = async (filter: "all" | "pending" = "pending") => {
+export const getTickets = async (
+  filter: "all" | "pending" = "pending",
+  paymentMethod?: string,
+) => {
   try {
-    const url =
-      filter === "all"
-        ? `${API_URL}/api/tickets?status=all`
-        : `${API_URL}/api/tickets`;
+    const params = new URLSearchParams();
 
+    if (filter === "all") {
+      params.append("status", "all");
+    }
+
+    if (paymentMethod) {
+      params.append("paymentMethod", paymentMethod);
+    }
+
+    const url = `${API_URL}/api/tickets?${params.toString()}`;
     const { data } = await axios.get(url);
     return data;
   } catch (error) {
