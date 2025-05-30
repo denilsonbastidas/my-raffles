@@ -36,6 +36,7 @@ function Panel() {
     id: string;
     phone: string;
   }>({ email: "", id: "", phone: "" });
+  const [showSold, setShowSold] = useState<boolean>(true);
   const [paymentMethod, setPaymentMethod] = useState<string | undefined>(
     undefined,
   );
@@ -377,9 +378,22 @@ function Panel() {
             <option value="pending">Pendientes</option>
           </select>
           <p className="text-sm md:text-base font-semibold text-white text-center md:text-left">
-            Total Números Vendidos:{" "}
-            <span className="text-green-600">
-              {soldNumber?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} 🎯
+            Total Tickets Vendidos:{" "}
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={() => setShowSold(!showSold)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setShowSold(!showSold);
+                }
+              }}
+              className="cursor-pointer text-green-600 inline-block"
+            >
+              {showSold
+                ? soldNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                : "*****"}{" "}
+              🎯
             </span>
           </p>
         </div>
