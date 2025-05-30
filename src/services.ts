@@ -117,12 +117,12 @@ export const getParallelDollar = async () => {
   };
 
   try {
-    const { data } = await axios.get("https://pydolarve.org/api/v2/dollar");
-    if (data?.monitors?.enparalelovzla?.price) {
-      const adjustedPrice =
-        Math.round(data?.monitors?.enparalelovzla?.price) + 2;
-      return { priceEnparalelovzla: adjustedPrice };
-    }
+    // const { data } = await axios.get("https://pydolarve.org/api/v2/dollar");
+    // if (data?.monitors?.enparalelovzla?.price) {
+    //   const adjustedPrice =
+    //     Math.round(data?.monitors?.enparalelovzla?.price) + 2;
+    //   return { priceEnparalelovzla: adjustedPrice };
+    // }
     return fallbackData;
   } catch (error) {
     console.error("Error getParallelDollar:", error);
