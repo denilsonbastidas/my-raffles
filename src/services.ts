@@ -48,6 +48,7 @@ export const getRaffle = async () => {
 export const getTickets = async (
   filter: "all" | "pending" = "pending",
   paymentMethod?: string,
+  pageTickets?: number,
 ) => {
   try {
     const params = new URLSearchParams();
@@ -59,6 +60,12 @@ export const getTickets = async (
     if (paymentMethod) {
       params.append("paymentMethod", paymentMethod);
     }
+
+    if (pageTickets) {
+      params.append("page", pageTickets.toString());
+    }
+
+    params.append("numbertoshow", "150");
 
     const url = `${API_URL}/api/tickets?${params.toString()}`;
     const { data } = await axios.get(url);
