@@ -31,6 +31,7 @@ function Panel() {
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState(false);
   const [isChangingTypes, setIsChangingTypes] = useState(false);
+  const [searchInPendings, setSearchInPendings] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [resendEmailLoading, setResendEmailLoading] = useState<boolean>(false);
   const [currentTikketSelected, setCurrentTikketSelected] = useState<{
@@ -94,7 +95,7 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-        code.toLowerCase().includes(search.toLowerCase()),
+        code.toLowerCase().includes(search.toLowerCase())
       )
       : true;
 
@@ -241,14 +242,14 @@ function Panel() {
   };
 
   const handleSearchTicket = async () => {
-    if (!search.trim()) return;
+    if (!searchInPendings.trim()) return;
 
     try {
-      const result = await checkTicket(search.trim());
+      const result = await checkTicket(searchInPendings.trim());
 
       if (result) {
         Swal.fire({
-          title: `¡Ticket ${search.trim()} vendido!`,
+          title: `¡Ticket ${searchInPendings.trim()} vendido!`,
           html: `
   <div style="
     background-color: #f9fafb;
@@ -362,9 +363,9 @@ function Panel() {
             <div className="flex items-center gap-3">
               <input
                 type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar boleto..."
+                value={searchInPendings}
+                onChange={(e) => setSearchInPendings(e.target.value)}
+                placeholder="Buscar por número de boleto..."
                 className="w-full border text-black px-3 py-2 rounded"
               />
               <button
