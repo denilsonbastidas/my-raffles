@@ -42,6 +42,7 @@ function Panel() {
   const [showSold, setShowSold] = useState<boolean>(true);
   const [pageTickets, setPageTickets] = useState<number>(1);
   const [isLastPage, setIsLastPage] = useState<boolean>(false);
+  const [orderTickets, setOrderTickets] = useState<string>("desc");
   const numberToShow = 150;
   const [paymentMethod, setPaymentMethod] = useState<string | undefined>(
     undefined,
@@ -62,7 +63,8 @@ function Panel() {
       const responseTikkets: TicketType[] = await getTickets(
         filter,
         paymentMethod,
-        pageTickets
+        pageTickets,
+        orderTickets
       );
 
       if (responseTikkets) {
@@ -75,14 +77,14 @@ function Panel() {
     };
 
     fetchGetTikkets();
-  }, [filter, paymentMethod, pageTickets]);
+  }, [filter, paymentMethod, pageTickets, orderTickets]);
 
   useEffect(() => {
     setIsChangingTypes(true)
     setTickets([]);
     setPageTickets(1);
     setIsLastPage(false);
-  }, [filter, paymentMethod]);
+  }, [filter, paymentMethod, orderTickets]);
 
   useEffect(() => {
     const fethSoldNumbers = async () => {
@@ -319,32 +321,54 @@ function Panel() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl md:text-4xl uppercase font-bold mb-5 text-center md:text-left" style={{ marginBottom: "50px !important" }}>
-        Listado de Tickets
-      </h2>
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+        <h2 className="text-2xl md:text-4xl uppercase font-bold text-center md:text-left mb-4 md:mb-0">
+          Listado de Tickets
+        </h2>
 
-      <div className="flex flex-col md:flex-row w-full justify-between items-center gap-4 md:gap-6 mb-4" style={{ marginTop: "30px" }}>
+        <p className="text-sm md:text-base font-semibold text-white text-center md:text-left">
+          Tickets Vendidos:{" "}
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => setShowSold(!showSold)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                setShowSold(!showSold);
+              }
+            }}
+            className="cursor-pointer text-green-600 inline-block"
+          >
+            {showSold
+              ? soldNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              : "*****"}{" "}
+            🎯
+          </span>
+        </p>
+      </div>
+
+      <div className="flex flex-col md:flex-row w-full justify-between items-center gap-4 md:gap-6 mb-4">
         <div className="w-full md:w-1/3">
           {filter === "all" ? (
-            <div className="flex items-center gap-3 w-full">
+            <div className="flex items-center gap-5 md-gap-3 w-full">
               <input
                 type="text"
                 placeholder="Buscar por número de boleto..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full border text-black px-3 py-2 rounded"
+                className="w-full border text-black px-3 py-2 rounded mt-6"
               />
 
-              <div className="w-full flex flex-col" style={{ marginTop: "-25px" }}>
+              <div className="w-full flex flex-col">
                 <label
                   htmlFor="paymentMethod"
                   className="mr-2 text-sm font-semibold mb-2"
                 >
-                  Filtrar por método de pago
+                  filtro método de pago
                 </label>
                 <select
                   id="paymentMethod"
-                  className="border text-black border-gray-300 rounded px-2 py-1"
+                  className="border text-black border-gray-300 rounded p-2"
                   value={paymentMethod || ""}
                   onChange={(e) =>
                     setPaymentMethod(
@@ -378,46 +402,51 @@ function Panel() {
           )}
         </div>
 
-        <div className="flex flex-col flex-wrap md:flex-row items-center gap-4 md:gap-7 w-full md:w-auto">
+        <div className="flex flex-col flex-wrap md:flex-row items-center gap-4 md:gap-4 w-full md:w-auto">
+          <div className="w-full md:w-auto flex flex-col">
+            <label
+              htmlFor="paymentMethod"
+              className="mr-2 text-sm font-semibold mb-2"
+            >
+              filtro por estado
+            </label>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as "all" | "pending")}
+              className="border px-3 py-2 rounded text-black w-full md:w-auto"
+            >
+              <option value="all">Todos</option>
+              <option value="pending">Pendientes</option>
+            </select>
+          </div>
+          <div className="w-full md:w-auto flex flex-col">
+            <label
+              htmlFor="paymentMethod"
+              className="mr-2 text-sm font-semibold mb-2"
+            >
+              filtro por orden
+            </label>
+            <select
+              value={orderTickets}
+              onChange={(e) => setOrderTickets(e.target.value)}
+              className="border px-3 py-2 rounded text-black w-full md:w-auto"
+            >
+              <option value="desc">Mas Recientes Primero</option>
+              <option value="asc">Mas Antiguos Primero</option>
+            </select>
+          </div>
           <button
             onClick={() => setModalCreateRaffle(true)}
-            className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto"
+            className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
           >
             Crear nueva rifa
           </button>
           <button
             onClick={() => clickedRaffleVisibility()}
-            className="bg-red-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto"
+            className="bg-red-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
           >
             Cerrar plataforma
           </button>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as "all" | "pending")}
-            className="border px-3 py-2 rounded text-black w-full md:w-auto"
-          >
-            <option value="all">Todos</option>
-            <option value="pending">Pendientes</option>
-          </select>
-          <p className="text-sm md:text-base font-semibold text-white text-center md:text-left">
-            Tickets Vendidos:{" "}
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={() => setShowSold(!showSold)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setShowSold(!showSold);
-                }
-              }}
-              className="cursor-pointer text-green-600 inline-block"
-            >
-              {showSold
-                ? soldNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                : "*****"}{" "}
-              🎯
-            </span>
-          </p>
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -456,9 +485,17 @@ function Panel() {
           <tbody>
             {
               isChangingTypes ? (
-                <div className="d-flex flex-column justify-content-center align-items-center my-4 p-5 text-center">
-                  <p className="text-muted">Cargando tickets...</p>
-                </div>
+                <tr>
+                  <td colSpan={999} className="py-10">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="relative w-10 h-10 mb-4">
+                        <div className="absolute inset-0 rounded-full border-4 border-white opacity-20"></div>
+                        <div className="absolute inset-0 rounded-full border-t-4 border-white animate-spin"></div>
+                      </div>
+                      <small className="text-white">Cargando tickets</small>
+                    </div>
+                  </td>
+                </tr>
               ) : (
                 filteredTickets.map((ticket, index) => (
                   <tr key={index} className="text-center">
@@ -580,8 +617,12 @@ function Panel() {
 
         {
           isLoadingPagination && !isChangingTypes && (
-            <div className="d-flex flex-column justify-content-center align-items-center my-4 p-5 text-center">
-              <p className="text-muted">Cargando mas...</p>
+            <div className="flex flex-col items-center justify-center my-10 p-5 text-center">
+              <div className="relative w-10 h-10 mb-4">
+                <div className="absolute inset-0 rounded-full border-4 border-white opacity-20"></div>
+                <div className="absolute inset-0 rounded-full border-t-4 border-white animate-spin"></div>
+              </div>
+              <small className="text-white">Cargando mas</small>
             </div>
           )
         }

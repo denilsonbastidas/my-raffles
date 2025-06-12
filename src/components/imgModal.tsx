@@ -22,7 +22,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => {
           <img
             src={imageUrl.split("uploads/")[1]}
             alt="Vista previa"
-            className="w-full max-h-[600px] object-cover rounded-xl border-4 border-gray-300"
+            className="w-70 max-h-[600px] object-cover rounded-xl border-4 border-gray-300"
           />
         </div>
       </div>

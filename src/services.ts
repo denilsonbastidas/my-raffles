@@ -49,6 +49,7 @@ export const getTickets = async (
   filter: "all" | "pending" = "pending",
   paymentMethod?: string,
   pageTickets?: number,
+  orderTickets?: string
 ) => {
   try {
     const params = new URLSearchParams();
@@ -63,6 +64,10 @@ export const getTickets = async (
 
     if (pageTickets) {
       params.append("page", pageTickets.toString());
+    }
+
+    if (orderTickets) {
+      params.append("order", orderTickets.toString());
     }
 
     params.append("numbertoshow", "150");
