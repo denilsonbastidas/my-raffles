@@ -64,7 +64,7 @@ function Panel() {
         filter,
         paymentMethod,
         pageTickets,
-        orderTickets
+        orderTickets,
       );
 
       if (responseTikkets) {
@@ -483,71 +483,70 @@ function Panel() {
             </tr>
           </thead>
           <tbody>
-            {
-              isChangingTypes ? (
-                <tr>
-                  <td colSpan={999} className="py-10">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="relative w-10 h-10 mb-4">
-                        <div className="absolute inset-0 rounded-full border-4 border-white opacity-20"></div>
-                        <div className="absolute inset-0 rounded-full border-t-4 border-white animate-spin"></div>
-                      </div>
-                      <small className="text-white">Cargando tickets</small>
+            {isChangingTypes ? (
+              <tr>
+                <td colSpan={999} className="py-10">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <div className="relative w-10 h-10 mb-4">
+                      <div className="absolute inset-0 rounded-full border-4 border-white opacity-20"></div>
+                      <div className="absolute inset-0 rounded-full border-t-4 border-white animate-spin"></div>
+                    </div>
+                    <small className="text-white">Cargando tickets</small>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredTickets.map((ticket, index) => (
+                <tr key={index} className="text-center">
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    <span className="font-bold px-1">{index + 1}.</span>{" "}
+                    {ticket.fullName}
+                  </td>
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    <div className="inline-flex items-center gap-8">
+                      {ticket.email}
+                      <FaEdit
+                        onClick={() => {
+                          setModalEditEmail(true);
+                          setCurrentTikketSelected({
+                            email: ticket.email,
+                            id: ticket._id,
+                            phone: ticket.phone,
+                          });
+                        }}
+                        size={20}
+                        className="cursor-pointer"
+                        title="Editar Datos del cliente"
+                      />
                     </div>
                   </td>
-                </tr>
-              ) : (
-                filteredTickets.map((ticket, index) => (
-                  <tr key={index} className="text-center">
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      <span className="font-bold px-1">{index + 1}.</span>{" "}
-                      {ticket.fullName}
-                    </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      <div className="inline-flex items-center gap-8">
-                        {ticket.email}
-                        <FaEdit
-                          onClick={() => {
-                            setModalEditEmail(true);
-                            setCurrentTikketSelected({
-                              email: ticket.email,
-                              id: ticket._id,
-                              phone: ticket.phone,
-                            });
-                          }}
-                          size={20}
-                          className="cursor-pointer"
-                          title="Editar Datos del cliente"
-                        />
-                      </div>
-                    </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      {ticket.phone}
-                    </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      {ticket.numberTickets}
-                    </td>
-                    <td className="border underline border-gray-300 px-2 md:px-4 py-2">
-                      {ticket.reference}
-                    </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      {ticket.paymentMethod}
-                    </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      {ticket?.amountPaid
-                        ?.toString()
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                      {ticket.paymentMethod === "BDV" ? "Bs" : "$"}
-                    </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      <button
-                        className="text-blue-500 underline"
-                        rel="noopener noreferrer"
-                        onClick={() => handleOpenModal(ticket.voucher)}
-                      >
-                        Ver imagen
-                      </button>
-                    </td>
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    {ticket.phone}
+                  </td>
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    {ticket.numberTickets}
+                  </td>
+                  <td className="border underline border-gray-300 px-2 md:px-4 py-2">
+                    {ticket.reference}
+                  </td>
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    {ticket.paymentMethod}
+                  </td>
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    {ticket?.amountPaid
+                      ?.toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                    {ticket.paymentMethod === "BDV" ? "Bs" : "$"}
+                  </td>
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    <button
+                      className="text-blue-500 underline"
+                      rel="noopener noreferrer"
+                      onClick={() => handleOpenModal(ticket.voucher)}
+                    >
+                      Ver imagen
+                    </button>
+                  </td>
 
                   <td className="border border-gray-300 px-2 md:px-4 py-2">
                     {ticket.approved ? (
@@ -614,17 +613,15 @@ function Panel() {
           </tbody>
         </table>
 
-        {
-          isLoadingPagination && !isChangingTypes && (
-            <div className="flex flex-col items-center justify-center my-10 p-5 text-center">
-              <div className="relative w-10 h-10 mb-4">
-                <div className="absolute inset-0 rounded-full border-4 border-white opacity-20"></div>
-                <div className="absolute inset-0 rounded-full border-t-4 border-white animate-spin"></div>
-              </div>
-              <small className="text-white">Cargando mas</small>
+        {isLoadingPagination && !isChangingTypes && (
+          <div className="flex flex-col items-center justify-center my-10 p-5 text-center">
+            <div className="relative w-10 h-10 mb-4">
+              <div className="absolute inset-0 rounded-full border-4 border-white opacity-20"></div>
+              <div className="absolute inset-0 rounded-full border-t-4 border-white animate-spin"></div>
             </div>
-          )
-        }
+            <small className="text-white">Cargando mas</small>
+          </div>
+        )}
 
         <div className="flex justify-center items-center gap-4 mt-4 p-5">
           <span className="font-semibold text-gray-300">
