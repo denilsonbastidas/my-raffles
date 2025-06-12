@@ -59,7 +59,7 @@ function Panel() {
 
   useEffect(() => {
     const fetchGetTikkets = async () => {
-      setIsLoadingPagination(true)
+      setIsLoadingPagination(true);
       const responseTikkets: TicketType[] = await getTickets(
         filter,
         paymentMethod,
@@ -72,15 +72,15 @@ function Panel() {
         setIsLastPage(responseTikkets.length < numberToShow);
       }
 
-      setIsLoadingPagination(false)
-      setIsChangingTypes(false)
+      setIsLoadingPagination(false);
+      setIsChangingTypes(false);
     };
 
     fetchGetTikkets();
   }, [filter, paymentMethod, pageTickets, orderTickets]);
 
   useEffect(() => {
-    setIsChangingTypes(true)
+    setIsChangingTypes(true);
     setTickets([]);
     setPageTickets(1);
     setIsLastPage(false);
@@ -97,8 +97,8 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-        code.toLowerCase().includes(search.toLowerCase())
-      )
+          code.toLowerCase().includes(search.toLowerCase()),
+        )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
@@ -288,14 +288,14 @@ function Panel() {
       <span style="font-weight: 500; color: #6b7280;">Fecha de compra:</span><br />
       <span style="font-size: 16px;">
         ${new Date(result.createdAt).toLocaleDateString("es-ES", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })}
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })}
       </span>
     </div>
   </div>
@@ -549,69 +549,68 @@ function Panel() {
                       </button>
                     </td>
 
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      {ticket.approved ? (
-                        <div className="flex items-center py-2 justify-center gap-4">
+                  <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    {ticket.approved ? (
+                      <div className="flex items-center py-2 justify-center gap-4">
+                        <button
+                          onClick={() => submitTikketDenied(ticket._id)}
+                          title="Eliminar registro de ticket"
+                          className="text-red-600 cursor-pointer text-2xl font-semibold bg-transparent border-none p-0"
+                        >
+                          X
+                        </button>
+                        {resendEmailLoading ? (
+                          <Skeleton
+                            width={20}
+                            className="animate-pulse w-full rounded-full"
+                            height={20}
+                          />
+                        ) : (
+                          <MdOutlineForwardToInbox
+                            onClick={() => submitResendEmail(ticket._id)}
+                            size={24}
+                            className="text-blue-500 cursor-pointer hover:text-blue-700"
+                            title="Reenviar email"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col py-2 md:flex-row justify-center items-center gap-2 w-full">
+                        {loadingId === ticket._id ? (
+                          <Skeleton
+                            width={100}
+                            className="animate-pulse w-full max-w-[120px]"
+                            height={30}
+                          />
+                        ) : (
+                          <button
+                            onClick={() => submitTikketApprove(ticket._id)}
+                            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
+                          >
+                            Aprobar
+                          </button>
+                        )}
+
+                        {loadingId === ticket._id ? (
+                          <Skeleton
+                            width={100}
+                            className="animate-pulse w-full max-w-[120px]"
+                            height={30}
+                          />
+                        ) : (
                           <button
                             onClick={() => submitTikketDenied(ticket._id)}
-                            title="Eliminar registro de ticket"
-                            className="text-red-600 cursor-pointer text-2xl font-semibold bg-transparent border-none p-0"
+                            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
                           >
-                            X
+                            Rechazar
                           </button>
-                          {resendEmailLoading ? (
-                            <Skeleton
-                              width={20}
-                              className="animate-pulse w-full rounded-full"
-                              height={20}
-                            />
-                          ) : (
-                            <MdOutlineForwardToInbox
-                              onClick={() => submitResendEmail(ticket._id)}
-                              size={24}
-                              className="text-blue-500 cursor-pointer hover:text-blue-700"
-                              title="Reenviar email"
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col py-2 md:flex-row justify-center items-center gap-2 w-full">
-                          {loadingId === ticket._id ? (
-                            <Skeleton
-                              width={100}
-                              className="animate-pulse w-full max-w-[120px]"
-                              height={30}
-                            />
-                          ) : (
-                            <button
-                              onClick={() => submitTikketApprove(ticket._id)}
-                              className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
-                            >
-                              Aprobar
-                            </button>
-                          )}
-
-                          {loadingId === ticket._id ? (
-                            <Skeleton
-                              width={100}
-                              className="animate-pulse w-full max-w-[120px]"
-                              height={30}
-                            />
-                          ) : (
-                            <button
-                              onClick={() => submitTikketDenied(ticket._id)}
-                              className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
-                            >
-                              Rechazar
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )
-            }
+                        )}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
 
@@ -628,7 +627,9 @@ function Panel() {
         }
 
         <div className="flex justify-center items-center gap-4 mt-4 p-5">
-          <span className="font-semibold text-gray-300">Página {pageTickets}</span>
+          <span className="font-semibold text-gray-300">
+            Página {pageTickets}
+          </span>
 
           <button
             onClick={() => {
