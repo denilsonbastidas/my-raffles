@@ -58,13 +58,15 @@ function Panel() {
   }, [navigate]);
 
   useEffect(() => {
+    let orderToSend = filter == "pending" ? "asc" : orderTickets
+
     const fetchGetTikkets = async () => {
       setIsLoadingPagination(true);
       const responseTikkets: TicketType[] = await getTickets(
         filter,
         paymentMethod,
         pageTickets,
-        orderTickets
+        orderToSend
       );
 
       if (responseTikkets) {
@@ -97,8 +99,8 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-          code.toLowerCase().includes(search.toLowerCase()),
-        )
+        code.toLowerCase().includes(search.toLowerCase()),
+      )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
@@ -288,14 +290,14 @@ function Panel() {
       <span style="font-weight: 500; color: #6b7280;">Fecha de compra:</span><br />
       <span style="font-size: 16px;">
         ${new Date(result.createdAt).toLocaleDateString("es-ES", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })}
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })}
       </span>
     </div>
   </div>
@@ -419,22 +421,28 @@ function Panel() {
               <option value="pending">Pendientes</option>
             </select>
           </div>
-          <div className="w-full md:w-auto flex flex-col">
-            <label
-              htmlFor="paymentMethod"
-              className="mr-2 text-sm font-semibold mb-2"
-            >
-              filtro por orden
-            </label>
-            <select
-              value={orderTickets}
-              onChange={(e) => setOrderTickets(e.target.value)}
-              className="border px-3 py-2 rounded text-black w-full md:w-auto"
-            >
-              <option value="desc">Mas Recientes Primero</option>
-              <option value="asc">Mas Antiguos Primero</option>
-            </select>
-          </div>
+
+          {
+            filter == "all" && (
+              <div className="w-full md:w-auto flex flex-col">
+                <label
+                  htmlFor="paymentMethod"
+                  className="mr-2 text-sm font-semibold mb-2"
+                >
+                  filtro por orden
+                </label>
+                <select
+                  value={orderTickets}
+                  onChange={(e) => setOrderTickets(e.target.value)}
+                  className="border px-3 py-2 rounded text-black w-full md:w-auto"
+                >
+                  <option value="desc">Mas Recientes Primero</option>
+                  <option value="asc">Mas Antiguos Primero</option>
+                </select>
+              </div>
+            )
+          }
+
           <button
             onClick={() => setModalCreateRaffle(true)}
             className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
@@ -549,68 +557,68 @@ function Panel() {
                       </button>
                     </td>
 
-                  <td className="border border-gray-300 px-2 md:px-4 py-2">
-                    {ticket.approved ? (
-                      <div className="flex items-center py-2 justify-center gap-4">
-                        <button
-                          onClick={() => submitTikketDenied(ticket._id)}
-                          title="Eliminar registro de ticket"
-                          className="text-red-600 cursor-pointer text-2xl font-semibold bg-transparent border-none p-0"
-                        >
-                          X
-                        </button>
-                        {resendEmailLoading ? (
-                          <Skeleton
-                            width={20}
-                            className="animate-pulse w-full rounded-full"
-                            height={20}
-                          />
-                        ) : (
-                          <MdOutlineForwardToInbox
-                            onClick={() => submitResendEmail(ticket._id)}
-                            size={24}
-                            className="text-blue-500 cursor-pointer hover:text-blue-700"
-                            title="Reenviar email"
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col py-2 md:flex-row justify-center items-center gap-2 w-full">
-                        {loadingId === ticket._id ? (
-                          <Skeleton
-                            width={100}
-                            className="animate-pulse w-full max-w-[120px]"
-                            height={30}
-                          />
-                        ) : (
-                          <button
-                            onClick={() => submitTikketApprove(ticket._id)}
-                            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
-                          >
-                            Aprobar
-                          </button>
-                        )}
-
-                        {loadingId === ticket._id ? (
-                          <Skeleton
-                            width={100}
-                            className="animate-pulse w-full max-w-[120px]"
-                            height={30}
-                          />
-                        ) : (
+                    <td className="border border-gray-300 px-2 md:px-4 py-2">
+                      {ticket.approved ? (
+                        <div className="flex items-center py-2 justify-center gap-4">
                           <button
                             onClick={() => submitTikketDenied(ticket._id)}
-                            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
+                            title="Eliminar registro de ticket"
+                            className="text-red-600 cursor-pointer text-2xl font-semibold bg-transparent border-none p-0"
                           >
-                            Rechazar
+                            X
                           </button>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
+                          {resendEmailLoading ? (
+                            <Skeleton
+                              width={20}
+                              className="animate-pulse w-full rounded-full"
+                              height={20}
+                            />
+                          ) : (
+                            <MdOutlineForwardToInbox
+                              onClick={() => submitResendEmail(ticket._id)}
+                              size={24}
+                              className="text-blue-500 cursor-pointer hover:text-blue-700"
+                              title="Reenviar email"
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col py-2 md:flex-row justify-center items-center gap-2 w-full">
+                          {loadingId === ticket._id ? (
+                            <Skeleton
+                              width={100}
+                              className="animate-pulse w-full max-w-[120px]"
+                              height={30}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => submitTikketApprove(ticket._id)}
+                              className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
+                            >
+                              Aprobar
+                            </button>
+                          )}
+
+                          {loadingId === ticket._id ? (
+                            <Skeleton
+                              width={100}
+                              className="animate-pulse w-full max-w-[120px]"
+                              height={30}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => submitTikketDenied(ticket._id)}
+                              className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded w-full max-w-[120px]"
+                            >
+                              Rechazar
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
           </tbody>
         </table>
 
