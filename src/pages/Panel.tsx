@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import { MdOutlineForwardToInbox } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import EditEmailModal from "@/components/editEmailModal";
+import EditDollarModal from "@/components/editDollarModal";
 
 function Panel() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ function Panel() {
   const [searchInPendings, setSearchInPendings] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [resendEmailLoading, setResendEmailLoading] = useState<boolean>(false);
+  const [isModalDollarOpen, setIsModalDollarOpen] = useState<boolean>(false);
   const [currentTikketSelected, setCurrentTikketSelected] = useState<{
     email: string;
     id: string;
@@ -99,8 +101,8 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-          code.toLowerCase().includes(search.toLowerCase()),
-        )
+        code.toLowerCase().includes(search.toLowerCase()),
+      )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
@@ -290,14 +292,14 @@ function Panel() {
       <span style="font-weight: 500; color: #6b7280;">Fecha de compra:</span><br />
       <span style="font-size: 16px;">
         ${new Date(result.createdAt).toLocaleDateString("es-ES", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })}
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })}
       </span>
     </div>
   </div>
@@ -346,6 +348,12 @@ function Panel() {
               : "*****"}{" "}
             🎯
           </span>
+          <button
+            onClick={() => setIsModalDollarOpen(true)}
+            className="ml-7 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200"
+          >
+            Actualizar Dólar
+          </button>
         </p>
       </div>
 
@@ -628,6 +636,8 @@ function Panel() {
             <small className="text-white">Cargando mas</small>
           </div>
         )}
+
+        <EditDollarModal isOpen={isModalDollarOpen} onClose={() => setIsModalDollarOpen(false)} />
 
         <div className="flex justify-center items-center gap-4 mt-4 p-5">
           <span className="font-semibold text-gray-300">

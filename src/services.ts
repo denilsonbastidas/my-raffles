@@ -125,22 +125,49 @@ export const raffleVisibility = async () => {
 
 export const getParallelDollar = async () => {
   const fallbackData = {
-    priceEnparalelovzla: EXCHANGE_RATE + 2, // !!! backup value !!!
+    priceEnparalelovzla: EXCHANGE_RATE + 2,
   };
 
   try {
-    // const { data } = await axios.get("https://pydolarve.org/api/v2/dollar");
-    // if (data?.monitors?.enparalelovzla?.price) {
-    //   const adjustedPrice =
-    //     Math.round(data?.monitors?.enparalelovzla?.price) + 2;
-    //   return { priceEnparalelovzla: adjustedPrice };
-    // }
-    return fallbackData;
+    const res = await fetch("http://localhost:5000/api/dollar");
+
+    if (!res.ok) { throw new Error("Respuesta no válida del servidor")}
+    const data = await res.json();
+    return { priceEnparalelovzla: parseFloat(data.priceVez)}
+
   } catch (error) {
     console.error("Error getParallelDollar:", error);
-    return fallbackData; // Retornar respaldo en caso de error
+    return fallbackData;
   }
-};
+}
+
+export const updateParallelDollar = async (newPrice: String) => {
+  try {
+    const res = await fetch("http://localhost:5000/api/dollar", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ priceVez: newPrice.toString() }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Error al actualizar el precio del dólar");
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      updated: parseFloat(data.dollar.priceVez),
+    };
+  } catch (error) {
+    console.error("Error updateParallelDollar:", error);
+    return {
+      success: false,
+      error: "No se pudo actualizar el precio del dólar",
+    };
+  }
+}
 
 export const resendEmail = async (id: string) => {
   try {
