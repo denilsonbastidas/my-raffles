@@ -24,4 +24,4 @@ export const banksData = [
   },
 ];
 export const PHONE_SUPPORT = "(0412)-4698178";
-export const EXCHANGE_RATE = 136;
+export const EXCHANGE_RATE = 135;
