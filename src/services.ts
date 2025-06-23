@@ -129,7 +129,7 @@ export const getParallelDollar = async () => {
   };
 
   try {
-    const res = await fetch("http://localhost:5000/api/dollar");
+    const res = await fetch(`${API_URL}/api/dollar`);
 
     if (!res.ok) { throw new Error("Respuesta no válida del servidor")}
     const data = await res.json();
@@ -143,7 +143,7 @@ export const getParallelDollar = async () => {
 
 export const updateParallelDollar = async (newPrice: String) => {
   try {
-    const res = await fetch("http://localhost:5000/api/dollar", {
+    const res = await fetch(`${API_URL}/api/dollar`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
