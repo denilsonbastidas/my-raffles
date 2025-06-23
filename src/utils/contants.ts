@@ -19,8 +19,8 @@ export const banksData = [
     type: "zelle",
     bank: "Zelle",
     logo: "zelleLogo.png",
-    email: "+1 (786) 681-6185",
-    nameZelle: "Ashley Ravelo",
+    email: "7867239406",
+    nameZelle: "Jhojan Garcia",
   },
 ];
 export const PHONE_SUPPORT = "(0412)-4698178";
