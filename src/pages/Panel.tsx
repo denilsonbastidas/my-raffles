@@ -105,8 +105,8 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-        code.toLowerCase().includes(search.toLowerCase()),
-      )
+          code.toLowerCase().includes(search.toLowerCase()),
+        )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
@@ -296,14 +296,14 @@ function Panel() {
       <span style="font-weight: 500; color: #6b7280;">Fecha de compra:</span><br />
       <span style="font-size: 16px;">
         ${new Date(result.createdAt).toLocaleDateString("es-ES", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })}
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })}
       </span>
     </div>
   </div>
@@ -329,48 +329,54 @@ function Panel() {
 
   return (
     <div className="p-6">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-        <h2 className="text-2xl md:text-4xl uppercase font-bold text-center md:text-left mb-4 md:mb-0">
-          Listado de Tickets
-        </h2>
+      <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-8 gap-4">
+        <div className="text-center md:text-left">
+          <h2 className="text-2xl md:text-4xl uppercase font-bold mb-2">
+            Listado de Tickets
+          </h2>
+          <p className="text-sm md:text-base font-semibold text-white">
+            Tickets Vendidos:{" "}
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={() => setShowSold(!showSold)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setShowSold(!showSold);
+                }
+              }}
+              className="cursor-pointer text-green-600 inline-block"
+            >
+              {showSold
+                ? soldNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                : "*****"}{" "}
+              🎯
+            </span>
+          </p>
+        </div>
 
-        <p className="text-sm md:text-base font-semibold text-white text-center md:text-left">
-          Tickets Vendidos:{" "}
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={() => setShowSold(!showSold)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                setShowSold(!showSold);
-              }
-            }}
-            className="cursor-pointer text-green-600 inline-block"
-          >
-            {showSold
-              ? soldNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-              : "*****"}{" "}
-            🎯
-          </span>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 w-full md:w-auto">
           <button
             onClick={() => setIsModalDollarOpen(true)}
-            className="ml-7 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200"
+            className="bg-blue-600 w-full hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200 md:w-auto"
           >
-            Dólar
+            Actualizar Dolar
           </button>
-          <button
-            onClick={() => setIsModalBuyersOpen(true)}
-            className="m-4 md:m-0 md:ml-2 bg-yellow-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200"
-          >
-            Compradores
-          </button>
-          <button
-            onClick={() => setIsModalSummaryOpen(true)}
-            className="m-4 md:m-0 md:ml-2 bg-black hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200"
-          >
-            Dinero
-          </button>
-        </p>
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => setIsModalBuyersOpen(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-md transition duration-200"
+            >
+              Ranking
+            </button>
+            <button
+              onClick={() => setIsModalSummaryOpen(true)}
+              className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg shadow-md transition duration-200"
+            >
+              Balance Total
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row w-full justify-between items-center gap-4 md:gap-6 mb-4">
@@ -658,8 +664,14 @@ function Panel() {
           onClose={() => setIsModalDollarOpen(false)}
         />
 
-        <TopBuyersModal isOpen={isModalBuyersOpen} onClose={() => setIsModalBuyersOpen(false)} />
-        <MoneySummaryModal isOpen={isModalSummaryOpen} onClose={() => setIsModalSummaryOpen(false)} />
+        <TopBuyersModal
+          isOpen={isModalBuyersOpen}
+          onClose={() => setIsModalBuyersOpen(false)}
+        />
+        <MoneySummaryModal
+          isOpen={isModalSummaryOpen}
+          onClose={() => setIsModalSummaryOpen(false)}
+        />
 
         <div className="flex justify-center items-center gap-4 mt-4 p-5">
           <span className="font-semibold text-gray-300">
