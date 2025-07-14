@@ -2,6 +2,16 @@ import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import Swal from "sweetalert2";
 import { getTopBuyers } from "@/services";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  LabelList,
+} from "recharts";
 
 interface TopBuyersModalProps {
   isOpen: boolean;
@@ -19,6 +29,7 @@ interface Buyer {
 const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [view, setView] = useState<"info" | "chart">("info");
 
   useEffect(() => {
     if (isOpen) {
@@ -35,6 +46,19 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
+  const scaledBuyers = buyers.map((buyer) => {
+    const scaledValue = Math.sqrt(buyer.totalTickets) * 10;
+
+    const nameParts = buyer.fullName.split(" ");
+    const shortName = nameParts.slice(0, 2).join(" ");
+
+    return {
+      ...buyer,
+      fullName: shortName,
+      scaledTickets: scaledValue,
+    };
+  });
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 px-4">
       <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-4xl relative overflow-y-auto max-h-[90vh]">
@@ -44,13 +68,35 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
         >
           ✕
         </button>
-        <h2 className="text-black text-lg md:text-xl font-bold mb-4 md:mb-6 text-center">
-          Top 10 Compradores
+
+        <h2 className="text-black text-lg md:text-xl font-bold mb-4 text-center">
+          Participantes con más tickets
         </h2>
+
+        <div className="flex justify-center gap-4 mb-4">
+          <button
+            className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "info"
+              ? "bg-black text-white border-black"
+              : "bg-white text-black border-gray-400 hover:bg-gray-100"
+              }`}
+            onClick={() => setView("info")}
+          >
+            Información
+          </button>
+          <button
+            className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "chart"
+              ? "bg-black text-white border-black"
+              : "bg-white text-black border-gray-400 hover:bg-gray-100"
+              }`}
+            onClick={() => setView("chart")}
+          >
+            Gráfico
+          </button>
+        </div>
 
         {loading ? (
           <Skeleton count={6} height={40} />
-        ) : (
+        ) : view === "info" ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm md:text-base border border-gray-500 text-left text-black">
               <thead className="bg-black text-white text-xs md:text-sm">
@@ -76,6 +122,41 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
                 ))}
               </tbody>
             </table>
+          </div>
+        ) : (
+          <div className="w-[120%] sm:w-full h-[450px] ml-[-20%] sm:ml-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={scaledBuyers}
+                layout="vertical"
+                margin={{ top: 10, right: 20, left: 80, bottom: 10 }}
+                barCategoryGap={8}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis type="number" tick={false} axisLine={false} />
+                <YAxis
+                  type="category"
+                  dataKey="fullName"
+                  tick={{ fontSize: 14, fontWeight: "bold" }}
+                  width={120}
+                />
+                <Tooltip
+                  formatter={(value: any, name: any, props: any) => {
+                    const realValue = buyers[props.index]?.totalTickets;
+                    return [`${realValue} tickets`, "Tickets reales"];
+                  }}
+                  labelFormatter={(label: any) => `Comprador: ${label}`}
+                />
+                <Bar dataKey="scaledTickets" fill="#000000" barSize={22}>
+                  <LabelList
+                    dataKey="totalTickets"
+                    position="insideRight"
+                    fill="#ffffff"
+                    fontSize={11}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         )}
       </div>
