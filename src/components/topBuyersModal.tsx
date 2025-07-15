@@ -141,9 +141,9 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
                   width={120}
                 />
                 <Tooltip
-                  formatter={(value: any, name: any, props: any) => {
-                    const realValue = buyers[props.index]?.totalTickets;
-                    return [`${realValue} tickets`, "Tickets reales"];
+                  formatter={(_value: any, _name: any, entry: any) => {
+                    const realValue = entry.payload.totalTickets;
+                    return [`${realValue} tickets`, "Tickets"];
                   }}
                   labelFormatter={(label: any) => `Comprador: ${label}`}
                 />
