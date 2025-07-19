@@ -147,12 +147,13 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
                   }}
                   labelFormatter={(label: any) => `Comprador: ${label}`}
                 />
-                <Bar dataKey="scaledTickets" fill="#000000" barSize={22}>
+                <Bar dataKey="scaledTickets" fill="#000000" barSize={36}>
                   <LabelList
                     dataKey="totalTickets"
                     position="insideRight"
                     fill="#ffffff"
-                    fontSize={11}
+                    fontSize={15}
+                    fontWeight={"bold"}
                   />
                 </Bar>
               </BarChart>
