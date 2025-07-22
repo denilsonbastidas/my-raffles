@@ -273,6 +273,7 @@ function HomePage() {
   const handleTicketChange = (newValue: number, type: 'increment' | 'decrement') => {
     const min = raffleActually?.minValue ?? 1;
     if (newValue < min) return;
+    if (newValue > 100) return;
 
     formik.setFieldValue('numberTickets', newValue);
     updateTotal(newValue);
@@ -519,7 +520,18 @@ function HomePage() {
                       name="numberTickets"
                       value={formik.values.numberTickets}
                       onChange={handleInputChange}
-                      onBlur={formik.handleBlur}
+                      onBlur={(e) => {
+                        formik.handleBlur(e);
+                        const min = raffleActually?.minValue ?? 1;
+                        const value = parseInt(e.target.value);
+
+                        if (value < min) {
+                          formik.setFieldValue('numberTickets', min);
+                          updateTotal(min);
+                        } else {
+                          updateTotal(value);
+                        }
+                      }}
                       className="w-20 text-center text-black border border-gray-300 rounded py-2 px-3 text-lg font-semibold"
                       min={raffleActually?.minValue}
                       max={MAX_VALUE}
