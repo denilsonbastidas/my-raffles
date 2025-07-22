@@ -24,7 +24,6 @@ function HomePage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [preview, setPreview] = useState<string | null>(null);
-  const [activeButton, setActiveButton] = useState<'increment' | 'decrement' | null>(null);
 
   const [raffleActually, setRaffleActually] = useState<RaffleType>({
     name: "",
@@ -270,14 +269,13 @@ function HomePage() {
     updateTotal(value);
   };
 
-  const handleTicketChange = (newValue: number, type: 'increment' | 'decrement') => {
+  const handleTicketChange = (newValue: number) => {
     const min = raffleActually?.minValue ?? 1;
     if (newValue < min) return;
     if (newValue > 100) return;
 
     formik.setFieldValue('numberTickets', newValue);
     updateTotal(newValue);
-    setActiveButton(type);
   };
 
 
@@ -500,11 +498,16 @@ function HomePage() {
                   <div className="flex items-center gap-6 mt-4">
                     <button
                       type="button"
+                      disabled={parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)}
                       onClick={() =>
-                        handleTicketChange(parseInt(formik.values.numberTickets) - 1, 'decrement')
+                        handleTicketChange(parseInt(formik.values.numberTickets) - 1)
                       }
-                      className={`w-10 h-10 ${activeButton === 'decrement' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
-                        } text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
+                      className={`w-10 h-10 
+      ${parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
+                          ? 'bg-gray-400'
+                          : 'bg-blue-600 hover:bg-blue-700'
+                        } 
+      text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                     >
                       <img
                         width="20"
@@ -528,6 +531,9 @@ function HomePage() {
                         if (value < min) {
                           formik.setFieldValue('numberTickets', min);
                           updateTotal(min);
+                        } else if (value > MAX_VALUE) {
+                          formik.setFieldValue('numberTickets', MAX_VALUE);
+                          updateTotal(MAX_VALUE);
                         } else {
                           updateTotal(value);
                         }
@@ -539,11 +545,16 @@ function HomePage() {
 
                     <button
                       type="button"
+                      disabled={parseInt(formik.values.numberTickets) >= MAX_VALUE}
                       onClick={() =>
-                        handleTicketChange(parseInt(formik.values.numberTickets) + 1, 'increment')
+                        handleTicketChange(parseInt(formik.values.numberTickets) + 1)
                       }
-                      className={`w-10 h-10 ${activeButton === 'increment' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
-                        } text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
+                      className={`w-10 h-10 
+      ${parseInt(formik.values.numberTickets) >= MAX_VALUE
+                          ? 'bg-gray-400'
+                          : 'bg-blue-600 hover:bg-blue-700'
+                        } 
+      text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                     >
                       <img
                         width="24"
@@ -553,6 +564,8 @@ function HomePage() {
                       />
                     </button>
                   </div>
+
+
 
                   {formik.touched.numberTickets &&
                     formik.errors.numberTickets ? (
