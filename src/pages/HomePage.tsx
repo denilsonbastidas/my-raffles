@@ -24,6 +24,7 @@ function HomePage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [preview, setPreview] = useState<string | null>(null);
+  const [activeButton, setActiveButton] = useState<'increment' | 'decrement' | null>(null);
 
   const [raffleActually, setRaffleActually] = useState<RaffleType>({
     name: "",
@@ -62,6 +63,10 @@ function HomePage() {
       try {
         const responseRaffle = await getRaffle();
         setRaffleActually(responseRaffle[0]);
+
+        let minValue = parseInt(responseRaffle[0]?.minValue)
+        formik.setFieldValue("numberTickets", minValue);
+        updateTotal(minValue);
       } catch (error) {
         console.error("Error al cargar datos:", error);
       } finally {
@@ -72,8 +77,12 @@ function HomePage() {
     fetchGetRaffle();
   }, []);
 
+  useEffect(() => {
+    updateTotal(raffleActually.minValue)
+  }, [raffleActually])
+
   const updateTotal = (quantity: number) => {
-    const totalUSD = quantity * parseFloat(raffleActually.ticketPrice);
+    const totalUSD = quantity * parseFloat(raffleActually?.ticketPrice);
     const totalBS = totalUSD * exchangeRateVzla;
     setTotalUSD(totalUSD);
     setTotalBS(totalBS);
@@ -260,6 +269,16 @@ function HomePage() {
     inputRef.current?.focus();
     updateTotal(value);
   };
+
+  const handleTicketChange = (newValue: number, type: 'increment' | 'decrement') => {
+    const min = raffleActually?.minValue ?? 1;
+    if (newValue < min) return;
+
+    formik.setFieldValue('numberTickets', newValue);
+    updateTotal(newValue);
+    setActiveButton(type);
+  };
+
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -477,20 +496,54 @@ function HomePage() {
                     Tickets por Compra
                   </label>
 
-                  <input
-                    ref={inputRef}
-                    type="number"
-                    name="numberTickets"
-                    value={formik.values.numberTickets}
-                    onChange={handleInputChange}
-                    onBlur={formik.handleBlur}
-                    className="mt-2 p-2 border rounded text-black text-center"
-                    min={raffleActually?.minValue}
-                    max={MAX_VALUE}
-                  />
+                  <div className="flex items-center gap-6 mt-4">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleTicketChange(parseInt(formik.values.numberTickets) - 1, 'decrement')
+                      }
+                      className={`w-10 h-10 ${activeButton === 'decrement' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
+                        } text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
+                    >
+                      <img
+                        width="20"
+                        height="20"
+                        src="https://img.icons8.com/ios-glyphs/30/FFFFFF/minus-math.png"
+                        alt="minus-math"
+                      />
+                    </button>
+
+                    <input
+                      ref={inputRef}
+                      type="number"
+                      name="numberTickets"
+                      value={formik.values.numberTickets}
+                      onChange={handleInputChange}
+                      onBlur={formik.handleBlur}
+                      className="w-20 text-center text-black border border-gray-300 rounded py-2 px-3 text-lg font-semibold"
+                      min={raffleActually?.minValue}
+                      max={MAX_VALUE}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleTicketChange(parseInt(formik.values.numberTickets) + 1, 'increment')
+                      }
+                      className={`w-10 h-10 ${activeButton === 'increment' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
+                        } text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
+                    >
+                      <img
+                        width="24"
+                        height="24"
+                        src="https://img.icons8.com/material-outlined/24/FFFFFF/plus-math.png"
+                        alt="plus-math"
+                      />
+                    </button>
+                  </div>
 
                   {formik.touched.numberTickets &&
-                  formik.errors.numberTickets ? (
+                    formik.errors.numberTickets ? (
                     <div className="text-red-500">
                       {formik.errors.numberTickets}
                     </div>
