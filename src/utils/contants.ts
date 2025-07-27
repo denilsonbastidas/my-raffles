@@ -19,8 +19,8 @@ export const banksData = [
     type: "zelle",
     bank: "Zelle",
     logo: "zelleLogo.png",
-    email: "7867239406",
-    nameZelle: "Jhojan Berrio",
+    email: "xxxxxxxx",
+    nameZelle: "xxxxxxx",
   },
 ];
 export const PHONE_SUPPORT = "(0412)-4698178";
