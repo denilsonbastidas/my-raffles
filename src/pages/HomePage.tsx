@@ -63,7 +63,7 @@ function HomePage() {
         const responseRaffle = await getRaffle();
         setRaffleActually(responseRaffle[0]);
 
-        let minValue = parseInt(responseRaffle[0]?.minValue)
+        const minValue = parseInt(responseRaffle[0]?.minValue);
         formik.setFieldValue("numberTickets", minValue);
         updateTotal(minValue);
       } catch (error) {
@@ -77,8 +77,8 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
-    updateTotal(raffleActually.minValue)
-  }, [raffleActually])
+    updateTotal(raffleActually.minValue);
+  }, [raffleActually]);
 
   const updateTotal = (quantity: number) => {
     const totalUSD = quantity * parseFloat(raffleActually?.ticketPrice);
@@ -274,10 +274,9 @@ function HomePage() {
     if (newValue < min) return;
     if (newValue > 100) return;
 
-    formik.setFieldValue('numberTickets', newValue);
+    formik.setFieldValue("numberTickets", newValue);
     updateTotal(newValue);
   };
-
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -408,7 +407,7 @@ function HomePage() {
           <strong style="color: #00d1ff;">Email:</strong> ${ticket.email}
         </p>
         <p style="margin: 0; font-size: 1rem;">
-          <strong style="color: #00d1ff;">Tickets:</strong>
+          <strong style="color: #00d1ff;">Tickets(${ticket.tickets.length}):</strong>
           <span style="
             background-color: #00d1ff22;
             color: #00d1ff;
@@ -498,15 +497,21 @@ function HomePage() {
                   <div className="flex items-center gap-6 mt-4">
                     <button
                       type="button"
-                      disabled={parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)}
+                      disabled={
+                        parseInt(formik.values.numberTickets) <=
+                        (raffleActually?.minValue ?? 1)
+                      }
                       onClick={() =>
-                        handleTicketChange(parseInt(formik.values.numberTickets) - 1)
+                        handleTicketChange(
+                          parseInt(formik.values.numberTickets) - 1,
+                        )
                       }
                       className={`w-10 h-10 
-      ${parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
-                          ? 'bg-gray-400'
-                          : 'bg-blue-600 hover:bg-blue-700'
-                        } 
+      ${
+        parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
+          ? "bg-gray-400"
+          : "bg-blue-600 hover:bg-blue-700"
+      } 
       text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                     >
                       <img
@@ -529,10 +534,10 @@ function HomePage() {
                         const value = parseInt(e.target.value);
 
                         if (value < min) {
-                          formik.setFieldValue('numberTickets', min);
+                          formik.setFieldValue("numberTickets", min);
                           updateTotal(min);
                         } else if (value > MAX_VALUE) {
-                          formik.setFieldValue('numberTickets', MAX_VALUE);
+                          formik.setFieldValue("numberTickets", MAX_VALUE);
                           updateTotal(MAX_VALUE);
                         } else {
                           updateTotal(value);
@@ -545,15 +550,20 @@ function HomePage() {
 
                     <button
                       type="button"
-                      disabled={parseInt(formik.values.numberTickets) >= MAX_VALUE}
+                      disabled={
+                        parseInt(formik.values.numberTickets) >= MAX_VALUE
+                      }
                       onClick={() =>
-                        handleTicketChange(parseInt(formik.values.numberTickets) + 1)
+                        handleTicketChange(
+                          parseInt(formik.values.numberTickets) + 1,
+                        )
                       }
                       className={`w-10 h-10 
-      ${parseInt(formik.values.numberTickets) >= MAX_VALUE
-                          ? 'bg-gray-400'
-                          : 'bg-blue-600 hover:bg-blue-700'
-                        } 
+      ${
+        parseInt(formik.values.numberTickets) >= MAX_VALUE
+          ? "bg-gray-400"
+          : "bg-blue-600 hover:bg-blue-700"
+      } 
       text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                     >
                       <img
@@ -565,10 +575,8 @@ function HomePage() {
                     </button>
                   </div>
 
-
-
                   {formik.touched.numberTickets &&
-                    formik.errors.numberTickets ? (
+                  formik.errors.numberTickets ? (
                     <div className="text-red-500">
                       {formik.errors.numberTickets}
                     </div>
