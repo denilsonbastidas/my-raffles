@@ -2,7 +2,8 @@ import axios from "axios";
 import { EXCHANGE_RATE } from "./utils/contants";
 import { RaffleType } from "./utils/types";
 
-const API_URL = "https://my-raffles-back-production.up.railway.app";
+// const API_URL = "https://my-raffles-back-production.up.railway.app";
+const API_URL = "http://localhost:5000";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const submitTicket = async (values: any) => {

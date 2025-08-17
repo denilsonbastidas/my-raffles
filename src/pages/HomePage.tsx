@@ -34,6 +34,8 @@ function HomePage() {
     minValue: 0,
   });
 
+  const [disponibleTickets, setDisponibleTickets] = useState<number>(0)
+  const [alertaTickets, setAlertaTickets] = useState<string>("");
   const [exchangeRateVzla, setExchangeRateVzla] = useState<number>(0);
 
   const [totalUSD, setTotalUSD] = useState(0);
@@ -65,6 +67,7 @@ function HomePage() {
 
         const minValue = parseInt(responseRaffle[0]?.minValue);
         formik.setFieldValue("numberTickets", minValue);
+        setDisponibleTickets(10000 - responseRaffle.totalSold)
         updateTotal(minValue);
       } catch (error) {
         console.error("Error al cargar datos:", error);
@@ -244,38 +247,67 @@ function HomePage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
 
-    // Permitir vacío (por si el usuario está borrando)
     if (rawValue === "") {
       formik.setFieldValue("numberTickets", "");
       setTotalUSD(0);
       setTotalBS(0);
+      setAlertaTickets("");
       return;
     }
 
-    // Solo continuar si es un número válido
     if (/^\d+$/.test(rawValue)) {
       let value = parseInt(rawValue, 10);
 
       if (value > MAX_VALUE) value = MAX_VALUE;
 
-      formik.setFieldValue("numberTickets", rawValue);
+      if (value > disponibleTickets) {
+        value = disponibleTickets;
+        setAlertaTickets(`Solo quedan ${disponibleTickets} tickets disponibles`);
+      } else {
+        setAlertaTickets("");
+      }
+
+      formik.setFieldValue("numberTickets", value);
       updateTotal(value);
     }
   };
 
   const handlePredefinedSelection = (value: number) => {
-    formik.setFieldValue("numberTickets", value);
+    let finalValue = value;
+
+    if (value > disponibleTickets) {
+      finalValue = disponibleTickets;
+      setAlertaTickets(`Solo quedan ${disponibleTickets} tickets disponibles`);
+    } else {
+      setAlertaTickets("");
+    }
+
+    formik.setFieldValue("numberTickets", finalValue);
     inputRef.current?.focus();
-    updateTotal(value);
+    updateTotal(finalValue);
   };
 
   const handleTicketChange = (newValue: number) => {
     const min = raffleActually?.minValue ?? 1;
-    if (newValue < min) return;
-    if (newValue > 100) return;
+    let finalValue = newValue;
 
-    formik.setFieldValue("numberTickets", newValue);
-    updateTotal(newValue);
+    if (finalValue < min) {
+      finalValue = min;
+    }
+
+    if (finalValue > MAX_VALUE) {
+      finalValue = MAX_VALUE;
+    }
+
+    if (finalValue > disponibleTickets) {
+      finalValue = disponibleTickets;
+      setAlertaTickets(`Solo quedan ${disponibleTickets} tickets disponibles`);
+    } else {
+      setAlertaTickets("");
+    }
+
+    formik.setFieldValue("numberTickets", finalValue);
+    updateTotal(finalValue);
   };
 
   const handleFileChange = async (
@@ -479,7 +511,7 @@ function HomePage() {
               ticketPrice={parseFloat(raffleActually?.ticketPrice)}
             />
 
-            {raffleActually?.visible ? (
+            {disponibleTickets > 0 && raffleActually?.visible ? (
               <div className="flex flex-col text-center items-center mt-6">
                 <h3 className="text-3xl font-semibold">COMPRAR TUS TICKETS</h3>
                 <form
@@ -507,11 +539,10 @@ function HomePage() {
                         )
                       }
                       className={`w-10 h-10 
-      ${
-        parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
-          ? "bg-gray-400"
-          : "bg-blue-600 hover:bg-blue-700"
-      } 
+      ${parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
+                          ? "bg-gray-400"
+                          : "bg-blue-600 hover:bg-blue-700"
+                        } 
       text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                     >
                       <img
@@ -530,17 +561,10 @@ function HomePage() {
                       onChange={handleInputChange}
                       onBlur={(e) => {
                         formik.handleBlur(e);
-                        const min = raffleActually?.minValue ?? 1;
                         const value = parseInt(e.target.value);
 
-                        if (value < min) {
-                          formik.setFieldValue("numberTickets", min);
-                          updateTotal(min);
-                        } else if (value > MAX_VALUE) {
-                          formik.setFieldValue("numberTickets", MAX_VALUE);
-                          updateTotal(MAX_VALUE);
-                        } else {
-                          updateTotal(value);
+                        if (!isNaN(value)) {
+                          handleTicketChange(value);
                         }
                       }}
                       className="w-20 text-center text-black border border-gray-300 rounded py-2 px-3 text-lg font-semibold"
@@ -559,11 +583,10 @@ function HomePage() {
                         )
                       }
                       className={`w-10 h-10 
-      ${
-        parseInt(formik.values.numberTickets) >= MAX_VALUE
-          ? "bg-gray-400"
-          : "bg-blue-600 hover:bg-blue-700"
-      } 
+      ${parseInt(formik.values.numberTickets) >= MAX_VALUE
+                          ? "bg-gray-400"
+                          : "bg-blue-600 hover:bg-blue-700"
+                        } 
       text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                     >
                       <img
@@ -576,11 +599,18 @@ function HomePage() {
                   </div>
 
                   {formik.touched.numberTickets &&
-                  formik.errors.numberTickets ? (
+                    formik.errors.numberTickets ? (
                     <div className="text-red-500">
                       {formik.errors.numberTickets}
                     </div>
                   ) : null}
+
+                  {alertaTickets && (
+                    <p className="bg-red-700 px-8 py-2 text-white rounded text-sm mt-2 flex gap-3">
+                      <img width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/FFFFFF/high-priority.png" alt="high-priority" />
+                      {alertaTickets}
+                    </p>
+                  )}
 
                   <p className="mt-2 text-gray-300">
                     Selecciona una cantidad de Tickets
