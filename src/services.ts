@@ -2,7 +2,8 @@ import axios from "axios";
 import { EXCHANGE_RATE } from "./utils/contants";
 import { RaffleType } from "./utils/types";
 
-const API_URL = "https://my-raffles-back-production.up.railway.app";
+// const API_URL = "https://my-raffles-back-production.up.railway.app";
+const API_URL = "http://localhost:5000";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const submitTicket = async (values: any) => {
@@ -20,9 +21,9 @@ export const submitTicket = async (values: any) => {
   }
 };
 
-export const getTopBuyers = async () => {
+export const getTopBuyers = async (mode: "today" | "total" = "total") => {
   try {
-    const response = await axios.get(`${API_URL}/api/tickets/top-buyers`);
+    const response = await axios.get(`${API_URL}/api/tickets/top-buyers/${mode}`);
     return response.data;
   } catch (error) {
     console.error("Error al obtener el top de compradores:", error);
@@ -151,9 +152,9 @@ export const getParallelDollar = async () => {
   try {
     const res = await fetch(`${API_URL}/api/dollar`);
 
-    if (!res.ok) { throw new Error("Respuesta no válida del servidor")}
+    if (!res.ok) { throw new Error("Respuesta no válida del servidor") }
     const data = await res.json();
-    return { priceEnparalelovzla: parseFloat(data.priceVez)}
+    return { priceEnparalelovzla: parseFloat(data.priceVez) }
 
   } catch (error) {
     console.error("Error getParallelDollar:", error);

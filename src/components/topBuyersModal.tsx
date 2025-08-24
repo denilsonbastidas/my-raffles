@@ -30,11 +30,12 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [view, setView] = useState<"info" | "chart">("info");
+  const [filter, setFilter] = useState<"today" | "total">("total");
 
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      getTopBuyers()
+      getTopBuyers(filter)
         .then((data) => setBuyers(data))
         .catch((err) => {
           console.error("Error al obtener top de compradores:", err);
@@ -42,7 +43,7 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
         })
         .finally(() => setLoading(false));
     }
-  }, [isOpen]);
+  }, [isOpen, filter]);
 
   if (!isOpen) return null;
 
@@ -73,25 +74,36 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
           Participantes con más tickets
         </h2>
 
-        <div className="flex justify-center gap-4 mb-4">
-          <button
-            className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "info"
-              ? "bg-black text-white border-black"
-              : "bg-white text-black border-gray-400 hover:bg-gray-100"
-              }`}
-            onClick={() => setView("info")}
+        <div className="flex justify-center gap-4 mb-4 flex-wrap">
+          <select
+            className="text-black border px-2 py-1 rounded"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as "today" | "total")}
           >
-            Información
-          </button>
-          <button
-            className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "chart"
-              ? "bg-black text-white border-black"
-              : "bg-white text-black border-gray-400 hover:bg-gray-100"
-              }`}
-            onClick={() => setView("chart")}
-          >
-            Gráfico
-          </button>
+            <option value="today">Top de Hoy</option>
+            <option value="total">Top General</option>
+          </select>
+
+          <div className="flex gap-2">
+            <button
+              className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "info"
+                ? "bg-black text-white border-black"
+                : "bg-white text-black border-gray-400 hover:bg-gray-100"
+                }`}
+              onClick={() => setView("info")}
+            >
+              Información
+            </button>
+            <button
+              className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "chart"
+                ? "bg-black text-white border-black"
+                : "bg-white text-black border-gray-400 hover:bg-gray-100"
+                }`}
+              onClick={() => setView("chart")}
+            >
+              Gráfico
+            </button>
+          </div>
         </div>
 
         {loading ? (
