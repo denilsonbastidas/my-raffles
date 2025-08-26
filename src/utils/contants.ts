@@ -19,8 +19,10 @@ export const banksData = [
     type: "zelle",
     bank: "Zelle",
     logo: "zelleLogo.png",
-    email: "jravelo470@gmail.com",
-    nameZelle: "Maykol sierra",
+    // email: "jravelo470@gmail.com",
+    email: "7866816185",
+    // nameZelle: "Maykol sierra",
+    nameZelle: "Ashley ravelo",
   },
 ];
 export const PHONE_SUPPORT = "(0412)-4698178";
