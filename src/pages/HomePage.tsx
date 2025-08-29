@@ -23,6 +23,7 @@ function HomePage() {
   const predefinedValues = [2, 5, 10, 20, 50, 100];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const whatsappUrl = `https://wa.me/${PHONE_SUPPORT.replace(/\D/g, '')}`;
   const [preview, setPreview] = useState<string | null>(null);
 
   const [raffleActually, setRaffleActually] = useState<RaffleType>({
@@ -84,8 +85,12 @@ function HomePage() {
   }, [raffleActually]);
 
   const updateTotal = (quantity: number) => {
-    const totalUSD = quantity * parseFloat(raffleActually?.ticketPrice);
-    const totalBS = totalUSD * exchangeRateVzla;
+    let totalUSD = quantity * parseFloat(raffleActually?.ticketPrice);
+    let totalBS = totalUSD * exchangeRateVzla;
+
+    totalUSD = Math.round(totalUSD * 10) / 10;
+    totalBS = Math.round(totalBS * 10) / 10;
+
     setTotalUSD(totalUSD);
     setTotalBS(totalBS);
 
@@ -353,7 +358,21 @@ function HomePage() {
           </p>
           <p style="margin: 0;">
             <strong>CONTÁCTANOS POR EL TLF DE SOPORTE:</strong><br/>
-            ${PHONE_SUPPORT}
+            <a
+              href=${whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style="margin-top: 15px;display: inline-flex; align-items: center; justify-content: center; background-color: #22c55e; border-radius: 9999px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 0.25rem 0.75rem; margin-left: 0.5rem; transition: transform 0.2s;"
+              onmouseover="this.style.transform='scale(1.05)'"
+              onmouseout="this.style.transform='scale(1)'"
+            >
+              <img
+                src="https://img.icons8.com/color/48/whatsapp--v1.png"
+                alt="WhatsApp"
+                style="width: 1.5rem; height: 1.5rem;"
+              />
+              <span style="color: white; margin-left: 0.25rem; margin-right: 0.25rem;">${PHONE_SUPPORT}</span>
+            </a>
           </p>
         </div>
 
@@ -786,10 +805,26 @@ function HomePage() {
                   )}
                 </form>
 
-                <p className="text-md  text-gray-300 my-4 w-full text-center md:w-1/2">
-                  Recuerde que debe esperar un lapso de 24 a 36 horas
-                  aproximadamente mientras nuestro equipo verifica y valida su
-                  compra. Los tickets serán enviados a su correo electrónico.
+                <p className="text-md text-gray-300 font-bold my-4 w-full text-center md:w-1/2">
+                  Recuerde que debe esperar un lapso de 24 a 36 horas aproximadamente mientras nuestro equipo verifica y valida su compra.
+                  Los tickets serán enviados a su correo electrónico.
+                  <br />
+                  <div className="flex items-center justify-center mt-3 gap-3">
+                    Teléfono de soporte:
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 inline-flex items-center justify-center bg-green-500 rounded-full shadow-lg p-1 ml-2 hover:scale-105 transition-transform"
+                    >
+                      <img
+                        className="w-6 h-6 md:w-7 md:h-7"
+                        src="https://img.icons8.com/color/48/whatsapp--v1.png"
+                        alt="WhatsApp"
+                      />
+                      <span className="text-white mx-1">{PHONE_SUPPORT}</span>
+                    </a>
+                  </div>
                 </p>
               </div>
             ) : (
