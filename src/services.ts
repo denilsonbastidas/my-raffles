@@ -21,7 +21,7 @@ export const submitTicket = async (values: any) => {
   }
 };
 
-export const getTopBuyers = async (mode: "today" | "total" = "total") => {
+export const getTopBuyers = async (mode: "today" | "yesterday" | "total" = "total") => {
   try {
     const response = await axios.get(`${API_URL}/api/tickets/top-buyers/${mode}`);
     return response.data;

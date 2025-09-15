@@ -36,6 +36,7 @@ function HomePage() {
   });
 
   const [disponibleTickets, setDisponibleTickets] = useState<number>(0)
+  const [disponibleWithNoAproved, setDisponibleWithNoAproved] = useState<number>(0)
   const [alertaTickets, setAlertaTickets] = useState<string>("");
   const [exchangeRateVzla, setExchangeRateVzla] = useState<number>(0);
 
@@ -69,6 +70,7 @@ function HomePage() {
         const minValue = parseInt(responseRaffle[0]?.minValue);
         formik.setFieldValue("numberTickets", minValue);
         setDisponibleTickets(10000 - responseRaffle.totalSold)
+        setDisponibleWithNoAproved(10000 - responseRaffle.totalSoldWithNoAproved)
         updateTotal(minValue);
       } catch (error) {
         console.error("Error al cargar datos:", error);
@@ -79,6 +81,8 @@ function HomePage() {
 
     fetchGetRaffle();
   }, []);
+
+  console.log(disponibleWithNoAproved)
 
   useEffect(() => {
     updateTotal(raffleActually.minValue);
@@ -530,7 +534,7 @@ function HomePage() {
               ticketPrice={parseFloat(raffleActually?.ticketPrice)}
             />
 
-            {disponibleTickets > 0 && raffleActually?.visible ? (
+            {disponibleTickets > 0 && disponibleWithNoAproved > 0 && raffleActually?.visible ? (
               <div className="flex flex-col text-center items-center mt-6">
                 <h3 className="text-3xl font-semibold">COMPRAR TUS TICKETS</h3>
                 <form

@@ -30,7 +30,7 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [view, setView] = useState<"info" | "chart">("info");
-  const [filter, setFilter] = useState<"today" | "total">("total");
+  const [filter, setFilter] = useState<"today" | "total" | "yesterday">("total");
 
   useEffect(() => {
     if (isOpen) {
@@ -78,9 +78,10 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
           <select
             className="text-black border px-2 py-1 rounded"
             value={filter}
-            onChange={(e) => setFilter(e.target.value as "today" | "total")}
+            onChange={(e) => setFilter(e.target.value as "today" | "total" | "yesterday")}
           >
             <option value="today">Top de Hoy</option>
+            <option value="yesterday">Top de Ayer</option>
             <option value="total">Top General</option>
           </select>
 
