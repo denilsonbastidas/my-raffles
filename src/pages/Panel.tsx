@@ -1,4 +1,5 @@
 import { CreateRaffleModal } from "@/components/createRaffleModal";
+import { UpdateRaffleModal } from "@/components/updateRaffleModal";
 import ImageModal from "@/components/imgModal";
 import {
   checkTicket,
@@ -8,9 +9,10 @@ import {
   resendEmail,
   tikketApprove,
   tikketDenied,
+  getRaffle
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
-import { TicketType } from "@/utils/types";
+import { TicketType, RaffleType } from "@/utils/types";
 import { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +32,7 @@ function Panel() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [soldNumber, setSoldNumber] = useState<number>(0);
   const [modalCreateRaffle, setModalCreateRaffle] = useState(false);
+  const [modalUpdateRaffle, setModalUpdateRaffle] = useState(false);
   const [modalEditEmail, setModalEditEmail] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState(false);
@@ -40,6 +43,14 @@ function Panel() {
   const [isModalDollarOpen, setIsModalDollarOpen] = useState<boolean>(false);
   const [isModalBuyersOpen, setIsModalBuyersOpen] = useState<boolean>(false);
   const [isModalSummaryOpen, setIsModalSummaryOpen] = useState<boolean>(false);
+  const [raffleActually, setRaffleActually] = useState<RaffleType>({
+    name: "",
+    description: "",
+    images: [],
+    ticketPrice: "",
+    visible: true,
+    minValue: 1,
+  });
   const [currentTikketSelected, setCurrentTikketSelected] = useState<{
     email: string;
     id: string;
@@ -58,6 +69,8 @@ function Panel() {
     setSelectedImage(image);
     setImgModalOpen(true);
   };
+
+  console.log(raffleActually)
 
   useEffect(() => {
     fetchAuth(navigate);
@@ -105,14 +118,27 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-          code.toLowerCase().includes(search.toLowerCase()),
-        )
+        code.toLowerCase().includes(search.toLowerCase()),
+      )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
 
     return matchesSearch && matchesFilter;
   });
+
+  useEffect(() => {
+    const fetchGetRaffle = async () => {
+      try {
+        const responseRaffle = await getRaffle();
+        setRaffleActually(responseRaffle[0]);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+
+    fetchGetRaffle();
+  }, []);
 
   const submitTikketApprove = async (id: string) => {
     const result = await Swal.fire({
@@ -296,14 +322,14 @@ function Panel() {
       <span style="font-weight: 500; color: #6b7280;">Fecha de compra:</span><br />
       <span style="font-size: 16px;">
         ${new Date(result.createdAt).toLocaleDateString("es-ES", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })}
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })}
       </span>
     </div>
   </div>
@@ -471,12 +497,25 @@ function Panel() {
             </div>
           )}
 
-          <button
-            onClick={() => setModalCreateRaffle(true)}
-            className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
-          >
-            Crear nueva rifa
-          </button>
+          {
+            raffleActually?.name ? (
+              <button
+                onClick={() => setModalUpdateRaffle(true)}
+                className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
+              >
+                Actualizar Rifa
+              </button>
+            ) : (
+              <button
+                onClick={() => setModalCreateRaffle(true)}
+                className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
+              >
+                Crear nueva rifa
+              </button>
+            )
+          }
+
+
           <button
             onClick={() => clickedRaffleVisibility()}
             className="bg-red-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
@@ -695,6 +734,14 @@ function Panel() {
           isOpen={modalCreateRaffle}
           onClose={() => setModalCreateRaffle(false)}
         ></CreateRaffleModal>
+      )}
+
+      {modalUpdateRaffle && (
+        <UpdateRaffleModal
+          isOpen={modalUpdateRaffle}
+          onClose={() => setModalUpdateRaffle(false)}
+          existingRaffle={raffleActually}
+        ></UpdateRaffleModal>
       )}
 
       {modalEditEmail && (

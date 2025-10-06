@@ -19,7 +19,22 @@ export const submitTicket = async (values: any) => {
     console.error("Error al enviar el formulario:", error);
     throw error;
   }
-};
+}
+
+export const submitUpdateRaffle = async (raffleData: any) => {
+  try {
+    const response = await axios.put(`${API_URL}/api/raffles`, raffleData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar la rifa:", error);
+    throw error;
+  }
+}
 
 export const getTopBuyers = async (mode: "today" | "yesterday" | "total" = "total") => {
   try {
@@ -29,7 +44,7 @@ export const getTopBuyers = async (mode: "today" | "yesterday" | "total" = "tota
     console.error("Error al obtener el top de compradores:", error);
     throw error;
   }
-};
+}
 
 export const getMoneySummary = async () => {
   try {
