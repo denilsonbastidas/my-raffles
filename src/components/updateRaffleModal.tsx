@@ -68,14 +68,14 @@ export const UpdateRaffleModal = ({
           let width = img.width;
           let height = img.height;
 
-          if (width > 600 || height > 600) {
+          if (width > 1000 || height > 1000) {
             const aspectRatio = width / height;
             if (width > height) {
-              width = 600;
-              height = Math.round(600 / aspectRatio);
+              width = 1000;
+              height = Math.round(1000 / aspectRatio);
             } else {
-              height = 600;
-              width = Math.round(600 * aspectRatio);
+              height = 1000;
+              width = Math.round(1000 * aspectRatio);
             }
           }
 
