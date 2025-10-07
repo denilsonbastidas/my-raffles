@@ -20,7 +20,6 @@ export const UpdateRaffleModal = ({
     minValue: 1,
   });
 
-
   useEffect(() => {
     if (existingRaffle) {
       const processedRaffle = {
@@ -68,14 +67,14 @@ export const UpdateRaffleModal = ({
           let width = img.width;
           let height = img.height;
 
-          if (width > 1000 || height > 1000) {
+          if (width > 750 || height > 750) {
             const aspectRatio = width / height;
             if (width > height) {
-              width = 1000;
-              height = Math.round(1000 / aspectRatio);
+              width = 750;
+              height = Math.round(750 / aspectRatio);
             } else {
-              height = 1000;
-              width = Math.round(1000 * aspectRatio);
+              height = 750;
+              width = Math.round(750 * aspectRatio);
             }
           }
 
@@ -84,7 +83,7 @@ export const UpdateRaffleModal = ({
 
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            const base64String = canvas.toDataURL("image/jpeg", 1);
+            const base64String = canvas.toDataURL("image/jpeg", .8);
             resolve(base64String);
           } else {
             reject(new Error("No se pudo obtener el contexto del canvas."));
