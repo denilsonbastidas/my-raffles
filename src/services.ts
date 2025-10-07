@@ -215,10 +215,12 @@ export const resendEmail = async (id: string) => {
   }
 };
 
-export const updatedEmail = async (
+export const updatedUser = async (
   id: string,
   newEmail: string,
   newPhone: string,
+  numberTickets: number, 
+  paymentMethod: string
 ) => {
   try {
     const { data } = await axios.put(
@@ -226,6 +228,8 @@ export const updatedEmail = async (
       {
         newEmail,
         newPhone,
+        numberTickets,
+        paymentMethod
       },
     );
     return data;
