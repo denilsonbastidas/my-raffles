@@ -513,26 +513,6 @@ function HomePage() {
     }
   };
 
-  useEffect(() => {
-    const ua = navigator.userAgent;
-
-    if (ua.includes("Instagram")) {
-      Swal.fire({
-        title: "⚠️ Estás usando Instagram",
-        text: "Para que esta página funcione correctamente, ábrela en tu navegador (Chrome o Safari).",
-        icon: "info",
-        confirmButtonText: "Abrir en navegador",
-        showCancelButton: true,
-        cancelButtonText: "Continuar aquí",
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.open(window.location.href, "_blank");
-        }
-      });
-    }
-  }, []);
-
   return (
     <div>
       {isLoading && (
