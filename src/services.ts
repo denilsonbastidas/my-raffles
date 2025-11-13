@@ -36,15 +36,25 @@ export const submitUpdateRaffle = async (raffleData: any) => {
   }
 }
 
-export const getTopBuyers = async (mode: "today" | "yesterday" | "total" = "total") => {
+export const getTopBuyers = async (
+  mode: "today" | "yesterday" | "total" | "custom" = "total",
+  startDate?: string,
+  endDate?: string
+) => {
   try {
-    const response = await axios.get(`${API_URL}/api/tickets/top-buyers/${mode}`);
+    let url = `${API_URL}/api/tickets/top-buyers/${mode}`;
+    if (mode === "custom" && startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+
+    const response = await axios.get(url);
     return response.data;
   } catch (error) {
     console.error("Error al obtener el top de compradores:", error);
     throw error;
   }
-}
+};
+
 
 export const getMoneySummary = async () => {
   try {
@@ -219,7 +229,7 @@ export const updatedUser = async (
   id: string,
   newEmail: string,
   newPhone: string,
-  numberTickets: number, 
+  numberTickets: number,
   paymentMethod: string
 ) => {
   try {
