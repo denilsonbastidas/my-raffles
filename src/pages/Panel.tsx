@@ -9,7 +9,7 @@ import {
   resendEmail,
   tikketApprove,
   tikketDenied,
-  getRaffle
+  getRaffle,
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
 import { TicketType, RaffleType } from "@/utils/types";
@@ -117,8 +117,8 @@ function Panel() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = search
       ? ticket.approvalCodes.some((code) =>
-        code.toLowerCase().includes(search.toLowerCase()),
-      )
+          code.toLowerCase().includes(search.toLowerCase()),
+        )
       : true;
 
     const matchesFilter = filter === "pending" ? !ticket.approved : true;
@@ -263,8 +263,8 @@ function Panel() {
   };
 
   const handleEmailUpdated = () => {
-    setTickets([])
-    fetchGetTikkets()
+    setTickets([]);
+    fetchGetTikkets();
   };
 
   const handleSearchTicket = async () => {
@@ -312,14 +312,14 @@ function Panel() {
       <span style="font-weight: 500; color: #6b7280;">Fecha de compra:</span><br />
       <span style="font-size: 16px;">
         ${new Date(result.createdAt).toLocaleDateString("es-ES", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })}
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })} a las ${new Date(result.createdAt).toLocaleTimeString("es-ES", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })}
       </span>
     </div>
   </div>
@@ -487,24 +487,21 @@ function Panel() {
             </div>
           )}
 
-          {
-            raffleActually?.name ? (
-              <button
-                onClick={() => setModalUpdateRaffle(true)}
-                className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
-              >
-                Actualizar Rifa
-              </button>
-            ) : (
-              <button
-                onClick={() => setModalCreateRaffle(true)}
-                className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
-              >
-                Crear nueva rifa
-              </button>
-            )
-          }
-
+          {raffleActually?.name ? (
+            <button
+              onClick={() => setModalUpdateRaffle(true)}
+              className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
+            >
+              Actualizar Rifa
+            </button>
+          ) : (
+            <button
+              onClick={() => setModalCreateRaffle(true)}
+              className="bg-green-500 text-white font-semibold px-4 py-2 rounded w-full md:w-auto mt-0 md:mt-6"
+            >
+              Crear nueva rifa
+            </button>
+          )}
 
           <button
             onClick={() => clickedRaffleVisibility()}

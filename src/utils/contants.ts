@@ -4,7 +4,7 @@ export const banksData = [
     bank: "Banco de Venezuela",
     logo: "bancoVenezuela.jpg",
     bdv: "0102",
-    phone: "04124698178",
+    phone: "04220106406",
     indentifyBdv: "30415915",
   },
 
