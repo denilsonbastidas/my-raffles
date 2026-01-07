@@ -25,9 +25,15 @@ function HeaderPage({ name, description, images, ticketPrice }: Props) {
         <p className="text-xl md:text-2xl uppercase font-bebas font-semibold text-gray-300 mb-2">
           {description}
         </p>
-        <p className="text-xl font-anton uppercase font-semibold text-blue-300">
+        {/* el que va en realidad */}
+        <p className="text-xl font-anton uppercase hidden font-semibold text-blue-300">
           Por tan solo <span className="text-yellow-400">{ticketPrice}$</span>{" "}
           por ticket.
+        </p>
+
+        <p className="text-xl font-anton uppercase font-semibold text-blue-300">
+          Por tan solo <span className="text-yellow-400">100bs</span> por
+          ticket.
         </p>
       </div>
 

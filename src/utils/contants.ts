@@ -15,15 +15,15 @@ export const banksData = [
     email: "ilianagoyo1@gmail.com",
   },
 
-  {
-    type: "zelle",
-    bank: "Zelle",
-    logo: "zelleLogo.png",
-    email: "jravelo470@gmail.com",
-    // email: "7866816185",
-    nameZelle: "Maykol sierra",
-    // nameZelle: "Ashley ravelo",
-  },
+  // {
+  //   type: "zelle",
+  //   bank: "Zelle",
+  //   logo: "zelleLogo.png",
+  //   email: "jravelo470@gmail.com",
+  //   // email: "7866816185",
+  //   nameZelle: "Maykol sierra",
+  //   // nameZelle: "Ashley ravelo",
+  // },
 ];
 export const PHONE_SUPPORT = "+58422-0106406";
 export const EXCHANGE_RATE = 135;
