@@ -60,14 +60,23 @@ function HomePage() {
   const openInExternalBrowser = () => {
     const url = window.location.href;
 
-    if (isAndroid()) {
-      const intentUrl = `intent://${url.replace(/^https?:\/\//, "")}#Intent;scheme=https;package=com.android.chrome;end`;
-      window.location.href = intentUrl;
+    if (isIOS()) {
+      const safariUrl = url.replace(/^https?:\/\//, "");
+      window.location.href = `x-safari-https://${safariUrl}`;
+
+      setTimeout(() => {
+        window.location.href = url;
+      }, 500);
       return;
     }
 
-    if (isIOS()) {
-      window.open(url, "_blank");
+    if (isAndroid()) {
+      const intentUrl = `intent://${url.replace(/^https?:\/\//, "")}#Intent;scheme=https;package=com.android.chrome;end`;
+      window.location.href = intentUrl;
+
+      setTimeout(() => {
+        window.location.href = url;
+      }, 500);
       return;
     }
 
@@ -80,19 +89,24 @@ function HomePage() {
     setShowIGOverlay(true);
 
     const interval = setInterval(() => {
-      setCount((c) => c - 1);
+      setCount((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     const timeout = setTimeout(() => {
       openInExternalBrowser();
-    }, count * 1000);
+    }, 5000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, []);
-
+  }, []); 
 
   useEffect(() => {
     formik.setFieldValue("paymentMethod", selectedBank);
