@@ -45,7 +45,7 @@ function HomePage() {
   const [selectedBank, setSelectedBank] = useState<string>();
 
   const [showIGOverlay, setShowIGOverlay] = useState(false);
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(4);
 
   const isInstagramBrowser = () => {
     const ua = navigator.userAgent || "";
@@ -604,7 +604,7 @@ function HomePage() {
               onClick={openInExternalBrowser}
               className="mt-6 px-5 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
             >
-              Abrir en Safari / Navegador
+              Abrir en Navegador Externo
             </button>
           </div>
         </div>
