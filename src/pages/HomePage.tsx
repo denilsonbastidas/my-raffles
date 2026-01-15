@@ -44,6 +44,56 @@ function HomePage() {
   const [totalBS, setTotalBS] = useState(0);
   const [selectedBank, setSelectedBank] = useState<string>();
 
+  const [showIGOverlay, setShowIGOverlay] = useState(false);
+  const [count, setCount] = useState(5);
+
+  const isInstagramBrowser = () => {
+    const ua = navigator.userAgent || "";
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("igtest") === "1") return true;
+    return /Instagram/i.test(ua);
+  };
+
+  const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isAndroid = () => /Android/i.test(navigator.userAgent);
+
+  const openInExternalBrowser = () => {
+    const url = window.location.href;
+
+    if (isAndroid()) {
+      const intentUrl = `intent://${url.replace(/^https?:\/\//, "")}#Intent;scheme=https;package=com.android.chrome;end`;
+      window.location.href = intentUrl;
+      return;
+    }
+
+    if (isIOS()) {
+      window.open(url, "_blank");
+      return;
+    }
+
+    window.open(url, "_blank");
+  };
+
+  useEffect(() => {
+    if (!isInstagramBrowser()) return;
+
+    setShowIGOverlay(true);
+
+    const interval = setInterval(() => {
+      setCount((c) => c - 1);
+    }, 1000);
+
+    const timeout = setTimeout(() => {
+      openInExternalBrowser();
+    }, count * 1000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+
   useEffect(() => {
     formik.setFieldValue("paymentMethod", selectedBank);
     if (selectedBank === "binance" || selectedBank === "zelle") {
@@ -515,360 +565,394 @@ function HomePage() {
 
   return (
     <div>
-      {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
-          <img
-            src="logo.webp"
-            alt="Cargando..."
-            className="w-32 h-32 animate-pulse rounded-full"
-          />
-        </div>
-      )}
-      {!isLoading && (
-        <section className="min-h-screen flex flex-col">
-          <div className="flex-grow">
-            <HeaderPage
-              name={raffleActually?.name}
-              description={raffleActually?.description}
-              images={raffleActually?.images}
-              ticketPrice={parseFloat(raffleActually?.ticketPrice)}
+
+      {showIGOverlay ? (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 z-50">
+          <div className="flex flex-col items-center text-center p-6 rounded-2xl backdrop-blur-md">
+            <img
+              src="logo.webp"
+              alt="Cargando..."
+              className="w-32 h-32 animate-pulse rounded-full mb-6"
             />
 
-            {disponibleTickets > 0 && disponibleWithNoAproved > 0 && raffleActually?.visible ? (
-              <div className="flex flex-col text-center items-center mt-6">
-                <h3 className="text-3xl font-semibold">COMPRAR TUS TICKETS</h3>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    formik.handleSubmit(e);
-                  }}
-                  className="flex flex-col items-center"
-                >
-                  <label className="text-gray-300">
-                    Mínimo {raffleActually?.minValue} y Máximo {MAX_VALUE}{" "}
-                    Tickets por Compra
-                  </label>
+            <h2 className="text-xl font-semibold text-gray-300">
+              Abriendo en tu navegador…
+            </h2>
+            <p className="text-gray-400 mt-1">
+              Para continuar fuera de Instagram
+            </p>
 
-                  <div className="flex items-center gap-6 mt-4">
-                    <button
-                      type="button"
-                      disabled={
-                        parseInt(formik.values.numberTickets) <=
-                        (raffleActually?.minValue ?? 1)
-                      }
-                      onClick={() =>
-                        handleTicketChange(
-                          parseInt(formik.values.numberTickets) - 1,
-                        )
-                      }
-                      className={`w-10 h-10 
-      ${parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
-                          ? "bg-gray-400"
-                          : "bg-blue-600 hover:bg-blue-700"
-                        } 
-      text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
-                    >
-                      <img
-                        width="20"
-                        height="20"
-                        src="https://img.icons8.com/ios-glyphs/30/FFFFFF/minus-math.png"
-                        alt="minus-math"
-                      />
-                    </button>
+            <p className="mt-3 text-sm text-gray-200">
+              {count > 0 ? `Intentando en ${count}s…` : "Si no se abre automáticamente:"}
+            </p>
 
-                    <input
-                      ref={inputRef}
-                      type="number"
-                      name="numberTickets"
-                      value={formik.values.numberTickets}
-                      onChange={handleInputChange}
-                      onBlur={(e) => {
-                        formik.handleBlur(e);
-                        const value = parseInt(e.target.value);
+            <button
+              onClick={openInExternalBrowser}
+              className="mt-6 px-5 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+            >
+              Abrir en Safari / Navegador
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {isLoading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
+              <img
+                src="logo.webp"
+                alt="Cargando..."
+                className="w-32 h-32 animate-pulse rounded-full"
+              />
+            </div>
+          )}
+          {!isLoading && (
+            <section className="min-h-screen flex flex-col">
+              <div className="flex-grow">
+                <HeaderPage
+                  name={raffleActually?.name}
+                  description={raffleActually?.description}
+                  images={raffleActually?.images}
+                  ticketPrice={parseFloat(raffleActually?.ticketPrice)}
+                />
 
-                        if (!isNaN(value)) {
-                          handleTicketChange(value);
-                        }
+                {disponibleTickets > 0 && disponibleWithNoAproved > 0 && raffleActually?.visible ? (
+                  <div className="flex flex-col text-center items-center mt-6">
+                    <h3 className="text-3xl font-semibold">COMPRAR TUS TICKETS</h3>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        formik.handleSubmit(e);
                       }}
-                      className="w-20 text-center text-black border border-gray-300 rounded py-2 px-3 text-lg font-semibold"
-                      min={raffleActually?.minValue}
-                      max={MAX_VALUE}
-                    />
+                      className="flex flex-col items-center"
+                    >
+                      <label className="text-gray-300">
+                        Mínimo {raffleActually?.minValue} y Máximo {MAX_VALUE}{" "}
+                        Tickets por Compra
+                      </label>
 
-                    <button
-                      type="button"
-                      disabled={
-                        parseInt(formik.values.numberTickets) >= MAX_VALUE
-                      }
-                      onClick={() =>
-                        handleTicketChange(
-                          parseInt(formik.values.numberTickets) + 1,
-                        )
-                      }
-                      className={`w-10 h-10 
-      ${parseInt(formik.values.numberTickets) >= MAX_VALUE
-                          ? "bg-gray-400"
-                          : "bg-blue-600 hover:bg-blue-700"
-                        } 
+                      <div className="flex items-center gap-6 mt-4">
+                        <button
+                          type="button"
+                          disabled={
+                            parseInt(formik.values.numberTickets) <=
+                            (raffleActually?.minValue ?? 1)
+                          }
+                          onClick={() =>
+                            handleTicketChange(
+                              parseInt(formik.values.numberTickets) - 1,
+                            )
+                          }
+                          className={`w-10 h-10 
+      ${parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
+                              ? "bg-gray-400"
+                              : "bg-blue-600 hover:bg-blue-700"
+                            } 
       text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
-                    >
-                      <img
-                        width="24"
-                        height="24"
-                        src="https://img.icons8.com/material-outlined/24/FFFFFF/plus-math.png"
-                        alt="plus-math"
-                      />
-                    </button>
-                  </div>
+                        >
+                          <img
+                            width="20"
+                            height="20"
+                            src="https://img.icons8.com/ios-glyphs/30/FFFFFF/minus-math.png"
+                            alt="minus-math"
+                          />
+                        </button>
 
-                  {formik.touched.numberTickets &&
-                    formik.errors.numberTickets ? (
-                    <div className="text-red-500">
-                      {formik.errors.numberTickets}
-                    </div>
-                  ) : null}
+                        <input
+                          ref={inputRef}
+                          type="number"
+                          name="numberTickets"
+                          value={formik.values.numberTickets}
+                          onChange={handleInputChange}
+                          onBlur={(e) => {
+                            formik.handleBlur(e);
+                            const value = parseInt(e.target.value);
 
-                  {alertaTickets && (
-                    <p className="bg-red-700 px-8 py-2 text-white rounded text-sm mt-2 flex gap-3">
-                      <img width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/FFFFFF/high-priority.png" alt="high-priority" />
-                      {alertaTickets}
-                    </p>
-                  )}
+                            if (!isNaN(value)) {
+                              handleTicketChange(value);
+                            }
+                          }}
+                          className="w-20 text-center text-black border border-gray-300 rounded py-2 px-3 text-lg font-semibold"
+                          min={raffleActually?.minValue}
+                          max={MAX_VALUE}
+                        />
 
-                  <p className="mt-2 text-gray-300">
-                    Selecciona una cantidad de Tickets
-                  </p>
+                        <button
+                          type="button"
+                          disabled={
+                            parseInt(formik.values.numberTickets) >= MAX_VALUE
+                          }
+                          onClick={() =>
+                            handleTicketChange(
+                              parseInt(formik.values.numberTickets) + 1,
+                            )
+                          }
+                          className={`w-10 h-10 
+      ${parseInt(formik.values.numberTickets) >= MAX_VALUE
+                              ? "bg-gray-400"
+                              : "bg-blue-600 hover:bg-blue-700"
+                            } 
+      text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
+                        >
+                          <img
+                            width="24"
+                            height="24"
+                            src="https://img.icons8.com/material-outlined/24/FFFFFF/plus-math.png"
+                            alt="plus-math"
+                          />
+                        </button>
+                      </div>
 
-                  <div className="grid grid-cols-6 gap-2 mb-8 mt-2 w-full max-w-xs">
-                    {predefinedValues.map((value) => (
-                      <button
-                        key={value}
-                        type="button"
-                        className="bg-blue-400 text-white p-2 rounded text-center w-full"
-                        onClick={() => handlePredefinedSelection(value)}
-                      >
-                        {value}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="mb-4">
-                    <PaymentMethods
-                      onSelectedBank={(type: string) => setSelectedBank(type)}
-                      totalBs={totalBS}
-                      totalUSD={totalUSD}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 w-full">
-                    <div>
-                      <p className="text-start font-semibold">
-                        <span className="text-red-500 ">*</span> Nombre y
-                        Apellido:
-                      </p>
-                      <input
-                        type="text"
-                        name="fullName"
-                        placeholder="Pedro jose"
-                        value={formik.values.fullName}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        className="mt-1 p-2 w-full border rounded text-black"
-                      />
-                      {formik.touched.fullName && formik.errors.fullName ? (
-                        <div className="text-red-500 text-start">
-                          {formik.errors.fullName}
+                      {formik.touched.numberTickets &&
+                        formik.errors.numberTickets ? (
+                        <div className="text-red-500">
+                          {formik.errors.numberTickets}
                         </div>
                       ) : null}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-start">
-                        {" "}
-                        <span className="text-red-500 ">*</span> Correo
-                        electrónico (se recomienda Gmail):
+
+                      {alertaTickets && (
+                        <p className="bg-red-700 px-8 py-2 text-white rounded text-sm mt-2 flex gap-3">
+                          <img width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/FFFFFF/high-priority.png" alt="high-priority" />
+                          {alertaTickets}
+                        </p>
+                      )}
+
+                      <p className="mt-2 text-gray-300">
+                        Selecciona una cantidad de Tickets
                       </p>
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="pedroj@gmail.com"
-                        value={formik.values.email}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        className="mt-1 p-2 w-full border rounded text-black"
-                      />
 
-                      {formik.touched.email && formik.errors.email ? (
-                        <div className="text-red-500 text-start">
-                          {formik.errors.email}
+                      <div className="grid grid-cols-6 gap-2 mb-8 mt-2 w-full max-w-xs">
+                        {predefinedValues.map((value) => (
+                          <button
+                            key={value}
+                            type="button"
+                            className="bg-blue-400 text-white p-2 rounded text-center w-full"
+                            onClick={() => handlePredefinedSelection(value)}
+                          >
+                            {value}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="mb-4">
+                        <PaymentMethods
+                          onSelectedBank={(type: string) => setSelectedBank(type)}
+                          totalBs={totalBS}
+                          totalUSD={totalUSD}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 w-full">
+                        <div>
+                          <p className="text-start font-semibold">
+                            <span className="text-red-500 ">*</span> Nombre y
+                            Apellido:
+                          </p>
+                          <input
+                            type="text"
+                            name="fullName"
+                            placeholder="Pedro jose"
+                            value={formik.values.fullName}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className="mt-1 p-2 w-full border rounded text-black"
+                          />
+                          {formik.touched.fullName && formik.errors.fullName ? (
+                            <div className="text-red-500 text-start">
+                              {formik.errors.fullName}
+                            </div>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
+                        <div>
+                          <p className="font-semibold text-start">
+                            {" "}
+                            <span className="text-red-500 ">*</span> Correo
+                            electrónico (se recomienda Gmail):
+                          </p>
+                          <input
+                            type="email"
+                            name="email"
+                            placeholder="pedroj@gmail.com"
+                            value={formik.values.email}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className="mt-1 p-2 w-full border rounded text-black"
+                          />
 
-                    <div>
-                      <p className="font-semibold text-start">
-                        {" "}
-                        <span className="text-red-500 ">*</span> Teléfono:
-                      </p>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formik.values.phone}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="+584124564323"
-                        className="mt-1 p-2 w-full border rounded text-black"
-                      />
-                      {formik.touched.phone && formik.errors.phone ? (
-                        <div className="text-red-500 text-start">
-                          {formik.errors.phone}
+                          {formik.touched.email && formik.errors.email ? (
+                            <div className="text-red-500 text-start">
+                              {formik.errors.email}
+                            </div>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
 
-                    <div>
-                      <p className="font-semibold text-start">
-                        <span className="text-red-500 ">*</span> N° de
-                        Comprobante
-                      </p>
-                      <input
-                        type="text"
-                        name="reference"
-                        value={formik.values.reference}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="234533 o Zelle Mario castro"
-                        className="mt-1 p-2 w-full border rounded text-black"
-                      />
-                      {formik.touched.reference && formik.errors.reference ? (
-                        <div className="text-red-500 text-start">
-                          {formik.errors.reference}
+                        <div>
+                          <p className="font-semibold text-start">
+                            {" "}
+                            <span className="text-red-500 ">*</span> Teléfono:
+                          </p>
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formik.values.phone}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="+584124564323"
+                            className="mt-1 p-2 w-full border rounded text-black"
+                          />
+                          {formik.touched.phone && formik.errors.phone ? (
+                            <div className="text-red-500 text-start">
+                              {formik.errors.phone}
+                            </div>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
-                  </div>
 
-                  <div className="mt-4 w-full max-w-md">
-                    <p className="font-bold flex items-center gap-2">
-                      <span className="text-red-500">*</span>COMPROBANTE DE
-                      PAGO:
-                    </p>
-                    <p className="text-gray-400 text-sm mb-2">
-                      Foto o Captura de Pantalla
-                    </p>
+                        <div>
+                          <p className="font-semibold text-start">
+                            <span className="text-red-500 ">*</span> N° de
+                            Comprobante
+                          </p>
+                          <input
+                            type="text"
+                            name="reference"
+                            value={formik.values.reference}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="234533 o Zelle Mario castro"
+                            className="mt-1 p-2 w-full border rounded text-black"
+                          />
+                          {formik.touched.reference && formik.errors.reference ? (
+                            <div className="text-red-500 text-start">
+                              {formik.errors.reference}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
 
-                    <label
-                      htmlFor="voucher-upload"
-                      className="flex items-center justify-center w-full h-24 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition overflow-hidden"
-                    >
-                      {preview ? (
-                        <img
-                          src={preview}
-                          alt="Vista previa"
-                          className="w-full h-full object-contain rounded-lg"
+                      <div className="mt-4 w-full max-w-md">
+                        <p className="font-bold flex items-center gap-2">
+                          <span className="text-red-500">*</span>COMPROBANTE DE
+                          PAGO:
+                        </p>
+                        <p className="text-gray-400 text-sm mb-2">
+                          Foto o Captura de Pantalla
+                        </p>
+
+                        <label
+                          htmlFor="voucher-upload"
+                          className="flex items-center justify-center w-full h-24 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition overflow-hidden"
+                        >
+                          {preview ? (
+                            <img
+                              src={preview}
+                              alt="Vista previa"
+                              className="w-full h-full object-contain rounded-lg"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center gap-2">
+                              <FiUploadCloud className="text-3xl text-gray-400" />
+                              <p className="text-gray-500 underline">
+                                Haz clic para subir una imagen
+                              </p>
+                            </div>
+                          )}
+                        </label>
+
+                        <input
+                          id="voucher-upload"
+                          type="file"
+                          name="voucher"
+                          accept="image/*"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+
+                        {formik.touched.voucher && formik.errors.voucher && (
+                          <div className="text-red-500 text-sm mt-1 text-start">
+                            {formik.errors.voucher}
+                          </div>
+                        )}
+                      </div>
+
+                      {isSubmitting ? (
+                        <Skeleton
+                          height={45}
+                          width={350}
+                          className="rounded mt-6 animate-pulse"
                         />
                       ) : (
-                        <div className="flex flex-col items-center gap-2">
-                          <FiUploadCloud className="text-3xl text-gray-400" />
-                          <p className="text-gray-500 underline">
-                            Haz clic para subir una imagen
-                          </p>
-                        </div>
+                        <button
+                          type="submit"
+                          className="mt-6 w-full font-bold bg-green-600 p-2 rounded"
+                        >
+                          Comprar Tickets
+                        </button>
                       )}
-                    </label>
+                    </form>
 
-                    <input
-                      id="voucher-upload"
-                      type="file"
-                      name="voucher"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-
-                    {formik.touched.voucher && formik.errors.voucher && (
-                      <div className="text-red-500 text-sm mt-1 text-start">
-                        {formik.errors.voucher}
+                    <p className="text-md text-gray-300 font-bold my-4 w-full text-center md:w-1/2">
+                      Recuerde que debe esperar un lapso de 24 a 36 horas aproximadamente mientras nuestro equipo verifica y valida su compra.
+                      Los tickets serán enviados a su correo electrónico.
+                      <br />
+                      <div className="flex items-center justify-center mt-3 gap-3">
+                        Teléfono de soporte:
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 inline-flex items-center justify-center bg-green-500 rounded-full shadow-lg p-1 ml-2 hover:scale-105 transition-transform"
+                        >
+                          <img
+                            className="w-6 h-6 md:w-7 md:h-7"
+                            src="https://img.icons8.com/color/48/whatsapp--v1.png"
+                            alt="WhatsApp"
+                          />
+                          <span className="text-white mx-1">{PHONE_SUPPORT}</span>
+                        </a>
                       </div>
-                    )}
+                    </p>
                   </div>
-
-                  {isSubmitting ? (
-                    <Skeleton
-                      height={45}
-                      width={350}
-                      className="rounded mt-6 animate-pulse"
+                ) : (
+                  <div className="h-96 flex flex-col gap-4 text-center items-center justify-center">
+                    <p className="text-lg font-bold text-red-500 md:text-4xl">
+                      Números Agotados.
+                    </p>
+                    <p className="text-lg font-bold md:text-4xl">
+                      Ya esta todo listo, Para mayor información pendiente de las
+                      historias en Instagram.
+                    </p>
+                    <img
+                      src="logo.webp"
+                      alt="logo denilson bastidas"
+                      className="w-52 h-52 rounded-full"
+                      loading="lazy"
                     />
-                  ) : (
-                    <button
-                      type="submit"
-                      className="mt-6 w-full font-bold bg-green-600 p-2 rounded"
-                    >
-                      Comprar Tickets
-                    </button>
-                  )}
-                </form>
-
-                <p className="text-md text-gray-300 font-bold my-4 w-full text-center md:w-1/2">
-                  Recuerde que debe esperar un lapso de 24 a 36 horas aproximadamente mientras nuestro equipo verifica y valida su compra.
-                  Los tickets serán enviados a su correo electrónico.
-                  <br />
-                  <div className="flex items-center justify-center mt-3 gap-3">
-                    Teléfono de soporte:
                     <a
-                      href={whatsappUrl}
+                      href="https://www.instagram.com/denilsonbastidas"
                       target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 inline-flex items-center justify-center bg-green-500 rounded-full shadow-lg p-1 ml-2 hover:scale-105 transition-transform"
+                      rel="noreferrer"
+                      className="text-red-500 text-lg underline font-semibold hover:text-red-700 transition duration-300"
                     >
-                      <img
-                        className="w-6 h-6 md:w-7 md:h-7"
-                        src="https://img.icons8.com/color/48/whatsapp--v1.png"
-                        alt="WhatsApp"
-                      />
-                      <span className="text-white mx-1">{PHONE_SUPPORT}</span>
+                      Denilson Bastidas
                     </a>
                   </div>
-                </p>
+                )}
+                <div className="flex justify-center items-center my-6">
+                  <button
+                    onClick={showVerifiedTickect}
+                    className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg shadow-2xl hover:bg-gray-800 hover:shadow-lg transition duration-300 ease-in-out"
+                  >
+                    Verifica Tus Tickets
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="h-96 flex flex-col gap-4 text-center items-center justify-center">
-                <p className="text-lg font-bold text-red-500 md:text-4xl">
-                  Números Agotados.
-                </p>
-                <p className="text-lg font-bold md:text-4xl">
-                  Ya esta todo listo, Para mayor información pendiente de las
-                  historias en Instagram.
-                </p>
-                <img
-                  src="logo.webp"
-                  alt="logo denilson bastidas"
-                  className="w-52 h-52 rounded-full"
-                  loading="lazy"
-                />
-                <a
-                  href="https://www.instagram.com/denilsonbastidas"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-red-500 text-lg underline font-semibold hover:text-red-700 transition duration-300"
-                >
-                  Denilson Bastidas
-                </a>
+              <div>
+                <Footer />
               </div>
-            )}
-            <div className="flex justify-center items-center my-6">
-              <button
-                onClick={showVerifiedTickect}
-                className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg shadow-2xl hover:bg-gray-800 hover:shadow-lg transition duration-300 ease-in-out"
-              >
-                Verifica Tus Tickets
-              </button>
-            </div>
-          </div>
-          <div>
-            <Footer />
-          </div>
-        </section>
+            </section>
+          )}
+
+        </>
       )}
     </div>
   );
