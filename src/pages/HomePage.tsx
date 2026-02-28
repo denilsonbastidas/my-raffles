@@ -66,15 +66,15 @@ function HomePage() {
 
       setTimeout(() => {
         attemptOpen(`googlechrome://${cleanUrl}`);
-      }, 800);
+      }, 300);
 
       setTimeout(() => {
         attemptOpen(`firefox://open-url?url=${encodeURIComponent(url)}`);
-      }, 1600);
+      }, 600);
 
       setTimeout(() => {
         window.location.replace(url);
-      }, 2400);
+      }, 900);
 
       return;
     }
