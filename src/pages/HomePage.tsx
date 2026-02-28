@@ -59,28 +59,50 @@ function HomePage() {
 
   const openInExternalBrowser = () => {
     const url = window.location.href;
+    const cleanUrl = url.replace(/^https?:\/\//, "");
 
     if (isIOS()) {
-      const safariUrl = url.replace(/^https?:\/\//, "");
-      window.location.href = `x-safari-https://${safariUrl}`;
+      attemptOpen(`safari-https://${cleanUrl}`);
 
       setTimeout(() => {
-        window.location.href = url;
-      }, 500);
+        attemptOpen(`googlechrome://${cleanUrl}`);
+      }, 800);
+
+      setTimeout(() => {
+        attemptOpen(`firefox://open-url?url=${encodeURIComponent(url)}`);
+      }, 1600);
+
+      setTimeout(() => {
+        window.location.replace(url);
+      }, 2400);
+
       return;
     }
 
     if (isAndroid()) {
-      const intentUrl = `intent://${url.replace(/^https?:\/\//, "")}#Intent;scheme=https;package=com.android.chrome;end`;
-      window.location.href = intentUrl;
+      window.location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+
+      setTimeout(() => {
+        window.location.href = `intent://${cleanUrl}#Intent;scheme=https;package=org.mozilla.firefox;end`;
+      }, 1000);
 
       setTimeout(() => {
         window.location.href = url;
-      }, 500);
+      }, 2000);
+
       return;
     }
 
     window.open(url, "_blank");
+  };
+
+  const attemptOpen = (schemeUrl: string): boolean => {
+    try {
+      window.location.href = schemeUrl;
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -106,7 +128,7 @@ function HomePage() {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, []); 
+  }, []);
 
   useEffect(() => {
     formik.setFieldValue("paymentMethod", selectedBank);
