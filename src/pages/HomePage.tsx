@@ -168,7 +168,6 @@ function HomePage() {
     fetchGetRaffle();
   }, []);
 
-  console.log(disponibleWithNoAproved)
 
   useEffect(() => {
     updateTotal(raffleActually.minValue);
@@ -628,6 +627,9 @@ function HomePage() {
             >
               Abrir en Navegador Externo
             </button>
+            <p className="mt-3 text-xs text-gray-400">
+              ¿No abre? Toca los <strong className="text-gray-300">···</strong> y selecciona <strong className="text-gray-300">"Abrir en Navegador Externo"</strong> ↘️
+            </p>
           </div>
         </div>
       ) : (
