@@ -6,7 +6,9 @@ interface Props {
   images: string[];
   ticketPrice: number;
 }
-function HeaderPage({ name, description, images, ticketPrice }: Props) {
+// function HeaderPage({ name, description, images, ticketPrice }: Props) {
+
+function HeaderPage({ name, description, images }: Props) {
   return (
     <div className="flex flex-col w-full mx-auto justify-center items-center border-b border-gray-700 p-8 md:w-2/3 bg-gradient-to-b from-gray-900 to-black rounded-b-3xl shadow-lg">
       <div className="py-2 mb-2 mx-auto">
