@@ -19,11 +19,11 @@ import { PHONE_SUPPORT } from "@/utils/contants";
 function HomePage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const MAX_VALUE = 100;
-  const predefinedValues = [2, 5, 10, 20, 50, 100];
+  const MAX_VALUE = 200;
+  const predefinedValues = [2, 5, 10, 20, 50, 100, 200];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
-  const whatsappUrl = `https://wa.me/${PHONE_SUPPORT.replace(/\D/g, '')}`;
+  const whatsappUrl = `https://wa.me/${PHONE_SUPPORT.replace(/\D/g, "")}`;
   const [preview, setPreview] = useState<string | null>(null);
 
   const [raffleActually, setRaffleActually] = useState<RaffleType>({
@@ -35,8 +35,9 @@ function HomePage() {
     minValue: 0,
   });
 
-  const [disponibleTickets, setDisponibleTickets] = useState<number>(0)
-  const [disponibleWithNoAproved, setDisponibleWithNoAproved] = useState<number>(0)
+  const [disponibleTickets, setDisponibleTickets] = useState<number>(0);
+  const [disponibleWithNoAproved, setDisponibleWithNoAproved] =
+    useState<number>(0);
   const [alertaTickets, setAlertaTickets] = useState<string>("");
   const [exchangeRateVzla, setExchangeRateVzla] = useState<number>(0);
 
@@ -155,8 +156,10 @@ function HomePage() {
 
         const minValue = parseInt(responseRaffle[0]?.minValue);
         formik.setFieldValue("numberTickets", minValue);
-        setDisponibleTickets(10000 - responseRaffle.totalSold)
-        setDisponibleWithNoAproved(10000 - responseRaffle.totalSoldWithNoAproved)
+        setDisponibleTickets(10000 - responseRaffle.totalSold);
+        setDisponibleWithNoAproved(
+          10000 - responseRaffle.totalSoldWithNoAproved,
+        );
         updateTotal(minValue);
       } catch (error) {
         console.error("Error al cargar datos:", error);
@@ -167,7 +170,6 @@ function HomePage() {
 
     fetchGetRaffle();
   }, []);
-
 
   useEffect(() => {
     updateTotal(raffleActually.minValue);
@@ -356,7 +358,9 @@ function HomePage() {
 
       if (value > disponibleTickets) {
         value = disponibleTickets;
-        setAlertaTickets(`Solo quedan ${disponibleTickets} tickets disponibles`);
+        setAlertaTickets(
+          `Solo quedan ${disponibleTickets} tickets disponibles`,
+        );
       } else {
         setAlertaTickets("");
       }
@@ -600,7 +604,6 @@ function HomePage() {
 
   return (
     <div>
-
       {showIGOverlay ? (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 z-50">
           <div className="flex flex-col items-center text-center p-6 rounded-2xl backdrop-blur-md">
@@ -618,7 +621,9 @@ function HomePage() {
             </p>
 
             <p className="mt-3 text-sm text-gray-200">
-              {count > 0 ? `Intentando en ${count}s…` : "Si no se abre automáticamente:"}
+              {count > 0
+                ? `Intentando en ${count}s…`
+                : "Si no se abre automáticamente:"}
             </p>
 
             <button
@@ -628,7 +633,12 @@ function HomePage() {
               Abrir en Navegador Externo
             </button>
             <p className="mt-5 text-sm text-gray-200">
-              ¿No abre? Toca los <strong className="text-gray-300">···</strong> y selecciona <strong className="text-gray-300">"Abrir en Navegador Externo"</strong> ↘️
+              ¿No abre? Toca los <strong className="text-gray-300">···</strong>{" "}
+              y selecciona{" "}
+              <strong className="text-gray-300">
+                {"Abrir en Navegador Externo"}
+              </strong>{" "}
+              ↘️
             </p>
           </div>
         </div>
@@ -653,9 +663,13 @@ function HomePage() {
                   ticketPrice={parseFloat(raffleActually?.ticketPrice)}
                 />
 
-                {disponibleTickets > 0 && disponibleWithNoAproved > 0 && raffleActually?.visible ? (
+                {disponibleTickets > 0 &&
+                disponibleWithNoAproved > 0 &&
+                raffleActually?.visible ? (
                   <div className="flex flex-col text-center items-center mt-6">
-                    <h3 className="text-3xl font-semibold">COMPRAR TUS TICKETS</h3>
+                    <h3 className="text-3xl font-semibold">
+                      COMPRAR TUS TICKETS
+                    </h3>
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -681,10 +695,11 @@ function HomePage() {
                             )
                           }
                           className={`w-10 h-10 
-      ${parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
-                              ? "bg-gray-400"
-                              : "bg-blue-600 hover:bg-blue-700"
-                            } 
+      ${
+        parseInt(formik.values.numberTickets) <= (raffleActually?.minValue ?? 1)
+          ? "bg-gray-400"
+          : "bg-blue-600 hover:bg-blue-700"
+      } 
       text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                         >
                           <img
@@ -725,10 +740,11 @@ function HomePage() {
                             )
                           }
                           className={`w-10 h-10 
-      ${parseInt(formik.values.numberTickets) >= MAX_VALUE
-                              ? "bg-gray-400"
-                              : "bg-blue-600 hover:bg-blue-700"
-                            } 
+      ${
+        parseInt(formik.values.numberTickets) >= MAX_VALUE
+          ? "bg-gray-400"
+          : "bg-blue-600 hover:bg-blue-700"
+      } 
       text-white text-xl font-extrabold rounded-full flex items-center justify-center transition duration-200`}
                         >
                           <img
@@ -741,7 +757,7 @@ function HomePage() {
                       </div>
 
                       {formik.touched.numberTickets &&
-                        formik.errors.numberTickets ? (
+                      formik.errors.numberTickets ? (
                         <div className="text-red-500">
                           {formik.errors.numberTickets}
                         </div>
@@ -749,7 +765,12 @@ function HomePage() {
 
                       {alertaTickets && (
                         <p className="bg-red-700 px-8 py-2 text-white rounded text-sm mt-2 flex gap-3">
-                          <img width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/FFFFFF/high-priority.png" alt="high-priority" />
+                          <img
+                            width="20"
+                            height="20"
+                            src="https://img.icons8.com/ios-glyphs/30/FFFFFF/high-priority.png"
+                            alt="high-priority"
+                          />
                           {alertaTickets}
                         </p>
                       )}
@@ -758,7 +779,7 @@ function HomePage() {
                         Selecciona una cantidad de Tickets
                       </p>
 
-                      <div className="grid grid-cols-6 gap-2 mb-8 mt-2 w-full max-w-xs">
+                      <div className="grid grid-cols-7 gap-2 mb-8 mt-2 w-full max-w-xs">
                         {predefinedValues.map((value) => (
                           <button
                             key={value}
@@ -773,7 +794,9 @@ function HomePage() {
 
                       <div className="mb-4">
                         <PaymentMethods
-                          onSelectedBank={(type: string) => setSelectedBank(type)}
+                          onSelectedBank={(type: string) =>
+                            setSelectedBank(type)
+                          }
                           totalBs={totalBS}
                           totalUSD={totalUSD}
                         />
@@ -858,7 +881,8 @@ function HomePage() {
                             placeholder="234533 o Zelle Mario castro"
                             className="mt-1 p-2 w-full border rounded text-black"
                           />
-                          {formik.touched.reference && formik.errors.reference ? (
+                          {formik.touched.reference &&
+                          formik.errors.reference ? (
                             <div className="text-red-500 text-start">
                               {formik.errors.reference}
                             </div>
@@ -929,8 +953,10 @@ function HomePage() {
                     </form>
 
                     <p className="text-md text-gray-300 font-bold my-4 w-full text-center md:w-1/2">
-                      Recuerde que debe esperar un lapso de 24 a 36 horas aproximadamente mientras nuestro equipo verifica y valida su compra.
-                      Los tickets serán enviados a su correo electrónico.
+                      Recuerde que debe esperar un lapso de 24 a 36 horas
+                      aproximadamente mientras nuestro equipo verifica y valida
+                      su compra. Los tickets serán enviados a su correo
+                      electrónico.
                       <br />
                       <div className="flex items-center justify-center mt-3 gap-3">
                         Teléfono de soporte:
@@ -945,7 +971,9 @@ function HomePage() {
                             src="https://img.icons8.com/color/48/whatsapp--v1.png"
                             alt="WhatsApp"
                           />
-                          <span className="text-white mx-1">{PHONE_SUPPORT}</span>
+                          <span className="text-white mx-1">
+                            {PHONE_SUPPORT}
+                          </span>
                         </a>
                       </div>
                     </p>
@@ -956,8 +984,8 @@ function HomePage() {
                       Números Agotados.
                     </p>
                     <p className="text-lg font-bold md:text-4xl">
-                      Ya esta todo listo, Para mayor información pendiente de las
-                      historias en Instagram.
+                      Ya esta todo listo, Para mayor información pendiente de
+                      las historias en Instagram.
                     </p>
                     <img
                       src="logo.webp"
@@ -989,7 +1017,6 @@ function HomePage() {
               </div>
             </section>
           )}
-
         </>
       )}
     </div>
