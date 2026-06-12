@@ -8,22 +8,20 @@ export const banksData = [
     indentifyBdv: "30415915",
   },
 
-  {
-    type: "binance",
-    bank: "Binance",
-    logo: "binanceLogo.jpeg",
-    email: "ilianagoyo1@gmail.com",
-  },
+  // {
+  //   type: "binance",
+  //   bank: "Binance",
+  //   logo: "binanceLogo.jpeg",
+  //   email: "ilianagoyo1@gmail.com",
+  // },
 
-  {
-    type: "zelle",
-    bank: "Zelle",
-    logo: "zelleLogo.png",
-    email: "jravelo470@gmail.com",
-    // email: "7866816185",
-    nameZelle: "Maykol sierra",
-    // nameZelle: "Ashley ravelo",
-  },
+  // {
+  //   type: "zelle",
+  //   bank: "Zelle",
+  //   logo: "zelleLogo.png",
+  //   email: "jravelo470@gmail.com",
+  //   nameZelle: "Maykol sierra",
+  // },
 ];
 export const PHONE_SUPPORT = "+58422-0106406";
 export const EXCHANGE_RATE = 135;
