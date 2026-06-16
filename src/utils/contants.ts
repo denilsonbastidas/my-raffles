@@ -8,12 +8,12 @@ export const banksData = [
     indentifyBdv: "30415915",
   },
 
-  // {
-  //   type: "binance",
-  //   bank: "Binance",
-  //   logo: "binanceLogo.jpeg",
-  //   email: "ilianagoyo1@gmail.com",
-  // },
+  {
+    type: "binance",
+    bank: "Binance",
+    logo: "binanceLogo.jpeg",
+    email: "ilianagoyo1@gmail.com",
+  },
 
   // {
   //   type: "zelle",
