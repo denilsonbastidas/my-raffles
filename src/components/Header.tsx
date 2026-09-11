@@ -34,8 +34,7 @@ function HeaderPage({ name, description, images }: Props) {
         </p> */}
 
         <p className="text-xl font-anton uppercase font-semibold text-blue-300">
-          Por tan solo <span className="text-yellow-400">200bs</span> por
-          ticket.
+          Por tan solo <span className="text-yellow-400">15bs</span> por ticket.
         </p>
       </div>
 
