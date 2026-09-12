@@ -22,6 +22,15 @@ export default {
         bebas: ['"Bebas Neue"', "sans-serif"],
         anton: ['"Anton"', "sans-serif"],
       },
+      keyframes: {
+        floatY: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-12px)" },
+        },
+      },
+      animation: {
+        floatY: "floatY 1.4s ease-in-out infinite",
+      },
     },
   },
   plugins: [],

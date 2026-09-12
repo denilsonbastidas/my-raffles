@@ -13,12 +13,15 @@ import { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-import { FiUploadCloud } from "react-icons/fi";
+import { FiUploadCloud, FiShoppingCart, FiBarChart2 } from "react-icons/fi";
 import { PHONE_SUPPORT } from "@/utils/contants";
+
+const TOTAL_TICKETS = 10000;
 
 function HomePage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const buySectionRef = useRef<HTMLDivElement>(null);
   const MAX_VALUE = 200;
   const predefinedValues = [2, 5, 10, 20, 50, 100, 200];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -602,6 +605,13 @@ function HomePage() {
     }
   };
 
+  const scrollToBuy = () => {
+    buySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const soldTickets = Math.max(0, TOTAL_TICKETS - disponibleTickets);
+  const percentSold = Math.min(100, (soldTickets / TOTAL_TICKETS) * 100);
+
   return (
     <div>
       {showIGOverlay ? (
@@ -664,9 +674,45 @@ function HomePage() {
                 />
 
                 {disponibleTickets > 0 &&
+                  disponibleWithNoAproved > 0 &&
+                  raffleActually?.visible && (
+                    <div className="flex flex-col items-center gap-6 mt-12 mb-10 px-4 w-full md:w-2/3 mx-auto">
+                      <button
+                        type="button"
+                        onClick={scrollToBuy}
+                        className="group flex items-center justify-center gap-2 w-full max-w-md py-4 px-8 rounded-2xl text-lg font-bold text-gray-900 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 shadow-lg shadow-yellow-500/40 hover:shadow-yellow-500/60 animate-floatY transition-shadow duration-200"
+                      >
+                        <FiShoppingCart className="text-xl group-hover:animate-bounce" />
+                        Comprar Número
+                      </button>
+
+                      <div className="w-full max-w-lg bg-black/20 rounded-2xl px-6 py-5">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="flex items-center gap-1.5 text-sm font-medium text-gray-300">
+                            <FiBarChart2 className="text-blue-300" />
+                            Disponibilidad
+                          </span>
+                          <span className="text-base font-extrabold text-blue-300">
+                            {percentSold.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="w-full h-3 rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-blue-300 transition-all duration-700 ease-out"
+                            style={{ width: `${percentSold}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                {disponibleTickets > 0 &&
                 disponibleWithNoAproved > 0 &&
                 raffleActually?.visible ? (
-                  <div className="flex flex-col text-center items-center mt-6">
+                  <div
+                    ref={buySectionRef}
+                    className="flex flex-col text-center items-center mt-6"
+                  >
                     <h3 className="text-3xl font-semibold">
                       COMPRAR TUS TICKETS
                     </h3>
