@@ -609,8 +609,10 @@ function HomePage() {
     buySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const soldTickets = Math.max(0, TOTAL_TICKETS - disponibleTickets);
-  const percentSold = Math.min(100, (soldTickets / TOTAL_TICKETS) * 100);
+  const percentAvailable = Math.max(
+    0,
+    Math.min(100, (disponibleTickets / TOTAL_TICKETS) * 100),
+  );
 
   return (
     <div>
@@ -693,13 +695,13 @@ function HomePage() {
                             Disponibilidad
                           </span>
                           <span className="text-base font-extrabold text-blue-300">
-                            {percentSold.toFixed(1)}%
+                            {percentAvailable.toFixed(1)}%
                           </span>
                         </div>
                         <div className="w-full h-3 rounded-full bg-white/10 overflow-hidden">
                           <div
                             className="h-full rounded-full bg-blue-300 transition-all duration-700 ease-out"
-                            style={{ width: `${percentSold}%` }}
+                            style={{ width: `${percentAvailable}%` }}
                           />
                         </div>
                       </div>
