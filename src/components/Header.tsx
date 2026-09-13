@@ -99,9 +99,10 @@ function HeaderPage({
                 {description}
               </p>
               <p className="text-lg md:text-xl font-anton uppercase font-semibold text-blue-300 mb-5">
-                Por tan solo <span className="text-yellow-400">{displayPrice}</span>
+                Por tan solo 
+                {/* <span className="text-yellow-400">{displayPrice}</span> */}
                 {displayPriceBs !== null && (
-                  <span className="text-yellow-400"> ({displayPriceBs} Bs)</span>
+                  <span className="text-yellow-400"> {displayPriceBs} Bs</span>
                 )}{" "}
                 por ticket.
               </p>
