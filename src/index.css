@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -30,11 +30,7 @@ input[type="date"],
 input[type="password"],
 input[type="tel"] {
   width: 100%;
-  border: solid 1px #d0d5dd;
-  border-radius: 8px;
-  padding: 8px 16px;
   font-size: 100%;
-  /* color: #9ca3af; */
 }
 input[type="email"] {
   font-family: sans-serif;
@@ -57,3 +53,31 @@ input[type="email"] {
 #tickets-container::-webkit-scrollbar-thumb:hover {
   background-color: #999;
 }
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  animation: ticker-scroll 22s linear infinite;
+}
+
+@keyframes shine-sweep {
+  0% {
+    transform: translateX(-120%) skewX(-15deg);
+  }
+  60%,
+  100% {
+    transform: translateX(150%) skewX(-15deg);
+  }
+}
+
+.shine-sweep {
+  animation: shine-sweep 1.8s ease-in-out infinite;
+}
+

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import Swal from "sweetalert2";
+import { swal, swalSuccess } from "@/utils/swal";
 import Skeleton from "react-loading-skeleton";
 import { getParallelDollar, updateParallelDollar } from "@/services";
+import Modal from "@/components/ui/Modal";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 
 interface EditDollarModalProps {
     isOpen: boolean;
@@ -38,7 +41,7 @@ const EditDollarModal: React.FC<EditDollarModalProps> = ({
 
         const parsed = parseFloat(dollarPrice);
         if (isNaN(parsed) || parsed <= 0) {
-            Swal.fire("Error", "Por favor ingresa un número válido.", "error");
+            swal.fire("Error", "Por favor ingresa un número válido.", "error");
             return;
         }
 
@@ -47,66 +50,45 @@ const EditDollarModal: React.FC<EditDollarModalProps> = ({
             const response = await updateParallelDollar(parsed.toString());
 
             if (response.success) {
-                Swal.fire("¡Actualizado!", "Precio actualizado correctamente", "success");
+                swalSuccess.fire("¡Actualizado!", "Precio actualizado correctamente", "success");
                 if (response.success && response.updated !== undefined) {
                     onDollarUpdated?.(response.updated);
                 }
                 onClose();
             } else {
-                Swal.fire("Error", response.error, "error");
+                swal.fire("Error", response.error, "error");
             }
         } catch (err) {
             console.error("Error al actualizar:", err);
-            Swal.fire("Error", "No se pudo actualizar el precio.", "error");
+            swal.fire("Error", "No se pudo actualizar el precio.", "error");
         } finally {
             setLoading(false);
         }
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
-            <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg relative">
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 text-3xl"
-                >
-                    ✕
-                </button>
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    <h2 className="text-black text-xl font-bold">
-                        Actualizar precio del dólar (VES)
-                    </h2>
+        <Modal isOpen={isOpen} onClose={onClose} title="Actualizar precio del dólar (VES)">
+            <form onSubmit={handleSubmit} className="space-y-5">
+                {initializing ? (
+                    <Skeleton height={44} className="rounded-xl" />
+                ) : (
+                    <Input
+                        label="Precio actual en bolívares"
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={dollarPrice}
+                        onChange={(e) => setDollarPrice(e.target.value)}
+                        placeholder="Precio actual en bolívares"
+                        required
+                    />
+                )}
 
-                    {initializing ? (
-                        <Skeleton width={300} height={40} />
-                    ) : (
-                        <input
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={dollarPrice}
-                            onChange={(e) => setDollarPrice(e.target.value)}
-                            className="w-full p-2 border rounded text-black"
-                            placeholder="Precio actual en bolívares"
-                            required
-                        />
-                    )}
-
-                    {loading ? (
-                        <Skeleton width={500} height={40} className="animate-pulse" />
-                    ) : (
-                        <button
-                            type="submit"
-                            className="px-4 py-2 w-full bg-green-600 text-white font-semibold rounded"
-                        >
-                            Guardar cambios
-                        </button>
-                    )}
-                </form>
-            </div>
-        </div>
+                <Button type="submit" variant="success" fullWidth loading={loading}>
+                    Guardar cambios
+                </Button>
+            </form>
+        </Modal>
     );
 };
 

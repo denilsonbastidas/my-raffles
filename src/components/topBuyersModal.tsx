@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
-import Swal from "sweetalert2";
+import { swal } from "@/utils/swal";
 import { getTopBuyers } from "@/services";
 import {
   BarChart,
@@ -12,10 +12,14 @@ import {
   CartesianGrid,
   LabelList,
 } from "recharts";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface TopBuyersModalProps {
   isOpen: boolean;
   onClose: () => void;
+  theme?: "dark" | "light";
 }
 
 interface Buyer {
@@ -26,7 +30,7 @@ interface Buyer {
   purchases: number;
 }
 
-const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
+const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose, theme = "dark" }) => {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [view, setView] = useState<"info" | "chart">("info");
@@ -45,7 +49,7 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
       setBuyers(data);
     } catch (err) {
       console.error("Error al obtener top de compradores:", err);
-      Swal.fire("Error", "No se pudo obtener el top de compradores.", "error");
+      swal.fire("Error", "No se pudo obtener el top de compradores.", "error");
     } finally {
       setLoading(false);
     }
@@ -59,13 +63,11 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
 
   const handleApplyFilter = () => {
     if (!startDate || !endDate) {
-      Swal.fire("Aviso", "Debe seleccionar ambas fechas.", "warning");
+      swal.fire("Aviso", "Debe seleccionar ambas fechas.", "warning");
       return;
     }
     fetchData();
   };
-
-  if (!isOpen) return null;
 
   const scaledBuyers = buyers.map((buyer) => {
     const scaledValue = Math.sqrt(buyer.totalTickets) * 10;
@@ -75,160 +77,154 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose }) => {
   });
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 px-4">
-      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-4xl relative overflow-y-auto max-h-[90vh]">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 text-2xl md:text-3xl"
-        >
-          ✕
-        </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Participantes con más tickets"
+      maxWidth="max-w-4xl"
+    >
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-5 flex-wrap">
+        <div className="w-full sm:w-auto flex flex-col items-stretch sm:flex-row sm:items-center gap-3">
+          <div className="flex items-center gap-2">
+            <select
+              className="px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-primary transition"
+              value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value as "total" | "custom");
+                if (e.target.value === "custom") setShowFilters(true);
+              }}
+            >
+              <option value="total">Top General</option>
+              <option value="custom">Personalizado</option>
+            </select>
 
-        <h2 className="text-black text-lg md:text-xl font-bold mb-4 text-center">
-          Participantes con más tickets
-        </h2>
-
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4 flex-wrap">
-          <div className="w-full flex flex-col items-center sm:flex-row sm:justify-center gap-3 border-b border-gray-300 pb-3">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <div className="flex w-full sm:w-auto items-center justify-center gap-2">
-                <select
-                  className="text-black border px-3 py-2 rounded w-full sm:w-auto text-center"
-                  value={filter}
-                  onChange={(e) => {
-                    setFilter(e.target.value as "total" | "custom");
-                    if (e.target.value === "custom") setShowFilters(true);
-                  }}
-                >
-                  <option value="total">Top General</option>
-                  <option value="custom">Personalizado</option>
-                </select>
-
-                {filter === "custom" && (
-                  <button
-                    className="sm:hidden bold flex items-center justify-center bg-gray-700 text-white border-none rounded px-5 py-2 text-sm font-medium transition"
-                    onClick={() => setShowFilters(!showFilters)}
-                  >
-                    {showFilters ? "⬆" : "⬇"}
-                  </button>
-                )}
-              </div>
-
-              {filter === "custom" && showFilters && (
-                <>
-                  <input
-                    type="date"
-                    className="border text-black px-3 py-2 rounded w-full sm:w-40 text-center"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                  <input
-                    type="date"
-                    className="border text-black px-3 py-2 rounded w-full sm:w-40 text-center"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                  <button
-                    className="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-900 transition w-full sm:w-auto"
-                    onClick={handleApplyFilter}
-                  >
-                    Aplicar
-                  </button>
-                </>
-              )}
-            </div>
+            {filter === "custom" && (
+              <button
+                type="button"
+                aria-label="Mostrar filtros de fecha"
+                className="sm:hidden flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-xl px-3 py-2.5 transition"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                {showFilters ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
+              </button>
+            )}
           </div>
 
-          <div className="flex gap-2">
-            <button
-              className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "info"
-                ? "bg-black text-white border-black"
-                : "bg-white text-black border-gray-400 hover:bg-gray-100"
-                }`}
-              onClick={() => setView("info")}
-            >
-              Información
-            </button>
-            <button
-              className={`w-28 py-2 text-sm rounded-full border font-medium transition-all duration-200 ${view === "chart"
-                ? "bg-black text-white border-black"
-                : "bg-white text-black border-gray-400 hover:bg-gray-100"
-                }`}
-              onClick={() => setView("chart")}
-            >
-              Gráfico
-            </button>
-          </div>
+          {filter === "custom" && showFilters && (
+            <>
+              <input
+                type="date"
+                className="px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-primary transition"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <input
+                type="date"
+                className="px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-primary transition"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+              <Button variant="primary" onClick={handleApplyFilter}>
+                Aplicar
+              </Button>
+            </>
+          )}
         </div>
 
-        {loading ? (
-          <Skeleton count={6} height={40} />
-        ) : view === "info" ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm md:text-base border border-gray-500 text-left text-black">
-              <thead className="bg-black text-white text-xs md:text-sm">
-                <tr>
-                  <th className="p-2 border-b">#</th>
-                  <th className="p-2 border-b">Nombre</th>
-                  <th className="p-2 border-b">Email</th>
-                  <th className="p-2 border-b">Teléfono</th>
-                  <th className="p-2 border-b">Tickets</th>
-                  <th className="p-2 border-b">Compras</th>
-                </tr>
-              </thead>
-              <tbody>
-                {buyers.map((buyer, index) => (
-                  <tr key={buyer._id} className="text-xs md:text-sm">
-                    <td className="p-2 border-b">{index + 1}</td>
-                    <td className="p-2 border-b">{buyer.fullName}</td>
-                    <td className="p-2 border-b">{buyer._id}</td>
-                    <td className="p-2 border-b">{buyer.phone}</td>
-                    <td className="p-2 border-b">{buyer.totalTickets}</td>
-                    <td className="p-2 border-b">{buyer.purchases}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="w-[120%] sm:w-full h-[450px] ml-[-20%] sm:ml-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={scaledBuyers}
-                layout="vertical"
-                margin={{ top: 10, right: 20, left: 80, bottom: 10 }}
-                barCategoryGap={8}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis type="number" tick={false} axisLine={false} />
-                <YAxis
-                  type="category"
-                  dataKey="fullName"
-                  tick={{ fontSize: 14, fontWeight: "bold" }}
-                  width={120}
-                />
-                <Tooltip
-                  formatter={(_, __, entry: any) => [
-                    `${entry.payload.totalTickets} tickets`,
-                    "Tickets",
-                  ]}
-                  labelFormatter={(label: any) => `Comprador: ${label}`}
-                />
-                <Bar dataKey="scaledTickets" fill="#000000" barSize={36}>
-                  <LabelList
-                    dataKey="totalTickets"
-                    position="insideRight"
-                    fill="#ffffff"
-                    fontSize={15}
-                    fontWeight={"bold"}
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <Button
+            variant={view === "info" ? "primary" : "outline"}
+            size="sm"
+            onClick={() => setView("info")}
+          >
+            Información
+          </Button>
+          <Button
+            variant={view === "chart" ? "primary" : "outline"}
+            size="sm"
+            onClick={() => setView("chart")}
+          >
+            Gráfico
+          </Button>
+        </div>
       </div>
-    </div>
+
+      {loading ? (
+        <Skeleton count={6} height={40} className="rounded-lg" />
+      ) : view === "info" ? (
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-100 dark:bg-gray-900/60 text-gray-600 dark:text-gray-200 text-xs uppercase tracking-wider">
+              <tr>
+                <th className="p-3">#</th>
+                <th className="p-3">Nombre</th>
+                <th className="p-3">Email</th>
+                <th className="p-3">Teléfono</th>
+                <th className="p-3">Tickets</th>
+                <th className="p-3">Compras</th>
+              </tr>
+            </thead>
+            <tbody>
+              {buyers.map((buyer, index) => (
+                <tr
+                  key={buyer._id}
+                  className="border-t border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition"
+                >
+                  <td className="p-3 text-gray-400">{index + 1}</td>
+                  <td className="p-3 font-medium">{buyer.fullName}</td>
+                  <td className="p-3 text-gray-500 dark:text-gray-400">{buyer._id}</td>
+                  <td className="p-3">{buyer.phone}</td>
+                  <td className="p-3 font-semibold text-blue-600 dark:text-blue-300">{buyer.totalTickets}</td>
+                  <td className="p-3">{buyer.purchases}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="w-[120%] sm:w-full h-[450px] ml-[-20%] sm:ml-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={scaledBuyers}
+              layout="vertical"
+              margin={{ top: 10, right: 20, left: 80, bottom: 10 }}
+              barCategoryGap={8}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === "dark" ? "#344054" : "#E4E7EC"} />
+              <XAxis type="number" tick={false} axisLine={false} />
+              <YAxis
+                type="category"
+                dataKey="fullName"
+                tick={{ fontSize: 13, fontWeight: 600, fill: theme === "dark" ? "#D0D5DD" : "#344054" }}
+                width={120}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: theme === "dark" ? "#1D2939" : "#ffffff",
+                  border: theme === "dark" ? "1px solid #344054" : "1px solid #E4E7EC",
+                  borderRadius: 12,
+                  color: theme === "dark" ? "#fff" : "#101828",
+                }}
+                formatter={(_, __, entry: any) => [
+                  `${entry.payload.totalTickets} tickets`,
+                  "Tickets",
+                ]}
+                labelFormatter={(label: any) => `Comprador: ${label}`}
+              />
+              <Bar dataKey="scaledTickets" fill="#2563EB" barSize={36} radius={[0, 6, 6, 0]}>
+                <LabelList
+                  dataKey="totalTickets"
+                  position="insideRight"
+                  fill="#ffffff"
+                  fontSize={14}
+                  fontWeight="bold"
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </Modal>
   );
 };
 

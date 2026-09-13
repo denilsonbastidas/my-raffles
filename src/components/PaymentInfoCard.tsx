@@ -1,4 +1,5 @@
-import { LuClipboard } from "react-icons/lu";
+import { useState } from "react";
+import { FiCopy, FiCheck } from "react-icons/fi";
 
 interface Props {
   type: string;
@@ -12,6 +13,7 @@ interface Props {
   totalUsd: number;
   totalBs: number;
 }
+
 const PaymentInfoCard = ({
   bank,
   logo,
@@ -24,97 +26,91 @@ const PaymentInfoCard = ({
   totalBs,
   type,
 }: Props) => {
-  const copyToClipboard = (text: string) => {
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
-    alert(`Copiado: ${text}`);
+    setCopiedField(field);
+    setTimeout(() => {
+      setCopiedField((current) => (current === field ? null : current));
+    }, 1500);
   };
 
-  return (
-    <div className="bg-blue-700 text-white rounded-2xl p-6 max-w-lg w-[350px] text-center shadow-lg">
-      <h2 className="text-lg font-semibold">Modo de Pago</h2>
-      <p className="text-sm mb-2">{bank}</p>
+  const Row = ({
+    label,
+    value,
+    field,
+  }: {
+    label: string;
+    value?: string;
+    field: string;
+  }) => (
+    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-gray-700/60 last:border-b-0">
+      <span className="text-xs text-gray-400">{label}</span>
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-sm font-semibold text-white truncate">
+          {value}
+        </span>
+        <button
+          type="button"
+          onClick={() => copyToClipboard(value ?? "", field)}
+          className="shrink-0 text-gray-400 hover:text-blue-300 transition"
+          aria-label={`Copiar ${label}`}
+        >
+          {copiedField === field ? (
+            <FiCheck size={16} className="text-success" />
+          ) : (
+            <FiCopy size={16} />
+          )}
+        </button>
+      </div>
+    </div>
+  );
 
-      <div className="flex justify-center items-center my-2">
+  return (
+    <div className="bg-gray-900/60 border border-gray-700 rounded-2xl p-5 w-full max-w-sm mx-auto">
+      <div className="flex items-center gap-3 mb-2">
         <img
           src={logo}
           alt={bank}
-          className="w-12 h-12 rounded-full"
+          className="w-12 h-12 rounded-full bg-white p-1 shrink-0"
           loading="lazy"
         />
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-wider text-gray-400">
+            Pagar con
+          </p>
+          <p className="text-base font-bold text-white truncate">{bank}</p>
+        </div>
       </div>
 
-      {type === "BDV" ? (
-        <div className="text-center space-y-2">
-          <p className="flex gap-2 items-center">
-            <span className="font-bold">BDV:</span> {bdv}
-            <LuClipboard
-              className="w-5 h-5 cursor-pointer"
-              onClick={() => copyToClipboard(bdv ?? "")}
-            />
-          </p>
-          <p className="flex gap-2 items-center">
-            <span className="font-bold">Teléfono:</span> {phone}
-            <LuClipboard
-              className="w-5 h-5 cursor-pointer"
-              onClick={() => copyToClipboard(phone ?? "")}
-            />
-          </p>
-          <p className="flex gap-2 items-center">
-            <span className="font-bold">Cédula de Identidad:</span>{" "}
-            {indentifyBdv}
-            <LuClipboard
-              className="w-5 h-5 cursor-pointer"
-              onClick={() => copyToClipboard(indentifyBdv ?? "")}
-            />
-          </p>
-        </div>
-      ) : null}
+      <div className="mt-2">
+        {type === "BDV" && (
+          <>
+            <Row label="Banco" value={bdv} field="bdv" />
+            <Row label="Teléfono" value={phone} field="phone" />
+            <Row label="Cédula de identidad" value={indentifyBdv} field="cedula" />
+          </>
+        )}
 
-      {type === "binance" ? (
-        <div className="text-center space-y-2">
-          <p className="flex gap-2 items-center">
-            <span className="font-bold">Email:</span> {email}
-            <LuClipboard
-              className="w-5 h-5 cursor-pointer"
-              onClick={() => copyToClipboard(email ?? "")}
-            />
-          </p>
-        </div>
-      ) : null}
+        {type === "binance" && <Row label="Email" value={email} field="email" />}
 
-      {type === "zelle" ? (
-        <div className="text-center space-y-2">
-          <p className="flex gap-2 items-center">
-            <span className="font-bold">Telefono:</span> {email}
-            <LuClipboard
-              className="w-5 h-5 cursor-pointer"
-              onClick={() => copyToClipboard(email ?? "")}
-            />
-          </p>
+        {type === "zelle" && (
+          <>
+            <Row label="Teléfono" value={email} field="zellePhone" />
+            <Row label="Nombre" value={nameZelle} field="zelleName" />
+          </>
+        )}
+      </div>
 
-          <p className="flex gap-2 items-center">
-            <span className="font-bold">Nombre:</span> {nameZelle}
-            <LuClipboard
-              className="w-5 h-5 cursor-pointer"
-              onClick={() => copyToClipboard(nameZelle ?? "")}
-            />
-          </p>
-        </div>
-      ) : null}
-      <h3 className="mt-4 text-lg font-bold">Total a Pagar:</h3>
-      {type === "BDV" ? (
-        <p className="text-2xl font-bold">
-          {totalBs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} Bs.
-        </p>
-      ) : null}
-
-      {type === "zelle" ? (
-        <p className="text-2xl font-bold">{totalUsd} $ USD</p>
-      ) : null}
-
-      {type === "binance" ? (
-        <p className="text-2xl font-bold">{totalUsd} $ USDT</p>
-      ) : null}
+      <div className="mt-4 flex items-center justify-between rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-3">
+        <span className="text-sm text-gray-300">Total a pagar</span>
+        <span className="text-xl font-extrabold text-blue-300">
+          {type === "BDV"
+            ? `${totalBs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} Bs`
+            : `${totalUsd} $`}
+        </span>
+      </div>
     </div>
   );
 };

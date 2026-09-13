@@ -2,7 +2,7 @@ export const banksData = [
   {
     type: "BDV",
     bank: "Banco de Venezuela",
-    logo: "bancoVenezuela.jpg",
+    logo: "/bancoVenezuela.jpg",
     bdv: "0102",
     phone: "04220106406",
     indentifyBdv: "30415915",
@@ -11,7 +11,7 @@ export const banksData = [
   {
     type: "binance",
     bank: "Binance",
-    logo: "binanceLogo.jpeg",
+    logo: "/binanceLogo.jpeg",
     email: "ilianagoyo1@gmail.com",
   },
 

@@ -1,3 +1,8 @@
+export interface PrizeType {
+  title: string;
+  amount: string;
+}
+
 export interface RaffleType {
   name: string;
   description: string;
@@ -5,6 +10,7 @@ export interface RaffleType {
   ticketPrice: string;
   visible: boolean;
   minValue: number;
+  prizes?: PrizeType[];
 }
 export interface ResponseAuthType {
   message: string;
@@ -23,4 +29,5 @@ export interface TicketType {
   approved: string;
   _id: string;
   approvalCodes: string[];
+  createdAt?: string;
 }

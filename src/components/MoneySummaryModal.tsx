@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
-import Swal from "sweetalert2";
+import { swal } from "@/utils/swal";
 import { getMoneySummary } from "@/services";
+import Modal from "@/components/ui/Modal";
+import { FiDollarSign } from "react-icons/fi";
 
 interface MoneySummaryModalProps {
     isOpen: boolean;
@@ -13,14 +15,14 @@ interface BreakdownItem {
     total: number;
 }
 
-const bgColors: Record<string, string> = {
-    BDV: "bg-yellow-500 text-white",
-    zelle: "bg-purple-600 text-white",
-    binance: "bg-blue-600 text-white",
-    nequi: "bg-pink-500 text-white",
-    efectivo: "bg-gray-700 text-white",
-    bancolombia: "bg-yellow-600 text-black",
-    default: "bg-green-600 text-white",
+const accentColors: Record<string, string> = {
+    bdv: "text-yellow-400 bg-yellow-400/10",
+    zelle: "text-purple-300 bg-purple-500/10",
+    binance: "text-amber-300 bg-amber-500/10",
+    nequi: "text-pink-300 bg-pink-500/10",
+    efectivo: "text-gray-300 bg-gray-500/10",
+    bancolombia: "text-yellow-300 bg-yellow-500/10",
+    default: "text-success bg-success/10",
 };
 
 const MoneySummaryModal: React.FC<MoneySummaryModalProps> = ({ isOpen, onClose }) => {
@@ -34,56 +36,54 @@ const MoneySummaryModal: React.FC<MoneySummaryModalProps> = ({ isOpen, onClose }
                 .then((data) => setBreakdown(data))
                 .catch((err) => {
                     console.error("Error al obtener resumen de dinero:", err);
-                    Swal.fire("Error", "No se pudo obtener el resumen de dinero.", "error");
+                    swal.fire("Error", "No se pudo obtener el resumen de dinero.", "error");
                 })
                 .finally(() => setLoading(false));
         }
     }, [isOpen]);
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 px-4">
-            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-4xl relative overflow-y-auto max-h-[90vh]">
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 text-2xl md:text-3xl"
-                >
-                    ✕
-                </button>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Totales por Método de Pago"
+            maxWidth="max-w-4xl"
+        >
+            {loading ? (
+                <Skeleton count={3} height={90} className="rounded-2xl" />
+            ) : breakdown.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {breakdown.map((item) => {
+                        const accent =
+                            accentColors[item.paymentMethod.toLowerCase()] || accentColors.default;
 
-                <h2 className="text-black text-lg md:text-xl font-bold mb-6 text-center">
-                    Totales por Método de Pago
-                </h2>
-
-                {loading ? (
-                    <Skeleton count={3} height={80} />
-                ) : breakdown.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {breakdown.map((item) => {
-                            const className =
-                                bgColors[item.paymentMethod.toLowerCase()] || bgColors.default;
-
-                            return (
-                                <div
-                                    key={item.paymentMethod}
-                                    className={`rounded-2xl shadow-md p-6 text-center ${className}`}
+                        return (
+                            <div
+                                key={item.paymentMethod}
+                                className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-5"
+                            >
+                                <span
+                                    className={`inline-flex items-center justify-center w-10 h-10 rounded-xl mb-3 ${accent}`}
                                 >
-                                    <div className="text-sm uppercase font-bold tracking-wider">
-                                        {item.paymentMethod}
-                                    </div>
-                                    <div className="text-2xl font-bold mt-2">
-                                        ${item.total.toLocaleString(undefined)} { item.paymentMethod == "BDV" ? " Bs " : " USD " }
-                                    </div>
+                                    <FiDollarSign size={18} />
+                                </span>
+                                <div className="text-xs uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400">
+                                    {item.paymentMethod}
                                 </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <p className="text-center text-red-600 mt-4">No hay datos disponibles.</p>
-                )}
-            </div>
-        </div>
+                                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mt-1">
+                                    {item.total.toLocaleString(undefined)}{" "}
+                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                        {item.paymentMethod === "BDV" ? "Bs" : "USD"}
+                                    </span>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <p className="text-center text-danger mt-4">No hay datos disponibles.</p>
+            )}
+        </Modal>
     );
 };
 

@@ -10,7 +10,7 @@ interface Props {
 
 export default function ImageSlider({ imagesSlider }: Props) {
   return (
-    <div className="w-full max-w-3xl mx-auto relative">
+    <div className="w-full mx-auto relative">
       <Swiper
         modules={[Navigation, Pagination]}
         spaceBetween={10}
@@ -24,7 +24,7 @@ export default function ImageSlider({ imagesSlider }: Props) {
             <img
               src={src.split("uploads/")[1]}
               alt={`Slide ${index}`}
-              className="w-full h-[500px] object-cover md:object-contain mx-auto bg-black"
+              className="w-full h-[320px] md:h-[420px] object-cover mx-auto"
               loading="lazy"
             />
           </SwiperSlide>
