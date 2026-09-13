@@ -585,6 +585,7 @@ function HomePage() {
                   description={raffleActually?.description}
                   images={raffleActually?.images}
                   ticketPrice={parseFloat(raffleActually?.ticketPrice)}
+                  exchangeRateVzla={exchangeRateVzla}
                   availabilityPercent={percentAvailable}
                   onBuyClick={scrollToBuy}
                   onVerifyClick={() => setIsConsultModalOpen(true)}

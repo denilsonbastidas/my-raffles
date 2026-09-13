@@ -7,6 +7,7 @@ interface Props {
   description: string;
   images: string[];
   ticketPrice: number;
+  exchangeRateVzla?: number;
   availabilityPercent: number;
   onBuyClick: () => void;
   onVerifyClick: () => void;
@@ -18,11 +19,16 @@ function HeaderPage({
   description,
   images,
   ticketPrice,
+  exchangeRateVzla,
   availabilityPercent,
   onBuyClick,
   onVerifyClick,
 }: Props) {
   const displayPrice = ticketPrice > 0 ? `${ticketPrice}$` : "15bs";
+  const displayPriceBs =
+    ticketPrice > 0 && exchangeRateVzla
+      ? Math.round(ticketPrice * exchangeRateVzla)
+      : null;
 
   return (
     <>
@@ -93,7 +99,10 @@ function HeaderPage({
                 {description}
               </p>
               <p className="text-lg md:text-xl font-anton uppercase font-semibold text-blue-300 mb-5">
-                Por tan solo <span className="text-yellow-400">{displayPrice}</span>{" "}
+                Por tan solo <span className="text-yellow-400">{displayPrice}</span>
+                {displayPriceBs !== null && (
+                  <span className="text-yellow-400"> ({displayPriceBs} Bs)</span>
+                )}{" "}
                 por ticket.
               </p>
 
