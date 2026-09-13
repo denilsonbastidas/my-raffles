@@ -24,7 +24,6 @@ function HeaderPage({
   onBuyClick,
   onVerifyClick,
 }: Props) {
-  const displayPrice = ticketPrice > 0 ? `${ticketPrice}$` : "15bs";
   const displayPriceBs =
     ticketPrice > 0 && exchangeRateVzla
       ? Math.round(ticketPrice * exchangeRateVzla)
@@ -99,8 +98,7 @@ function HeaderPage({
                 {description}
               </p>
               <p className="text-lg md:text-xl font-anton uppercase font-semibold text-blue-300 mb-5">
-                Por tan solo 
-                {/* <span className="text-yellow-400">{displayPrice}</span> */}
+                Por tan solo
                 {displayPriceBs !== null && (
                   <span className="text-yellow-400"> {displayPriceBs} Bs</span>
                 )}{" "}

@@ -5,6 +5,7 @@ const baseCustomClass = {
   popup: "!rounded-2xl !border !border-gray-700 !bg-gray-900 !text-gray-100 !font-sans",
   title: "!text-white",
   htmlContainer: "!text-gray-300",
+  input: "!w-[calc(100%-2.5em)] !box-border !mx-auto",
   confirmButton:
     "!rounded-xl !px-5 !py-2.5 !font-semibold !text-white !mx-1.5 !shadow-none",
   cancelButton:
