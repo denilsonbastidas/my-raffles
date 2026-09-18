@@ -10,6 +10,7 @@ import {
   tikketApprove,
   tikketDenied,
   getRaffle,
+  deleteRaffle,
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
 import { TicketType, RaffleType } from "@/utils/types";
@@ -341,6 +342,37 @@ function Panel() {
     }
   };
 
+  const clickedDeleteRaffle = async () => {
+    const result = await swalDanger.fire({
+      title: "¿Eliminar la rifa actual?",
+      html: "Esta acción <strong>borrará la rifa y TODOS los tickets</strong> (aprobados y pendientes) de forma permanente. No se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar todo",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteRaffle();
+        swalSuccess.fire({
+          title: "Rifa eliminada",
+          text: "La rifa y todos sus tickets fueron eliminados.",
+          icon: "success",
+          confirmButtonText: "Okey",
+        });
+        window.location.reload();
+      } catch (error) {
+        console.log(error);
+        swal.fire({
+          title: "Error",
+          text: "No se pudo eliminar la rifa.",
+          icon: "error",
+        });
+      }
+    }
+  };
+
   const handleEmailUpdated = () => {
     setTickets([]);
     fetchGetTikkets();
@@ -634,46 +666,46 @@ function Panel() {
           {activeSection === "tickets" && (
             <>
               {/* Estadísticas */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-2xl p-5">
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
-                    <FiTag /> Vendidos
+              <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
+                <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-xl sm:rounded-2xl p-2.5 sm:p-5">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-gray-500 dark:text-gray-400 text-[11px] sm:text-sm mb-1">
+                    <FiTag /> <span className="truncate">Vendidos</span>
                   </div>
                   {statsLoading ? (
-                    <Skeleton height={28} width={80} />
+                    <Skeleton height={22} width={60} />
                   ) : (
-                    <p className="text-2xl font-extrabold text-green-600 dark:text-green-400">
+                    <p className="text-base sm:text-2xl font-extrabold text-green-600 dark:text-green-400 truncate">
                       {showSold ? soldFormatted : "*****"}
                     </p>
                   )}
                 </div>
-                <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-2xl p-5">
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
-                    <FiGift /> Disponibles
+                <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-xl sm:rounded-2xl p-2.5 sm:p-5">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-gray-500 dark:text-gray-400 text-[11px] sm:text-sm mb-1">
+                    <FiGift /> <span className="truncate">Disponibles</span>
                   </div>
                   {statsLoading ? (
-                    <Skeleton height={28} width={80} />
+                    <Skeleton height={22} width={60} />
                   ) : (
-                    <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-300">
+                    <p className="text-base sm:text-2xl font-extrabold text-blue-600 dark:text-blue-300 truncate">
                       {availableTickets
                         .toString()
                         .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
                     </p>
                   )}
                 </div>
-                <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-2xl p-5">
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
-                    <FiPieChart /> % Vendido
+                <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-xl sm:rounded-2xl p-2.5 sm:p-5">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-gray-500 dark:text-gray-400 text-[11px] sm:text-sm mb-1">
+                    <FiPieChart /> <span className="truncate">% Vendido</span>
                   </div>
                   {statsLoading ? (
-                    <Skeleton height={28} width={60} />
+                    <Skeleton height={22} width={40} />
                   ) : (
-                    <p className="text-2xl font-extrabold text-yellow-600 dark:text-yellow-400">
+                    <p className="text-base sm:text-2xl font-extrabold text-yellow-600 dark:text-yellow-400">
                       {percentSold}%
                     </p>
                   )}
                 </div>
-                <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-2xl p-3 flex items-center gap-3">
+                <div className="hidden sm:flex bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-2xl p-3 items-center gap-3">
                   {statsLoading ? (
                     <Skeleton circle height={80} width={80} />
                   ) : (
@@ -1156,6 +1188,16 @@ function Panel() {
                 >
                   {raffleActually?.visible ? "Ocultar rifa" : "Mostrar rifa"}
                 </Button>
+                {raffleActually?.name && (
+                  <Button
+                    variant="outline"
+                    icon={<FiTrash2 />}
+                    className="sm:col-span-2 !text-danger !border-danger/40 hover:!bg-danger/10"
+                    onClick={() => clickedDeleteRaffle()}
+                  >
+                    Eliminar rifa actual
+                  </Button>
+                )}
               </div>
             </div>
           )}

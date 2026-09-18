@@ -91,6 +91,16 @@ export const getRaffle = async () => {
   }
 };
 
+export const deleteRaffle = async () => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/raffles`);
+    return response.data;
+  } catch (error) {
+    console.error("Error al eliminar la rifa:", error);
+    throw error;
+  }
+};
+
 export const getTickets = async (
   filter: "all" | "pending" = "pending",
   paymentMethod?: string,

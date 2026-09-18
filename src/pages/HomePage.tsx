@@ -23,7 +23,7 @@ import {
   FiUser,
   FiMail,
   FiHash,
-  FiXCircle,
+  FiInbox,
   FiMinus,
   FiPlus,
   FiAlertTriangle,
@@ -194,15 +194,27 @@ function HomePage() {
     const fetchGetRaffle = async () => {
       try {
         const responseRaffle = await getRaffle();
-        setRaffleActually(responseRaffle[0]);
-
-        const minValue = parseInt(responseRaffle[0]?.minValue);
-        formik.setFieldValue("numberTickets", minValue);
-        setDisponibleTickets(10000 - responseRaffle.totalSold);
-        setDisponibleWithNoAproved(
-          10000 - responseRaffle.totalSoldWithNoAproved,
+        const raffle = responseRaffle?.[0];
+        setRaffleActually(
+          raffle ?? {
+            name: "",
+            description: "",
+            images: [],
+            ticketPrice: "",
+            visible: false,
+            minValue: 0,
+          },
         );
-        updateTotal(minValue);
+
+        if (raffle) {
+          const minValue = parseInt(raffle?.minValue);
+          formik.setFieldValue("numberTickets", minValue);
+          setDisponibleTickets(10000 - (responseRaffle?.totalSold ?? 0));
+          setDisponibleWithNoAproved(
+            10000 - (responseRaffle?.totalSoldWithNoAproved ?? 0),
+          );
+          updateTotal(minValue);
+        }
       } catch (error) {
         console.error("Error al cargar datos:", error);
       } finally {
@@ -214,7 +226,9 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
-    updateTotal(raffleActually.minValue);
+    if (raffleActually?.minValue !== undefined) {
+      updateTotal(raffleActually.minValue);
+    }
   }, [raffleActually]);
 
   const updateTotal = (quantity: number) => {
@@ -475,6 +489,8 @@ function HomePage() {
     Math.min(100, (disponibleTickets / TOTAL_TICKETS) * 100),
   );
 
+  const hasRaffle = Boolean(raffleActually?.name);
+
   const rawPrizes = raffleActually?.prizes ?? [];
   const totalRepartir = rawPrizes.reduce(
     (sum, prize) => sum + parseMoney(prize.amount),
@@ -565,20 +581,22 @@ function HomePage() {
                 <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[150px]" />
               </div>
 
-              <div className="relative z-10 w-full bg-black/20 backdrop-blur-sm overflow-hidden">
-                <div className="ticker-track flex w-max gap-8 py-2 whitespace-nowrap">
-                  {[...PROMO_MESSAGES, ...PROMO_MESSAGES].map((message, i) => (
-                    <span
-                      key={i}
-                      className="flex items-center gap-2 text-sm text-gray-300"
-                    >
-                      <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
-                      <span className="font-medium">{message}</span>
-                      <span className="text-gray-600">·</span>
-                    </span>
-                  ))}
+              {hasRaffle && (
+                <div className="relative z-10 w-full bg-black/20 backdrop-blur-sm overflow-hidden">
+                  <div className="ticker-track flex w-max gap-8 py-2 whitespace-nowrap">
+                    {[...PROMO_MESSAGES, ...PROMO_MESSAGES].map((message, i) => (
+                      <span
+                        key={i}
+                        className="flex items-center gap-2 text-sm text-gray-300"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
+                        <span className="font-medium">{message}</span>
+                        <span className="text-gray-600">·</span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="relative z-10 flex-grow">
                 <HeaderPage
                   name={raffleActually?.name}
@@ -587,9 +605,34 @@ function HomePage() {
                   ticketPrice={parseFloat(raffleActually?.ticketPrice)}
                   exchangeRateVzla={exchangeRateVzla}
                   availabilityPercent={percentAvailable}
+                  hasRaffle={hasRaffle}
+                  soldOut={
+                    !(
+                      disponibleTickets > 0 &&
+                      disponibleWithNoAproved > 0 &&
+                      raffleActually?.visible
+                    )
+                  }
                   onBuyClick={scrollToBuy}
                   onVerifyClick={() => setIsConsultModalOpen(true)}
                 />
+
+                {!hasRaffle && (
+                  <div className="w-full py-20 flex items-center justify-center">
+                    <div className="max-w-md mx-auto px-6 flex flex-col items-center text-center gap-4">
+                      <span className="flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-500/15 text-blue-300">
+                        <FiInbox size={36} />
+                      </span>
+                      <p className="text-2xl md:text-3xl font-bold text-white">
+                        No hay ninguna rifa activa
+                      </p>
+                      <p className="text-gray-400">
+                        Muy pronto anunciaremos una nueva rifa. Mantente pendiente de
+                        nuestras redes sociales.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {displayPrizes.length > 0 && raffleActually?.visible && (
                   <div className="w-full pt-6 pb-10">
@@ -964,36 +1007,7 @@ function HomePage() {
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="w-full pt-6 pb-20">
-                    <div className="max-w-lg mx-auto px-6 flex flex-col gap-4 text-center items-center">
-                      <span className="flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/15 text-red-400">
-                        <FiXCircle size={30} />
-                      </span>
-                      <p className="text-2xl md:text-3xl font-bold text-red-400">
-                        Números Agotados
-                      </p>
-                      <p className="text-gray-300">
-                        Ya está todo listo. Para más información, mantente pendiente de
-                        las historias en Instagram.
-                      </p>
-                      <img
-                        src="/logo.webp"
-                        alt="logo denilson bastidas"
-                        className="w-24 h-24 rounded-full border-2 border-yellow-400/70"
-                        loading="lazy"
-                      />
-                      <a
-                        href="https://www.instagram.com/denilsonbastidas"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-300 underline font-semibold hover:text-blue-200 transition duration-300"
-                      >
-                        Denilson Bastidas
-                      </a>
-                    </div>
-                  </div>
-                )}
+                ) : null}
               </div>
               <div className="relative z-10">
                 <Footer />

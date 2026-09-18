@@ -9,6 +9,8 @@ interface Props {
   ticketPrice: number;
   exchangeRateVzla?: number;
   availabilityPercent: number;
+  soldOut?: boolean;
+  hasRaffle?: boolean;
   onBuyClick: () => void;
   onVerifyClick: () => void;
 }
@@ -21,6 +23,8 @@ function HeaderPage({
   ticketPrice,
   exchangeRateVzla,
   availabilityPercent,
+  soldOut,
+  hasRaffle = true,
   onBuyClick,
   onVerifyClick,
 }: Props) {
@@ -83,61 +87,77 @@ function HeaderPage({
       </header>
 
       {/* Hero */}
-      <div className="w-full pt-14 pb-16 md:pt-20 md:pb-20">
-        <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div>
-              <ImageSlider imagesSlider={images} />
-            </div>
-
-            <div className="flex flex-col text-center lg:text-left">
-              <p className="text-4xl md:text-6xl uppercase font-bebas font-bold text-white mb-1 leading-none">
-                {name}
-              </p>
-              <p className="text-lg md:text-2xl uppercase font-bebas font-semibold text-gray-300 mb-3">
-                {description}
-              </p>
-              <p className="text-lg md:text-xl font-anton uppercase font-semibold text-blue-300 mb-5">
-                Por tan solo
-                {displayPriceBs !== null && (
-                  <span className="text-yellow-400"> {displayPriceBs} Bs</span>
-                )}{" "}
-                por ticket.
-              </p>
-
-              <div className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-6 backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="flex items-center gap-2 text-sm font-semibold text-gray-200">
-                    <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-500/20 text-blue-300">
-                      <FiPieChart size={14} />
-                    </span>
-                    Disponibilidad
-                  </span>
-                  <span className="text-lg font-extrabold text-blue-300">
-                    {availabilityPercent.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-700 ease-out"
-                    style={{ width: `${availabilityPercent}%` }}
-                  />
-                </div>
+      {hasRaffle && (
+        <div className="w-full pt-14 pb-16 md:pt-20 md:pb-20">
+          <div className="max-w-6xl mx-auto px-4 md:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div>
+                <ImageSlider imagesSlider={images} />
               </div>
 
-              <button
-                type="button"
-                onClick={onBuyClick}
-                className="relative overflow-hidden flex items-center justify-center gap-2 w-full py-3 px-6 rounded-xl text-base font-bold text-gray-900 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 shadow-md shadow-yellow-500/30 hover:shadow-yellow-500/50 animate-floatY transition-shadow duration-200"
-              >
-                <span className="pointer-events-none absolute inset-0 -translate-x-full shine-sweep bg-gradient-to-r from-transparent via-white/60 to-transparent" />
-                <FiShoppingCart className="relative text-lg" />
-                <span className="relative">Comprar Número</span>
-              </button>
+              <div className="flex flex-col text-center lg:text-left">
+                <p className="text-4xl md:text-6xl uppercase font-bebas font-bold text-white mb-1 leading-none">
+                  {name}
+                </p>
+                <p className="text-lg md:text-2xl uppercase font-bebas font-semibold text-gray-300 mb-3">
+                  {description}
+                </p>
+                <p className="text-lg md:text-xl font-anton uppercase font-semibold text-blue-300 mb-5">
+                  Por tan solo
+                  {displayPriceBs !== null && (
+                    <span className="text-yellow-400"> {displayPriceBs} Bs</span>
+                  )}{" "}
+                  por ticket.
+                </p>
+
+                {!soldOut ? (
+                  <>
+                    <div className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-6 backdrop-blur-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-gray-200">
+                          <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-500/20 text-blue-300">
+                            <FiPieChart size={14} />
+                          </span>
+                          Disponibilidad
+                        </span>
+                        <span className="text-lg font-extrabold text-blue-300">
+                          {availabilityPercent.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-700 ease-out"
+                          style={{ width: `${availabilityPercent}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={onBuyClick}
+                      className="relative overflow-hidden flex items-center justify-center gap-2 w-full py-3 px-6 rounded-xl text-base font-bold text-gray-900 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 shadow-md shadow-yellow-500/30 hover:shadow-yellow-500/50 animate-floatY transition-shadow duration-200"
+                    >
+                      <span className="pointer-events-none absolute inset-0 -translate-x-full shine-sweep bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+                      <FiShoppingCart className="relative text-lg" />
+                      <span className="relative">Comprar Número</span>
+                    </button>
+                  </>
+                ) : (
+                  <div>
+                    <p className="text-2xl md:text-3xl font-bold text-red-400 mb-2">
+                      Números Agotados
+                    </p>
+                    <p className="text-gray-300">
+                      Ya está todo listo. Para más información, mantente pendiente de
+                      las historias en Instagram.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
