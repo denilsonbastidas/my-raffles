@@ -864,6 +864,7 @@ function Panel() {
                       <th className="px-2 md:px-4 py-3 text-left rounded-l-lg">
                         Nombre
                       </th>
+                      <th className="px-2 md:px-4 py-3 text-left">Email</th>
                       <th className="px-2 md:px-4 py-3">Tickets</th>
                       <th className="px-2 md:px-4 py-3">Referencia</th>
                       <th className="px-2 md:px-4 py-3">Método</th>
@@ -903,6 +904,14 @@ function Panel() {
                               </span>{" "}
                               {ticket.fullName}
                             </button>
+                          </td>
+                          <td className="px-2 md:px-4 py-2 text-left">
+                            <span
+                              className="block max-w-[220px] truncate font-medium text-gray-700 dark:text-gray-200"
+                              title={ticket.email}
+                            >
+                              {ticket.email}
+                            </span>
                           </td>
                           <td className="px-2 md:px-4 py-2">
                             {ticket.numberTickets}

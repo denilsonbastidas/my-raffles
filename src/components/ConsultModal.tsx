@@ -143,6 +143,9 @@ const ConsultModal = ({ isOpen, onClose, whatsappUrl, phoneSupport }: Props) => 
                   <FiCheckCircle /> {r.nombre}
                 </div>
                 <p className="text-xs text-gray-400 mb-2">{r.email}</p>
+                <p className="mb-3 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm font-bold text-blue-200">
+                  Total de tickets comprados: {r.tickets.length}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {r.tickets.map((t, j) => (
                     <span
