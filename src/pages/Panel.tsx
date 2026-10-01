@@ -861,7 +861,7 @@ function Panel() {
                 <table className="w-full border-collapse text-sm md:text-base">
                   <thead className="text-gray-600 bg-gray-100 dark:text-gray-200 dark:bg-gray-900/60">
                     <tr>
-                      <th className="px-2 md:px-4 py-3 text-left rounded-l-lg">
+                      <th className="min-w-[220px] px-2 md:px-4 py-3 text-left rounded-l-lg">
                         Nombre
                       </th>
                       <th className="min-w-[220px] px-2 md:px-4 py-3 text-left">Email</th>
@@ -892,7 +892,7 @@ function Panel() {
                           key={index}
                           className="text-center border-b border-gray-100 dark:border-gray-700/60 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition"
                         >
-                          <td className="px-2 md:px-4 py-2 text-left">
+                          <td className="min-w-[220px] px-2 md:px-4 py-2 text-left">
                             <button
                               type="button"
                               onClick={() => handleOpenDetail(ticket)}
