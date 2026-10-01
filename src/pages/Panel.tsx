@@ -907,7 +907,7 @@ function Panel() {
                           </td>
                           <td className="px-2 md:px-4 py-2 text-left">
                             <span
-                              className="block max-w-[220px] truncate font-medium text-gray-700 dark:text-gray-200"
+                              className="block break-all font-medium text-gray-700 dark:text-gray-200"
                               title={ticket.email}
                             >
                               {ticket.email}
