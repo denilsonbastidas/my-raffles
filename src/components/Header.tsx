@@ -40,9 +40,9 @@ function HeaderPage({
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-3 sm:flex-row sm:justify-between px-4 md:px-6 py-3">
           <div className="flex items-center gap-3">
             <img
-              src="/logo.webp"
+              src="/logo-nuevo.png"
               alt="logo denilson bastidas"
-              className="w-11 h-11 rounded-full border-2 border-yellow-400/70"
+              className="w-11 h-11 rounded-lg border-2 border-yellow-400/70"
               loading="lazy"
             />
             <div className="leading-tight text-center sm:text-left">

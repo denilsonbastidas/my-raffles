@@ -521,9 +521,9 @@ function HomePage() {
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 z-50">
           <div className="flex flex-col items-center text-center p-6 rounded-2xl backdrop-blur-md">
             <img
-              src="/logo.webp"
+              src="/logo-nuevo.png"
               alt="Cargando..."
-              className="w-32 h-32 animate-pulse rounded-full mb-6"
+              className="w-32 h-32 animate-pulse rounded-2xl mb-6"
             />
 
             <h2 className="text-xl font-semibold text-gray-300">
@@ -560,9 +560,9 @@ function HomePage() {
           {isLoading && (
             <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900 z-50">
               <img
-                src="/logo.webp"
+                src="/logo-nuevo.png"
                 alt="Cargando..."
-                className="w-24 h-24 rounded-full border-2 border-yellow-400/70 animate-pulse mb-5"
+                className="w-24 h-24 rounded-2xl border-2 border-yellow-400/70 animate-pulse mb-5"
               />
               <p className="font-bebas text-3xl tracking-wide text-white">
                 Denilson Bastidas

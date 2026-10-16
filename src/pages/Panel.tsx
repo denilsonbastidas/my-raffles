@@ -492,9 +492,9 @@ function Panel() {
       >
         <div className={`flex items-center gap-3 px-5 py-5 border-b border-gray-200 dark:border-gray-700 ${sidebarCollapsed ? "md:justify-center md:px-2" : ""}`}>
           <img
-            src="/logo.webp"
+            src="/logo-nuevo.png"
             alt="logo"
-            className="w-10 h-10 rounded-full border border-yellow-400/70 shrink-0"
+            className="w-10 h-10 rounded-lg border border-yellow-400/70 shrink-0"
           />
           <div className={sidebarCollapsed ? "md:hidden" : ""}>
             <p className="font-bebas text-lg leading-none tracking-wide">

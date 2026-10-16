@@ -29,13 +29,32 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-b from-[#0d1424] to-[#05070c] text-white border-t border-white/10">
       <div className="max-w-4xl mx-auto px-6 py-10 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center mb-8">
+          <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-3">
+            Rifa avalada por
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <img
+              src="/superganalogo.png"
+              alt="Super Gana"
+              className="h-16 w-auto object-contain"
+              loading="lazy"
+            />
+            <img
+              src="/conalotlogo.png"
+              alt="CONALOT - Comisión Nacional de Lotería"
+              className="h-16 w-16 object-contain rounded-xl bg-white"
+              loading="lazy"
+            />
+          </div>
+        </div>
         <p className="font-anton uppercase text-lg md:text-xl tracking-wide bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent mb-6">
           El que no juega, no gana
         </p>
         <img
-          src="/logo.webp"
+          src="/logo-nuevo.png"
           alt="Rifas Denilson Bastidas"
-          className="w-16 h-16 rounded-full border-2 border-yellow-400/70 mb-3"
+          className="w-16 h-16 rounded-xl border-2 border-yellow-400/70 mb-3"
         />
         <p className="font-bebas text-2xl tracking-wide">Denilson Bastidas</p>
         <p className="text-gray-400 text-sm max-w-md mt-1">

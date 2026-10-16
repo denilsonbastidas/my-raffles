@@ -60,9 +60,9 @@ function Admin() {
         <div className="relative z-10 max-w-md mx-auto md:mx-0">
           <div className="flex items-center gap-3 mb-8">
             <img
-              src="/logo.webp"
+              src="/logo-nuevo.png"
               alt="Rifas Denilson Bastidas"
-              className="w-14 h-14 rounded-full border-2 border-yellow-400/70"
+              className="w-14 h-14 rounded-xl border-2 border-yellow-400/70"
             />
             <div>
               <p className="text-white font-bebas text-2xl leading-none tracking-wide">
@@ -99,9 +99,9 @@ function Admin() {
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center text-center mb-8 md:hidden">
             <img
-              src="/logo.webp"
+              src="/logo-nuevo.png"
               alt="Rifas Denilson Bastidas"
-              className="w-16 h-16 rounded-full border-2 border-yellow-400 mb-3"
+              className="w-16 h-16 rounded-xl border-2 border-yellow-400 mb-3"
             />
           </div>
 
