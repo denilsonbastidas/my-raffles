@@ -64,7 +64,30 @@ function Panel() {
     }).finally(() => setLoading(false));
   }, [navigate]);
   const selected = raffles.find((raffle) => raffle._id === params.get("rifa")) || raffles.find((raffle) => raffle.status === "active") || raffles[0];
-  if (loading) return <p className="p-8">Cargando rifas...</p>;
+  if (loading) return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`min-h-screen flex items-center justify-center ${
+        localStorage.getItem("adminTheme") === "light"
+          ? "bg-gray-100"
+          : "bg-gray-900"
+      }`}
+    >
+      <div className="relative flex h-28 w-28 items-center justify-center">
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full border-4 border-blue-500/15 border-t-blue-500 animate-spin motion-reduce:animate-none"
+        />
+        <img
+          src="/logo-nuevo.png"
+          alt=""
+          className="h-20 w-20 rounded-2xl object-cover shadow-lg"
+        />
+      </div>
+      <span className="sr-only">Cargando panel de administración</span>
+    </div>
+  );
   if (error) return <p role="alert" className="p-8">{error}</p>;
   const selector = (
     <div className="flex flex-wrap gap-3 items-center">
