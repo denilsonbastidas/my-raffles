@@ -7,6 +7,7 @@
 - `/rifas/:raffleId` muestra la rifa seleccionada. Si esta cerrada, solo presenta su informacion, premios y consulta de numeros por correo; no muestra compras ni metodos de pago.
 - El panel permite seleccionar cada rifa y consultar sus compras, pagos y ranking sin mezclar datos. Crear una nueva no reemplaza las anteriores.
 - Cerrar conserva el historial y requiere resolver primero las compras pendientes. Ocultar y cerrar son acciones distintas.
+- El modal de comprobantes muestra directamente la imagen Base64 o URL entregada por el backend, sin recortar rutas. Si no puede cargarla, muestra un aviso.
 
 ## Desarrollo
 
