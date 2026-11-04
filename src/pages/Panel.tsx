@@ -3,17 +3,19 @@ import { UpdateRaffleModal } from "@/components/updateRaffleModal";
 import ImageModal from "@/components/imgModal";
 import {
   checkTicket,
-  getSoldNumbers,
   getTickets,
   raffleVisibility,
   resendEmail,
   tikketApprove,
   tikketDenied,
-  getRaffles,
+  getAdminRaffle,
+  getAdminRaffleCatalog,
+  getTicketVoucher,
+  deleteTicket,
   closeRaffle,
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
-import { TicketType, RaffleRecord } from "@/utils/types";
+import { TicketType, RaffleRecord, RaffleOption } from "@/utils/types";
 import { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -53,17 +55,48 @@ import Button from "@/components/ui/Button";
 function Panel() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const [raffles, setRaffles] = useState<RaffleRecord[]>([]);
+  const [raffles, setRaffles] = useState<RaffleOption[]>([]);
+  const [selected, setSelected] = useState<RaffleRecord | null>(null);
+  const [catalogError, setCatalogError] = useState("");
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogAttempt, setCatalogAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
+  const selectedId = params.get("rifa") || undefined;
   useEffect(() => {
     fetchAuth(navigate);
-    getRaffles().then(setRaffles).catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : "No se pudieron cargar las rifas.");
-    }).finally(() => setLoading(false));
   }, [navigate]);
-  const selected = raffles.find((raffle) => raffle._id === params.get("rifa")) || raffles.find((raffle) => raffle.status === "active") || raffles[0];
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError("");
+    getAdminRaffle(selectedId).then((raffle) => {
+      if (active) setSelected(raffle);
+    }).catch((err: unknown) => {
+      if (!active) return;
+      setError(err instanceof Error ? err.message : "No se pudieron cargar las rifas.");
+    }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [selectedId]);
+  useEffect(() => {
+    if (loading || error || raffles.length) return;
+    let active = true;
+    setCatalogLoading(true);
+    setCatalogError("");
+    getAdminRaffleCatalog().then((items) => {
+      if (active) {
+        setCatalogLoading(false);
+        setRaffles(items);
+      }
+    }).catch((err: unknown) => {
+      if (active) {
+        setCatalogLoading(false);
+        setCatalogError(err instanceof Error ? err.message : "No se pudo cargar el catálogo de rifas.");
+      }
+    });
+    return () => { active = false; };
+  }, [loading, error, raffles.length, catalogAttempt]);
   if (loading) return (
     <div
       role="status"
@@ -89,13 +122,17 @@ function Panel() {
     </div>
   );
   if (error) return <p role="alert" className="p-8">{error}</p>;
+  const options = selected && !raffles.some((raffle) => raffle._id === selected._id)
+    ? [selected, ...raffles] : raffles;
   const selector = (
     <div className="flex flex-wrap gap-3 items-center">
       <label htmlFor="admin-raffle">Rifa:</label>
       <select id="admin-raffle" className="max-w-xs rounded-lg p-2 bg-white text-gray-900 border" value={selected?._id || ""}
         onChange={(event) => setParams({ rifa: event.target.value })}>
-        {raffles.map((raffle) => <option key={raffle._id} value={raffle._id}>{raffle.name} · {raffle.status === "closed" ? "Cerrada" : "Activa"}</option>)}
+        {options.map((raffle) => <option key={raffle._id} value={raffle._id}>{raffle.name} · {raffle.status === "closed" ? "Cerrada" : "Activa"}</option>)}
       </select>
+      {catalogLoading && <span role="status" className="h-5 w-5 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin"><span className="sr-only">Cargando otras rifas</span></span>}
+      {catalogError && <div role="alert" className="text-red-500">{catalogError} <button type="button" className="underline" onClick={() => setCatalogAttempt((attempt) => attempt + 1)}>Reintentar</button></div>}
       <Button icon={<FiPlus />} onClick={() => setCreating(true)}>Crear nueva rifa</Button>
     </div>
   );
@@ -113,9 +150,10 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "pending">(isClosed ? "all" : "pending");
   const requestId = useRef(0);
+  const ticketsController = useRef<AbortController | null>(null);
   const previousQuery = useRef("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [soldNumber, setSoldNumber] = useState<number>(0);
+  const [soldNumber, setSoldNumber] = useState<number>(initialRaffle.totalSold || 0);
   const [modalCreateRaffle, setModalCreateRaffle] = useState(false);
   const [modalUpdateRaffle, setModalUpdateRaffle] = useState(false);
   const [modalEditEmail, setModalEditEmail] = useState(false);
@@ -125,6 +163,9 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
+  const [voucherLoading, setVoucherLoading] = useState(false);
+  const voucherCache = useRef(new Map<string, string>());
+  const voucherRequest = useRef(0);
   const [resendEmailLoading, setResendEmailLoading] = useState<boolean>(false);
   const [isModalDollarOpen, setIsModalDollarOpen] = useState<boolean>(false);
   const [isModalBuyersOpen, setIsModalBuyersOpen] = useState<boolean>(false);
@@ -158,8 +199,8 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
   const [theme, setTheme] = useState<"dark" | "light">(
     () => (localStorage.getItem("adminTheme") as "dark" | "light") || "dark",
   );
-  const [pendingCount, setPendingCount] = useState<number | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
+  const [pendingCount, setPendingCount] = useState<number>(initialRaffle.pendingCount || 0);
+  const statsLoading = false;
   const [detailTicket, setDetailTicket] = useState<TicketType | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
@@ -176,13 +217,35 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
     navigate("/admin");
   };
 
-  const handleOpenModal = (image: string) => {
-    setSelectedImage(image);
+  const closeVoucher = () => {
+    voucherRequest.current++;
+    setImgModalOpen(false);
+  };
+  useEffect(() => () => { voucherRequest.current++; }, []);
+  const handleOpenModal = async (id: string) => {
+    const request = ++voucherRequest.current;
+    setSelectedImage("");
+    setVoucherLoading(true);
     setImgModalOpen(true);
+    try {
+      const image = voucherCache.current.get(id) || await getTicketVoucher(id, raffleId);
+      if (request !== voucherRequest.current) return;
+      voucherCache.current.set(id, image);
+      setSelectedImage(image);
+    } catch (error) {
+      if (request !== voucherRequest.current) return;
+      setImgModalOpen(false);
+      swal.fire("Error", error instanceof Error ? error.message : "No se pudo cargar el comprobante.", "error");
+    } finally {
+      if (request === voucherRequest.current) setVoucherLoading(false);
+    }
   };
 
   const fetchGetTikkets = async () => {
     const request = ++requestId.current;
+    ticketsController.current?.abort();
+    const controller = new AbortController();
+    ticketsController.current = controller;
     setIsLoadingPagination(true);
     try {
     const responseTikkets: TicketType[] = await getTickets(
@@ -191,6 +254,7 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
       paymentMethod,
       pageTickets,
       orderToSend,
+      controller.signal,
     );
 
     if (request === requestId.current) {
@@ -221,34 +285,11 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
       }
     }
     fetchGetTikkets();
-    return () => { requestId.current++; };
+    return () => {
+      requestId.current++;
+      ticketsController.current?.abort();
+    };
   }, [filter, paymentMethod, pageTickets, orderTickets]);
-
-  useEffect(() => {
-    const fethSoldNumbers = async () => {
-      try {
-      const responseSoldNumbers = await getSoldNumbers(raffleId);
-      setSoldNumber(responseSoldNumbers?.totalSold);
-      } catch (error) {
-        swal.fire("Error", error instanceof Error ? error.message : "No se pudieron cargar los números vendidos.", "error");
-      } finally {
-      setStatsLoading(false);
-      }
-    };
-    fethSoldNumbers();
-  }, []);
-
-  useEffect(() => {
-    const fetchPendingCount = async () => {
-      try {
-      const res = await getTickets(raffleId, "pending", undefined, 1, "asc");
-      if (Array.isArray(res)) setPendingCount(res.length);
-      } catch (error) {
-        swal.fire("Error", error instanceof Error ? error.message : "No se pudieron cargar las compras pendientes.", "error");
-      }
-    };
-    fetchPendingCount();
-  }, []);
 
   const filteredTickets = tickets.filter((ticket) => {
     const query = search.trim().toLowerCase();
@@ -275,7 +316,8 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
       return true;
     })();
 
-    return matchesSearch && matchesFilter && matchesDateRange;
+    return !ticket.rejected && matchesSearch && matchesFilter && matchesDateRange &&
+      (!paymentMethod || ticket.paymentMethod === paymentMethod);
   });
 
   const submitTikketApprove = async (id: string) => {
@@ -373,6 +415,36 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
     }
   };
 
+  const submitDeleteTicket = async (ticket: TicketType) => {
+    const result = await swalDanger.fire({
+      title: "¿Eliminar esta compra?",
+      text: "Se anularán sus boletos aprobados y se liberarán sus números. El cliente no participará con ellos. Se conservará una copia de auditoría.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      setLoadingId(ticket._id);
+      const deleted = await deleteTicket(ticket._id, raffleId);
+      requestId.current++;
+      ticketsController.current?.abort();
+      setIsLoadingPagination(false);
+      setIsChangingTypes(false);
+      setTickets((items) => items.filter((item) => item._id !== ticket._id));
+      voucherCache.current.delete(ticket._id);
+      if (deleted.approved) setSoldNumber((count) => Math.max(0, count - deleted.releasedNumbers));
+      else if (!deleted.rejected) setPendingCount((count) => Math.max(0, count - 1));
+      if (detailTicket?._id === ticket._id) setIsDetailModalOpen(false);
+      swalSuccess.fire("Compra eliminada", "Se conservó una copia de auditoría.", "success");
+    } catch (error) {
+      swal.fire("Error", error instanceof Error ? error.message : "No se pudo eliminar la compra.", "error");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   const clickedRaffleVisibility = async () => {
     const isCurrentlyVisible = raffleActually?.visible;
     const result = await swal.fire({
@@ -434,10 +506,13 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
     }
   };
 
-  const handleEmailUpdated = () => {
-    setTickets([]);
-    if (pageTickets !== 1) setPageTickets(1);
-    else fetchGetTikkets();
+  const handleEmailUpdated = (updated: TicketType) => {
+    requestId.current++;
+    ticketsController.current?.abort();
+    setIsLoadingPagination(false);
+    setIsChangingTypes(false);
+    setTickets((items) => items.map((ticket) => ticket._id === updated._id ? { ...ticket, ...updated } : ticket));
+    setDetailTicket((ticket) => ticket?._id === updated._id ? { ...ticket, ...updated } : ticket);
   };
 
   const handleOpenDetail = (ticket: TicketType) => {
@@ -592,7 +667,6 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
                 }`}
               >
                 {pendingCount}
-                {pendingCount >= numberToShow ? "+" : ""}
               </span>
             )}
           </button>
@@ -995,7 +1069,8 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
                           <td className="px-2 md:px-4 py-2">
                             <button
                               type="button"
-                              onClick={() => handleOpenModal(ticket.voucher)}
+                              onClick={() => handleOpenModal(ticket._id)}
+                              disabled={!ticket.hasVoucher}
                               title="Ver comprobante"
                               aria-label="Ver comprobante"
                               className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-blue-600 dark:text-blue-300 hover:bg-blue-500/15 transition"
@@ -1004,9 +1079,19 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
                             </button>
                           </td>
                           <td className="px-2 md:px-4 py-2">
-                            {ticket.rejected ? (
-                              <button type="button" onClick={() => handleOpenDetail(ticket)} className="text-red-500">Rechazada · Ver detalle</button>
-                            ) : ticket.approved ? (
+                            {ticket.approved && !ticket.rejected && (
+                              <button
+                                type="button"
+                                disabled={isClosed || loadingId === ticket._id}
+                                onClick={() => submitDeleteTicket(ticket)}
+                                title="Eliminar compra"
+                                aria-label="Eliminar compra"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-danger hover:bg-danger/15 disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                <FiTrash2 size={16} />
+                              </button>
+                            )}
+                            {ticket.approved ? (
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
                                   type="button"
@@ -1321,7 +1406,8 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
       {imgModalOpen && (
         <ImageModal
           imageUrl={selectedImage}
-          onClose={() => setImgModalOpen(false)}
+          loading={voucherLoading}
+          onClose={closeVoucher}
         />
       )}
 

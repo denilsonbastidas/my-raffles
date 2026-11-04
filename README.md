@@ -8,6 +8,8 @@
 - El panel permite seleccionar cada rifa y consultar sus compras, pagos y ranking sin mezclar datos. Crear una nueva no reemplaza las anteriores.
 - Cerrar conserva el historial y requiere resolver primero las compras pendientes. Ocultar y cerrar son acciones distintas.
 - El modal de comprobantes muestra directamente la imagen Base64 o URL entregada por el backend, sin recortar rutas. Si no puede cargarla, muestra un aviso.
+- El admin carga primero la rifa actual; el selector recibe las otras rifas en segundo plano y sus detalles solo al seleccionarlas. Los comprobantes se descargan al abrirlos y se reutilizan durante la sesion de esa rifa.
+- Editar una compra actualiza solo su fila, sin volver a descargar la tabla. Solo las aprobadas muestran Eliminar: requiere confirmacion, libera los numeros y conserva una copia de auditoria en el backend. Las pendientes se rechazan y las rechazadas no aparecen en ningun listado. Las rifas cerradas siguen siendo de solo consulta.
 
 ## Desarrollo
 

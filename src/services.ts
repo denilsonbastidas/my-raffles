@@ -1,6 +1,11 @@
 import axios from "axios";
 import { EXCHANGE_RATE } from "./utils/contants";
-import { RaffleType, RaffleRecord, TicketType } from "./utils/types";
+import {
+  RaffleType,
+  RaffleRecord,
+  RaffleOption,
+  TicketType,
+} from "./utils/types";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -132,6 +137,65 @@ export const getRaffles = async (): Promise<RaffleRecord[]> => {
   }
 };
 
+export const getAdminRaffle = async (
+  raffleId?: string,
+): Promise<RaffleRecord | null> => {
+  try {
+    const { data } = await axios.get<{ raffle: RaffleRecord | null }>(
+      `${API_URL}/api/admin/raffles/current`,
+      { params: { raffleId } },
+    );
+    return data.raffle;
+  } catch (error) {
+    throw apiError(error);
+  }
+};
+
+export const getAdminRaffleCatalog = async (): Promise<RaffleOption[]> => {
+  try {
+    const { data } = await axios.get<{ raffles: RaffleOption[] }>(
+      `${API_URL}/api/admin/raffles`,
+    );
+    return data.raffles;
+  } catch (error) {
+    throw apiError(error);
+  }
+};
+
+export const getTicketVoucher = async (
+  id: string,
+  raffleId: string,
+): Promise<string> => {
+  try {
+    const { data } = await axios.get<{ voucher: string }>(
+      `${API_URL}/api/tickets/${id}/voucher`,
+      scope(raffleId),
+    );
+    return data.voucher;
+  } catch (error) {
+    throw apiError(error);
+  }
+};
+
+export const deleteTicket = async (
+  id: string,
+  raffleId: string,
+): Promise<{
+  approved: boolean;
+  rejected: boolean;
+  releasedNumbers: number;
+}> => {
+  try {
+    const { data } = await axios.delete(
+      `${API_URL}/api/tickets/${id}`,
+      scope(raffleId),
+    );
+    return data;
+  } catch (error) {
+    throw apiError(error);
+  }
+};
+
 export const closeRaffle = async (raffleId: string) => {
   try {
     const response = await axios.post(
@@ -152,6 +216,7 @@ export const getTickets = async (
   paymentMethod?: string,
   pageTickets?: number,
   orderTickets?: string,
+  signal?: AbortSignal,
 ): Promise<TicketType[]> => {
   try {
     const params = new URLSearchParams();
@@ -176,9 +241,10 @@ export const getTickets = async (
     params.append("numbertoshow", "150");
 
     const url = `${API_URL}/api/tickets?${params.toString()}`;
-    const { data } = await axios.get<TicketType[]>(url);
+    const { data } = await axios.get<TicketType[]>(url, { signal });
     return data;
   } catch (error) {
+    if (axios.isCancel(error)) throw error;
     console.error("Error getTickets:", error);
     throw apiError(error);
   }
@@ -306,7 +372,7 @@ export const updatedUser = async (
   raffleId: string,
 ) => {
   try {
-    const { data } = await axios.put(
+    const { data } = await axios.put<{ ticket: TicketType }>(
       `${API_URL}/api/tickets/update-contact/${id}`,
       {
         newEmail,

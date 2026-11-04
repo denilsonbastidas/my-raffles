@@ -4,9 +4,14 @@ import Modal from "@/components/ui/Modal";
 interface ImageModalProps {
   imageUrl: string;
   onClose: () => void;
+  loading?: boolean;
 }
 
-const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => {
+const ImageModal: React.FC<ImageModalProps> = ({
+  imageUrl,
+  onClose,
+  loading = false,
+}) => {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const hasError = !imageUrl || failedUrl === imageUrl;
 
@@ -18,7 +23,15 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => {
       maxWidth="max-w-xl"
     >
       <div className="flex justify-center">
-        {hasError ? (
+        {loading ? (
+          <div role="status" className="p-8">
+            <span
+              aria-hidden="true"
+              className="block h-10 w-10 animate-spin rounded-full border-4 border-blue-500/20 border-t-blue-500"
+            />
+            <span className="sr-only">Cargando comprobante</span>
+          </div>
+        ) : hasError ? (
           <p
             role="alert"
             className="text-center text-red-600 dark:text-red-400"

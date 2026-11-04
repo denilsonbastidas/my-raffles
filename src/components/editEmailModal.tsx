@@ -4,14 +4,21 @@ import { swal, swalSuccess } from "@/utils/swal";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import { TicketType } from "@/utils/types";
 
 interface EditEmailProps {
   raffleId: string;
   approved: boolean;
-  currentTikketSelected: { email: string; id: string; phone: string, numberTickets: number, paymentMethod: string };
+  currentTikketSelected: {
+    email: string;
+    id: string;
+    phone: string;
+    numberTickets: number;
+    paymentMethod: string;
+  };
   isOpen: boolean;
   onClose: () => void;
-  onEmailUpdated: (id: string, newEmail: string, newPhone: string, newNumberTickets: number, newPaymentMethod: string) => void;
+  onEmailUpdated: (ticket: TicketType) => void;
 }
 
 const EditEmailModal: React.FC<EditEmailProps> = ({
@@ -48,7 +55,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
 
     try {
       setLoading(true);
-      await updatedUser(
+      const { ticket } = await updatedUser(
         selectedTikket.id,
         selectedTikket.email,
         selectedTikket.phone,
@@ -63,17 +70,17 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
         confirmButtonText: "Aceptar",
       });
 
-      onEmailUpdated(
-        selectedTikket.id,
-        selectedTikket.email,
-        selectedTikket.phone,
-        selectedTikket.numberTickets,
-        selectedTikket.paymentMethod,
-      );
+      onEmailUpdated(ticket);
       onClose();
     } catch (error) {
       console.error("Error actualizar Datos:", error);
-      swal.fire("Error", error instanceof Error ? error.message : "No se pudieron actualizar los datos.", "error");
+      swal.fire(
+        "Error",
+        error instanceof Error
+          ? error.message
+          : "No se pudieron actualizar los datos.",
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -140,7 +147,10 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
             className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-primary transition"
             value={selectedTikket.paymentMethod}
             onChange={(e) =>
-              setSelectedTikket({ ...selectedTikket, paymentMethod: e.target.value })
+              setSelectedTikket({
+                ...selectedTikket,
+                paymentMethod: e.target.value,
+              })
             }
             required
           >

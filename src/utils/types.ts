@@ -10,6 +10,7 @@ export interface RaffleType {
   closedAt?: string;
   totalSold?: number;
   totalSoldWithNoAproved?: number;
+  pendingCount?: number;
   name: string;
   description: string;
   images: string[];
@@ -22,6 +23,7 @@ export interface RaffleRecord extends RaffleType {
   _id: string;
   status: "active" | "closed";
 }
+export type RaffleOption = Pick<RaffleRecord, "_id" | "name" | "status">;
 export interface ResponseAuthType {
   message: string;
   token: string;
@@ -33,7 +35,8 @@ export interface TicketType {
   email: string;
   phone: string;
   reference: string;
-  voucher: string;
+  voucher?: string;
+  hasVoucher?: boolean;
   paymentMethod: string;
   amountPaid: string;
   approved: boolean;
