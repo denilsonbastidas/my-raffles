@@ -102,30 +102,7 @@ function Panel() {
     });
     return () => { active = false; };
   }, [loading, error, raffles.length, catalogAttempt]);
-  if (loading) return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={`min-h-screen flex items-center justify-center ${
-        localStorage.getItem("adminTheme") === "light"
-          ? "bg-gray-100"
-          : "bg-gray-900"
-      }`}
-    >
-      <div className="relative flex h-28 w-28 items-center justify-center">
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 rounded-full border-4 border-blue-500/15 border-t-blue-500 animate-spin motion-reduce:animate-none"
-        />
-        <img
-          src="/logo-nuevo.png"
-          alt=""
-          className="h-20 w-20 rounded-2xl object-cover shadow-lg"
-        />
-      </div>
-      <span className="sr-only">Cargando panel de administración</span>
-    </div>
-  );
+  if (loading) return <PanelSkeleton section={activeSection} />;
   if (error) return <p role="alert" className="p-8">{error}</p>;
   const options = selected && !raffles.some((raffle) => raffle._id === selected._id)
     ? [selected, ...raffles] : raffles;
@@ -137,7 +114,7 @@ function Panel() {
         onChange={(event) => openRaffle(event.target.value)}>
         {options.map((raffle) => <option key={raffle._id} value={raffle._id}>{raffle.name} · {raffle.status === "closed" ? "Cerrada" : "Activa"}</option>)}
       </select>
-      {catalogLoading && <span role="status" className="h-5 w-5 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin"><span className="sr-only">Cargando otras rifas</span></span>}
+      {catalogLoading && <Skeleton height={4} />}
       {catalogError && <div role="alert" className="text-red-500">{catalogError} <button type="button" className="underline" onClick={() => setCatalogAttempt((attempt) => attempt + 1)}>Reintentar</button></div>}
     </div>
   );
@@ -154,6 +131,59 @@ function Panel() {
 }
 
 type AdminSection = "tickets" | "rifa";
+
+function PanelSkeleton({ section }: { section: AdminSection }) {
+  const dark = localStorage.getItem("adminTheme") !== "light";
+  const collapsed = localStorage.getItem("adminSidebarCollapsed") === "true";
+  const colors = {
+    baseColor: dark ? "#374151" : "#e5e7eb",
+    highlightColor: dark ? "#4b5563" : "#f3f4f6",
+  };
+  return (
+    <div className={dark ? "dark" : ""} role="status" aria-busy="true">
+      <span className="sr-only">Cargando panel de administración</span>
+      <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white flex" aria-hidden="true">
+        <aside className={`hidden md:flex ${collapsed ? "w-20" : "w-64"} shrink-0 h-screen flex-col bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700`}>
+          <div className="flex items-center gap-3 p-5 border-b border-gray-200 dark:border-gray-700">
+            <img src="/logo-nuevo.png" alt="" className="w-10 h-10 rounded-lg shrink-0" />
+            {!collapsed && <div><p className="font-bebas text-lg leading-none">Denilson Bastidas</p><p className="text-xs text-blue-500 dark:text-blue-300">Panel Admin</p></div>}
+          </div>
+          <div className="p-3 space-y-4">
+            <Skeleton height={40} {...colors} />
+            {!collapsed && <p className="text-[11px] uppercase text-gray-400">Gestión</p>}
+            <Skeleton height={40} count={2} {...colors} />
+            {!collapsed && <p className="text-[11px] uppercase text-gray-400">Herramientas</p>}
+            <Skeleton height={40} count={3} {...colors} />
+          </div>
+        </aside>
+        <div className="flex-1 min-w-0">
+          <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 md:px-6 py-4 flex justify-between items-center gap-3">
+            <h1 className="text-lg md:text-xl font-bold">{section === "tickets" ? "Listado de Tickets" : "Rifas"}</h1>
+            <div className="w-24 sm:w-48"><Skeleton height={28} {...colors} /></div>
+          </header>
+          <main className="p-4 md:p-6">
+            {section === "tickets" ? (
+              <>
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  {[0, 1, 2].map((item) => <div key={item} className="rounded-xl p-4 bg-white dark:bg-gray-800"><Skeleton width="60%" {...colors} /><Skeleton height={28} width="45%" {...colors} /></div>)}
+                </div>
+                <div className="mb-6"><Skeleton height={40} {...colors} /></div>
+                <div className="rounded-xl p-4 bg-white dark:bg-gray-800"><Skeleton height={38} count={8} {...colors} /></div>
+              </>
+            ) : (
+              <div className="max-w-3xl mx-auto space-y-6">
+                <Skeleton height={32} width="45%" {...colors} />
+                <Skeleton height={320} borderRadius={16} {...colors} />
+                <Skeleton height={24} count={3} {...colors} />
+                <Skeleton height={40} {...colors} />
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectionChange, onOpenRaffle, onCreateRaffle }: {
   initialRaffle: RaffleRecord;
