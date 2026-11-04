@@ -61,6 +61,8 @@ function Panel() {
   const [catalogError, setCatalogError] = useState("");
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogAttempt, setCatalogAttempt] = useState(0);
+  const [catalogRequested, setCatalogRequested] = useState(false);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
@@ -85,7 +87,7 @@ function Panel() {
     return () => { active = false; };
   }, [selectedId]);
   useEffect(() => {
-    if (loading || error || raffles.length) return;
+    if (loading || error || !catalogRequested || catalogLoaded) return;
     let active = true;
     setCatalogLoading(true);
     setCatalogError("");
@@ -93,6 +95,7 @@ function Panel() {
       if (active) {
         setCatalogLoading(false);
         setRaffles(items);
+        setCatalogLoaded(true);
       }
     }).catch((err: unknown) => {
       if (active) {
@@ -101,7 +104,7 @@ function Panel() {
       }
     });
     return () => { active = false; };
-  }, [loading, error, raffles.length, catalogAttempt]);
+  }, [loading, error, catalogRequested, catalogLoaded, catalogAttempt]);
   if (loading) return <PanelSkeleton section={activeSection} />;
   if (error) return <p role="alert" className="p-8">{error}</p>;
   const options = selected && !raffles.some((raffle) => raffle._id === selected._id)
@@ -110,17 +113,30 @@ function Panel() {
     <div className="space-y-2 pb-3">
       <label htmlFor="admin-raffle" className="block text-xs font-semibold text-gray-500 dark:text-gray-400">Rifa seleccionada</label>
       <select id="admin-raffle" className="w-full min-w-0 rounded-lg p-2 bg-gray-50 text-gray-900 border border-gray-200 dark:bg-gray-900 dark:text-white dark:border-gray-700 disabled:opacity-60 disabled:cursor-not-allowed text-sm" value={selected?._id || ""}
-        disabled={options.length <= 1}
+        disabled={catalogLoaded && options.length <= 1}
+        aria-busy={catalogLoading}
+        onFocus={() => setCatalogRequested(true)}
+        onPointerDown={() => setCatalogRequested(true)}
         onChange={(event) => openRaffle(event.target.value)}>
         {options.map((raffle) => <option key={raffle._id} value={raffle._id}>{raffle.name} · {raffle.status === "closed" ? "Cerrada" : "Activa"}</option>)}
+        {!catalogLoaded && <option value="" disabled>{catalogLoading ? "Cargando otras rifas…" : "Abrir para cargar otras rifas"}</option>}
       </select>
-      {catalogLoading && <Skeleton height={4} />}
+      {catalogLoading && <span role="status" className="block text-xs text-gray-500 dark:text-gray-400">Cargando otras rifas…</span>}
       {catalogError && <div role="alert" className="text-red-500">{catalogError} <button type="button" className="underline" onClick={() => setCatalogAttempt((attempt) => attempt + 1)}>Reintentar</button></div>}
     </div>
   );
   return <>
     {selected ? <RafflePanel key={selected._id} initialRaffle={selected} selector={selector}
       raffles={options} activeSection={activeSection} onOpenRaffle={openRaffle}
+      catalogLoaded={catalogLoaded}
+      catalogControl={!catalogLoaded && <div className="space-y-2">
+        <Button variant="outline" loading={catalogLoading} onClick={() => {
+          setCatalogRequested(true);
+          if (catalogError) setCatalogAttempt((attempt) => attempt + 1);
+        }}>Cargar otras rifas e historial</Button>
+        {catalogLoading && <p role="status" className="text-sm text-gray-500">Cargando otras rifas…</p>}
+        {catalogError && <p role="alert" className="text-red-500">{catalogError}</p>}
+      </div>}
       onSectionChange={(section) => setParams({
         ...(selectedId ? { rifa: selectedId } : {}),
         ...(section === "rifa" ? { seccion: "rifas" } : {}),
@@ -185,7 +201,7 @@ function PanelSkeleton({ section }: { section: AdminSection }) {
   );
 }
 
-function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectionChange, onOpenRaffle, onCreateRaffle }: {
+function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectionChange, onOpenRaffle, onCreateRaffle, catalogLoaded, catalogControl }: {
   initialRaffle: RaffleRecord;
   selector: React.ReactNode;
   raffles: RaffleOption[];
@@ -193,6 +209,8 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
   onSectionChange: (section: AdminSection) => void;
   onOpenRaffle: (id: string, section: AdminSection) => void;
   onCreateRaffle: () => void;
+  catalogLoaded: boolean;
+  catalogControl: React.ReactNode;
 }) {
   const raffleId = initialRaffle._id;
   const isClosed = initialRaffle.status === "closed";
@@ -1442,7 +1460,8 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
               <Button variant="outline" icon={<FiTag />} onClick={() => onSectionChange("tickets")}>
                 Ver compras y números de esta rifa
               </Button>
-              {[
+              {catalogControl}
+              {catalogLoaded && [
                 { title: "Otras rifas activas", items: raffles.filter((raffle) => raffle.status === "active" && raffle._id !== raffleId) },
                 { title: "Rifas anteriores", items: raffles.filter((raffle) => raffle.status === "closed") },
               ].map(({ title, items }) => (
