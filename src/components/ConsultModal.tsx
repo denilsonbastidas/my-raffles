@@ -15,13 +15,14 @@ interface ConsultResult {
 }
 
 interface Props {
+  raffleId: string;
   isOpen: boolean;
   onClose: () => void;
   whatsappUrl: string;
   phoneSupport: string;
 }
 
-const ConsultModal = ({ isOpen, onClose, whatsappUrl, phoneSupport }: Props) => {
+const ConsultModal = ({ isOpen, onClose, whatsappUrl, phoneSupport, raffleId }: Props) => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -46,7 +47,7 @@ const ConsultModal = ({ isOpen, onClose, whatsappUrl, phoneSupport }: Props) => 
     setLoading(true);
     setResults(null);
     try {
-      const response = await checkApprovedTickets(email);
+      const response = await checkApprovedTickets(email, raffleId);
       if (!response || response.length === 0) {
         setError("No se encontraron tickets aprobados con ese correo");
       } else {

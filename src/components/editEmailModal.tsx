@@ -6,6 +6,8 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
 interface EditEmailProps {
+  raffleId: string;
+  approved: boolean;
   currentTikketSelected: { email: string; id: string; phone: string, numberTickets: number, paymentMethod: string };
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +19,8 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
   onClose,
   currentTikketSelected,
   onEmailUpdated,
+  raffleId,
+  approved,
 }) => {
   const [selectedTikket, setSelectedTikket] = useState<{
     email: string;
@@ -49,7 +53,8 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
         selectedTikket.email,
         selectedTikket.phone,
         selectedTikket.numberTickets,
-        selectedTikket.paymentMethod
+        selectedTikket.paymentMethod,
+        raffleId,
       );
 
       swalSuccess.fire({
@@ -68,6 +73,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
       onClose();
     } catch (error) {
       console.error("Error actualizar Datos:", error);
+      swal.fire("Error", error instanceof Error ? error.message : "No se pudieron actualizar los datos.", "error");
     } finally {
       setLoading(false);
     }
@@ -111,6 +117,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
           name="numberTickets"
           placeholder="Cantidad de Tickets"
           min="1"
+          disabled={approved}
           value={selectedTikket.numberTickets}
           onChange={(e) =>
             setSelectedTikket({

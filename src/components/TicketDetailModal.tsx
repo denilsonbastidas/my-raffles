@@ -45,7 +45,7 @@ export default function TicketDetailModal({
           }`}
         >
           {isApproved ? <FiCheckCircle size={14} /> : <FiClock size={14} />}
-          {isApproved ? "Aprobado" : "Pendiente"}
+          {ticket.rejected ? "Rechazado" : isApproved ? "Aprobado" : "Pendiente"}
         </span>
       </div>
 

@@ -9,14 +9,14 @@ import {
   resendEmail,
   tikketApprove,
   tikketDenied,
-  getRaffle,
-  deleteRaffle,
+  getRaffles,
+  closeRaffle,
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
-import { TicketType, RaffleType } from "@/utils/types";
-import { useEffect, useState } from "react";
+import { TicketType, RaffleRecord } from "@/utils/types";
+import { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { swal, swalSuccess, swalDanger } from "@/utils/swal";
 import {
   FiTag,
@@ -52,9 +52,45 @@ import Button from "@/components/ui/Button";
 
 function Panel() {
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const [raffles, setRaffles] = useState<RaffleRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [creating, setCreating] = useState(false);
+  useEffect(() => {
+    fetchAuth(navigate);
+    getRaffles().then(setRaffles).catch((err: unknown) => {
+      setError(err instanceof Error ? err.message : "No se pudieron cargar las rifas.");
+    }).finally(() => setLoading(false));
+  }, [navigate]);
+  const selected = raffles.find((raffle) => raffle._id === params.get("rifa")) || raffles.find((raffle) => raffle.status === "active") || raffles[0];
+  if (loading) return <p className="p-8">Cargando rifas...</p>;
+  if (error) return <p role="alert" className="p-8">{error}</p>;
+  const selector = (
+    <div className="flex flex-wrap gap-3 items-center">
+      <label htmlFor="admin-raffle">Rifa:</label>
+      <select id="admin-raffle" className="max-w-xs rounded-lg p-2 bg-white text-gray-900 border" value={selected?._id || ""}
+        onChange={(event) => setParams({ rifa: event.target.value })}>
+        {raffles.map((raffle) => <option key={raffle._id} value={raffle._id}>{raffle.name} · {raffle.status === "closed" ? "Cerrada" : "Activa"}</option>)}
+      </select>
+      <Button icon={<FiPlus />} onClick={() => setCreating(true)}>Crear nueva rifa</Button>
+    </div>
+  );
+  return <>
+    {selected ? <RafflePanel key={selected._id} initialRaffle={selected} selector={selector} /> : <div className="p-8">{selector}<p>No hay rifas. Crea la primera.</p></div>}
+    {creating && <CreateRaffleModal isOpen={creating} onClose={() => setCreating(false)} />}
+  </>;
+}
+
+function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord; selector: React.ReactNode }) {
+  const raffleId = initialRaffle._id;
+  const isClosed = initialRaffle.status === "closed";
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "pending">("pending");
+  const [filter, setFilter] = useState<"all" | "pending">(isClosed ? "all" : "pending");
+  const requestId = useRef(0);
+  const previousQuery = useRef("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [soldNumber, setSoldNumber] = useState<number>(0);
   const [modalCreateRaffle, setModalCreateRaffle] = useState(false);
@@ -70,14 +106,7 @@ function Panel() {
   const [isModalDollarOpen, setIsModalDollarOpen] = useState<boolean>(false);
   const [isModalBuyersOpen, setIsModalBuyersOpen] = useState<boolean>(false);
   const [isModalSummaryOpen, setIsModalSummaryOpen] = useState<boolean>(false);
-  const [raffleActually, setRaffleActually] = useState<RaffleType>({
-    name: "",
-    description: "",
-    images: [],
-    ticketPrice: "",
-    visible: true,
-    minValue: 1,
-  });
+  const [raffleActually, setRaffleActually] = useState<RaffleRecord>(initialRaffle);
   const [currentTikketSelected, setCurrentTikketSelected] = useState<{
     email: string;
     id: string;
@@ -129,52 +158,71 @@ function Panel() {
     setImgModalOpen(true);
   };
 
-  useEffect(() => {
-    fetchAuth(navigate);
-  }, [navigate]);
-
   const fetchGetTikkets = async () => {
+    const request = ++requestId.current;
     setIsLoadingPagination(true);
+    try {
     const responseTikkets: TicketType[] = await getTickets(
+      raffleId,
       filter,
       paymentMethod,
       pageTickets,
       orderToSend,
     );
 
-    if (responseTikkets) {
-      setTickets((prev) => [...prev, ...responseTikkets]);
+    if (request === requestId.current) {
+      setTickets((prev) => pageTickets === 1 ? responseTikkets : [...prev, ...responseTikkets.filter((ticket) => !prev.some((item) => item._id === ticket._id))]);
       setIsLastPage(responseTikkets.length < numberToShow);
     }
-
-    setIsLoadingPagination(false);
-    setIsChangingTypes(false);
+    } catch (error) {
+      if (request === requestId.current) swal.fire("Error", error instanceof Error ? error.message : "No se pudieron cargar las compras.", "error");
+    } finally {
+      if (request === requestId.current) {
+        setIsLoadingPagination(false);
+        setIsChangingTypes(false);
+      }
+    }
   };
 
   useEffect(() => {
+    const query = `${filter}:${paymentMethod}:${orderTickets}`;
+    if (previousQuery.current !== query) {
+      previousQuery.current = query;
+      requestId.current++;
+      setIsChangingTypes(true);
+      setTickets([]);
+      setIsLastPage(false);
+      if (pageTickets !== 1) {
+        setPageTickets(1);
+        return;
+      }
+    }
     fetchGetTikkets();
+    return () => { requestId.current++; };
   }, [filter, paymentMethod, pageTickets, orderTickets]);
 
   useEffect(() => {
-    setIsChangingTypes(true);
-    setTickets([]);
-    setPageTickets(1);
-    setIsLastPage(false);
-  }, [filter, paymentMethod, orderTickets]);
-
-  useEffect(() => {
     const fethSoldNumbers = async () => {
-      const responseSoldNumbers = await getSoldNumbers();
+      try {
+      const responseSoldNumbers = await getSoldNumbers(raffleId);
       setSoldNumber(responseSoldNumbers?.totalSold);
+      } catch (error) {
+        swal.fire("Error", error instanceof Error ? error.message : "No se pudieron cargar los números vendidos.", "error");
+      } finally {
       setStatsLoading(false);
+      }
     };
     fethSoldNumbers();
   }, []);
 
   useEffect(() => {
     const fetchPendingCount = async () => {
-      const res = await getTickets("pending", undefined, 1, "asc");
+      try {
+      const res = await getTickets(raffleId, "pending", undefined, 1, "asc");
       if (Array.isArray(res)) setPendingCount(res.length);
+      } catch (error) {
+        swal.fire("Error", error instanceof Error ? error.message : "No se pudieron cargar las compras pendientes.", "error");
+      }
     };
     fetchPendingCount();
   }, []);
@@ -189,7 +237,7 @@ function Panel() {
         ticket.email?.toLowerCase().includes(query)
       : true;
 
-    const matchesFilter = filter === "pending" ? !ticket.approved : true;
+    const matchesFilter = filter === "pending" ? !ticket.approved && !ticket.rejected : true;
 
     const matchesDateRange = (() => {
       if (!dateFrom && !dateTo) return true;
@@ -207,19 +255,6 @@ function Panel() {
     return matchesSearch && matchesFilter && matchesDateRange;
   });
 
-  useEffect(() => {
-    const fetchGetRaffle = async () => {
-      try {
-        const responseRaffle = await getRaffle();
-        setRaffleActually(responseRaffle[0]);
-      } catch (error) {
-        console.error("Error al cargar datos:", error);
-      }
-    };
-
-    fetchGetRaffle();
-  }, []);
-
   const submitTikketApprove = async (id: string) => {
     const result = await swalSuccess.fire({
       title: "¿Aprobar este ticket?",
@@ -233,7 +268,7 @@ function Panel() {
     if (result.isConfirmed) {
       try {
         setLoadingId(id);
-        await tikketApprove(id);
+        const approval = await tikketApprove(id, raffleId);
         swalSuccess.fire({
           title: "¡Ticket aprobado!",
           icon: "success",
@@ -242,13 +277,15 @@ function Panel() {
         setTickets((prevTickets) =>
           prevTickets.map((ticket) =>
             ticket._id === id
-              ? ({ ...ticket, approved: true } as unknown as TicketType)
+              ? { ...ticket, approved: true, approvalCodes: approval.approvalCodes }
               : ticket,
           ),
         );
         setPendingCount((c) => (c !== null ? Math.max(0, c - 1) : c));
+        setSoldNumber((count) => count + approval.approvalCodes.length);
       } catch (error) {
-        console.log(error);
+        swal.fire("Error", error instanceof Error ? error.message : "No se pudo aprobar la compra.", "error");
+        fetchGetTikkets();
       } finally {
         setLoadingId(null);
       }
@@ -268,7 +305,7 @@ function Panel() {
     if (result.isConfirmed) {
       try {
         setLoadingId(id);
-        await tikketDenied(id);
+        await tikketDenied(id, raffleId);
         swal.fire({
           title: "¡Ticket rechazado!",
           icon: "success",
@@ -279,7 +316,7 @@ function Panel() {
         );
         setPendingCount((c) => (c !== null ? Math.max(0, c - 1) : c));
       } catch (error) {
-        console.log(error);
+        swal.fire("Error", error instanceof Error ? error.message : "No se pudo rechazar la compra.", "error");
       } finally {
         setLoadingId(null);
       }
@@ -299,14 +336,14 @@ function Panel() {
     if (result.isConfirmed) {
       try {
         setResendEmailLoading(true);
-        await resendEmail(id);
+        await resendEmail(id, raffleId);
         swalSuccess.fire({
           title: "¡Ticket! reviando",
           icon: "success",
           confirmButtonText: "Aceptar",
         });
       } catch (error) {
-        console.log(error);
+        swal.fire("Error", error instanceof Error ? error.message : "No se pudo reenviar el correo.", "error");
       } finally {
         setResendEmailLoading(false);
       }
@@ -327,7 +364,8 @@ function Panel() {
     });
     if (result.isConfirmed) {
       try {
-        await raffleVisibility();
+        const result = await raffleVisibility(raffleId);
+        setRaffleActually((raffle) => ({ ...raffle, visible: result.visible }));
         swalSuccess.fire({
           title: "Success",
           text: isCurrentlyVisible
@@ -337,27 +375,27 @@ function Panel() {
           confirmButtonText: "Okey",
         });
       } catch (error) {
-        console.log(error);
+        swal.fire("Error", error instanceof Error ? error.message : "No se pudo cambiar la visibilidad.", "error");
       }
     }
   };
 
   const clickedDeleteRaffle = async () => {
     const result = await swalDanger.fire({
-      title: "¿Eliminar la rifa actual?",
-      html: "Esta acción <strong>borrará la rifa y TODOS los tickets</strong> (aprobados y pendientes) de forma permanente. No se puede deshacer.",
+      title: "¿Cerrar esta rifa?",
+      html: "Se conservarán las compras y los números. La rifa pasará al historial de solo consulta. Resuelve primero todas las compras pendientes. No se puede reabrir.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, eliminar todo",
+      confirmButtonText: "Sí, cerrar rifa",
       cancelButtonText: "Cancelar",
     });
 
     if (result.isConfirmed) {
       try {
-        await deleteRaffle();
+        await closeRaffle(raffleId);
         swalSuccess.fire({
-          title: "Rifa eliminada",
-          text: "La rifa y todos sus tickets fueron eliminados.",
+          title: "Rifa cerrada",
+          text: "Se conservó todo su historial. Ya puedes crear otra rifa.",
           icon: "success",
           confirmButtonText: "Okey",
         });
@@ -366,7 +404,7 @@ function Panel() {
         console.log(error);
         swal.fire({
           title: "Error",
-          text: "No se pudo eliminar la rifa.",
+          text: error instanceof Error ? error.message : "No se pudo cerrar la rifa.",
           icon: "error",
         });
       }
@@ -375,7 +413,8 @@ function Panel() {
 
   const handleEmailUpdated = () => {
     setTickets([]);
-    fetchGetTikkets();
+    if (pageTickets !== 1) setPageTickets(1);
+    else fetchGetTikkets();
   };
 
   const handleOpenDetail = (ticket: TicketType) => {
@@ -397,7 +436,7 @@ function Panel() {
     if (!ticketNumber?.trim()) return;
 
     try {
-      const result = await checkTicket(ticketNumber.trim());
+      const result = await checkTicket(ticketNumber.trim(), raffleId);
 
       if (result) {
         swal.fire({
@@ -611,6 +650,7 @@ function Panel() {
 
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
+        <div className="p-4 border-b border-gray-300 dark:border-gray-700">{selector}</div>
         <header className="sticky top-0 z-20 bg-white/90 border-b border-gray-200 dark:bg-gray-800/90 dark:border-gray-700 backdrop-blur px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -644,7 +684,7 @@ function Panel() {
               <button
                 type="button"
                 onClick={handleSearchTicket}
-                title="Verificar si un número exacto ya fue vendido en toda la base de datos"
+                title="Verificar si un número exacto fue vendido en la rifa seleccionada"
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-gray-700 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap"
               >
                 <FiSearch size={15} /> <span className="hidden sm:inline">Verificar Números</span>
@@ -842,6 +882,7 @@ function Panel() {
                   </div>
                   {(dateFrom || dateTo || search) && (
                     <button
+                      disabled={isClosed}
                       type="button"
                       onClick={() => {
                         setDateFrom("");
@@ -940,7 +981,9 @@ function Panel() {
                             </button>
                           </td>
                           <td className="px-2 md:px-4 py-2">
-                            {ticket.approved ? (
+                            {ticket.rejected ? (
+                              <button type="button" onClick={() => handleOpenDetail(ticket)} className="text-red-500">Rechazada · Ver detalle</button>
+                            ) : ticket.approved ? (
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
                                   type="button"
@@ -952,6 +995,7 @@ function Panel() {
                                   <FiInfo size={16} />
                                 </button>
                                 <button
+                                  disabled={isClosed}
                                   type="button"
                                   onClick={() => {
                                     setModalEditEmail(true);
@@ -968,15 +1012,6 @@ function Panel() {
                                   className="w-8 h-8 flex items-center justify-center rounded-lg text-blue-600 dark:text-blue-300 hover:bg-blue-500/15 transition"
                                 >
                                   <FiEdit2 size={16} />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => submitTikketDenied(ticket._id)}
-                                  title="Eliminar registro de ticket"
-                                  aria-label="Eliminar registro de ticket"
-                                  className="w-8 h-8 flex items-center justify-center rounded-lg text-danger hover:bg-danger/15 transition"
-                                >
-                                  <FiTrash2 size={16} />
                                 </button>
                                 {resendEmailLoading ? (
                                   <Skeleton
@@ -1006,6 +1041,7 @@ function Panel() {
                                     />
                                   ) : (
                                     <Button
+                                      disabled={isClosed}
                                       variant="success"
                                       size="sm"
                                       icon={<FiCheck size={16} />}
@@ -1024,6 +1060,7 @@ function Panel() {
                                     />
                                   ) : (
                                     <Button
+                                      disabled={isClosed}
                                       variant="danger"
                                       size="sm"
                                       icon={<FiX size={16} />}
@@ -1096,7 +1133,7 @@ function Panel() {
                     onClick={() => {
                       if (!isLastPage) setPageTickets((prev) => prev + 1);
                     }}
-                    disabled={isLastPage}
+                    disabled={isLastPage || isLoadingPagination}
                   >
                     Siguiente
                   </Button>
@@ -1112,9 +1149,7 @@ function Panel() {
                   <div className="w-full h-64 sm:h-80 bg-gray-100 dark:bg-black/40">
                     <img
                       src={
-                        raffleActually.images[0].includes("uploads/")
-                          ? raffleActually.images[0].split("uploads/")[1]
-                          : raffleActually.images[0]
+                        raffleActually.images[0]
                       }
                       alt={raffleActually.name}
                       className="w-full h-full object-cover"
@@ -1173,8 +1208,10 @@ function Panel() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {isClosed && <p className="sm:col-span-2">Rifa cerrada. El historial se conserva en modo de consulta.</p>}
                 {raffleActually?.name ? (
                   <Button
+                    disabled={isClosed}
                     variant="primary"
                     icon={<FiEdit3 />}
                     onClick={() => setModalUpdateRaffle(true)}
@@ -1191,6 +1228,7 @@ function Panel() {
                   </Button>
                 )}
                 <Button
+                  disabled={isClosed}
                   variant="danger"
                   icon={raffleActually?.visible ? <FiEyeOff /> : <FiEye />}
                   onClick={() => clickedRaffleVisibility()}
@@ -1199,12 +1237,13 @@ function Panel() {
                 </Button>
                 {raffleActually?.name && (
                   <Button
+                    disabled={isClosed}
                     variant="outline"
                     icon={<FiTrash2 />}
                     className="sm:col-span-2 !text-danger !border-danger/40 hover:!bg-danger/10"
                     onClick={() => clickedDeleteRaffle()}
                   >
-                    Eliminar rifa actual
+                    Cerrar rifa y conservar historial
                   </Button>
                 )}
               </div>
@@ -1219,11 +1258,13 @@ function Panel() {
         onClose={() => setIsModalDollarOpen(false)}
       />
       <TopBuyersModal
+        raffleId={raffleId}
         isOpen={isModalBuyersOpen}
         onClose={() => setIsModalBuyersOpen(false)}
         theme={theme}
       />
       <MoneySummaryModal
+        raffleId={raffleId}
         isOpen={isModalSummaryOpen}
         onClose={() => setIsModalSummaryOpen(false)}
       />
@@ -1245,6 +1286,8 @@ function Panel() {
 
       {modalEditEmail && (
         <EditEmailModal
+          raffleId={raffleId}
+          approved={Boolean(tickets.find((ticket) => ticket._id === currentTikketSelected.id)?.approved)}
           currentTikketSelected={currentTikketSelected}
           isOpen={modalEditEmail}
           onClose={() => setModalEditEmail(false)}

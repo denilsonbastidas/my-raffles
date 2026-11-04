@@ -7,6 +7,7 @@ import Textarea from "@/components/ui/Textarea";
 import Button from "@/components/ui/Button";
 import PrizesEditor from "@/components/ui/PrizesEditor";
 import { FiX } from "react-icons/fi";
+import { swal } from "@/utils/swal";
 
 export const UpdateRaffleModal = ({
   isOpen,
@@ -32,9 +33,7 @@ export const UpdateRaffleModal = ({
     if (existingRaffle) {
       const processedRaffle = {
         ...existingRaffle,
-        images: existingRaffle.images?.map((img: string) => {
-          return img.includes("uploads/") ? img.split("uploads/")[1] : img;
-        }) || [],
+        images: existingRaffle.images || [],
         prizes: existingRaffle.prizes ?? [],
       };
 
@@ -124,10 +123,12 @@ export const UpdateRaffleModal = ({
 
     try {
       setSubmitting(true);
-      await submitUpdateRaffle(raffleData);
+      if (!existingRaffle?._id) throw new Error("Debe seleccionar una rifa.");
+      await submitUpdateRaffle(raffleData, existingRaffle._id);
       window.location.reload();
     } catch (error) {
       console.error("Error al actualizar la rifa:", error);
+      swal.fire("Error", error instanceof Error ? error.message : "No se pudo actualizar la rifa.", "error");
       setSubmitting(false);
     }
   };

@@ -5,10 +5,13 @@ import ConsultModal from "@/components/ConsultModal";
 import PhonePrefixSelect from "@/components/PhonePrefixSelect";
 import {
   getParallelDollar,
-  getRaffle,
+  getRaffles,
   submitTicket,
 } from "@/services";
-import { RaffleType } from "@/utils/types";
+import { RaffleType, RaffleRecord } from "@/utils/types";
+import { Link, useParams } from "react-router-dom";
+import RaffleCarousel from "@/components/RaffleCarousel";
+import ClosedRafflePage from "./ClosedRafflePage";
 import { useFormik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
@@ -51,6 +54,9 @@ const PROMO_MESSAGES = [
 ];
 
 function HomePage() {
+  const { raffleId } = useParams();
+  const [raffles, setRaffles] = useState<RaffleRecord[]>([]);
+  const [loadError, setLoadError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const buySectionRef = useRef<HTMLDivElement>(null);
@@ -193,8 +199,14 @@ function HomePage() {
   useEffect(() => {
     const fetchGetRaffle = async () => {
       try {
-        const responseRaffle = await getRaffle();
-        const raffle = responseRaffle?.[0];
+        setIsLoading(true);
+        setLoadError("");
+        const responseRaffle = await getRaffles();
+        setRaffles(responseRaffle);
+        const raffle = raffleId
+          ? responseRaffle.find((item) => item._id === raffleId && (item.visible || item.status === "closed"))
+          : responseRaffle.find((item) => item.status === "active" && item.visible);
+        if (raffleId && !raffle) throw new Error("La rifa no existe o no está disponible.");
         setRaffleActually(
           raffle ?? {
             name: "",
@@ -207,29 +219,30 @@ function HomePage() {
         );
 
         if (raffle) {
-          const minValue = parseInt(raffle?.minValue);
+          const minValue = Number(raffle.minValue);
           formik.setFieldValue("numberTickets", minValue);
-          setDisponibleTickets(10000 - (responseRaffle?.totalSold ?? 0));
+          setDisponibleTickets(10000 - (raffle.totalSold ?? 0));
           setDisponibleWithNoAproved(
-            10000 - (responseRaffle?.totalSoldWithNoAproved ?? 0),
+            10000 - (raffle.totalSoldWithNoAproved ?? 0),
           );
           updateTotal(minValue);
         }
       } catch (error) {
         console.error("Error al cargar datos:", error);
+        setLoadError(error instanceof Error ? error.message : "No se pudieron cargar las rifas.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchGetRaffle();
-  }, []);
+  }, [raffleId]);
 
   useEffect(() => {
-    if (raffleActually?.minValue !== undefined) {
-      updateTotal(raffleActually.minValue);
+    if (raffleActually.minValue > 0) {
+      updateTotal(Number(formik.values.numberTickets) || raffleActually.minValue);
     }
-  }, [raffleActually]);
+  }, [raffleActually, exchangeRateVzla]);
 
   const updateTotal = (quantity: number) => {
     let totalUSD = quantity * parseFloat(raffleActually?.ticketPrice);
@@ -261,6 +274,8 @@ function HomePage() {
     },
     validationSchema: Yup.object({
       numberTickets: Yup.number()
+        .integer("La cantidad debe ser un número entero")
+        .min(raffleActually.minValue, `El mínimo es ${raffleActually.minValue}`)
         .max(MAX_VALUE, `No puede seleccionar más de ${MAX_VALUE} números`)
         .required("Este campo es obligatorio"),
       fullName: Yup.string().required("Este campo es obligatorio"),
@@ -278,7 +293,8 @@ function HomePage() {
       try {
         values.paymentMethod = selectedBank;
 
-        await submitTicket(values);
+        if (!raffleActually._id || raffleActually.status !== "active") throw new Error("Esta rifa no acepta compras.");
+        await submitTicket({ ...values, numberTickets: Number(values.numberTickets), raffleId: raffleActually._id });
 
         swalSuccess.fire({
           title: "¡Gracias por realizar tu compra!🎉",
@@ -515,6 +531,13 @@ function HomePage() {
     });
   }
 
+  if (!isLoading && loadError) return (
+    <div className="min-h-screen bg-slate-950 text-white p-12 text-center">
+      <p role="alert">{loadError}</p><Link to="/" className="text-blue-300">Volver al inicio</Link>
+    </div>
+  );
+  if (!isLoading && raffleActually.status === "closed") return <ClosedRafflePage key={raffleActually._id} raffle={raffleActually} />;
+
   return (
     <div>
       {showIGOverlay ? (
@@ -616,6 +639,8 @@ function HomePage() {
                   onBuyClick={scrollToBuy}
                   onVerifyClick={() => setIsConsultModalOpen(true)}
                 />
+                {raffleId && <div className="max-w-6xl mx-auto px-6"><Link to="/" className="text-blue-300">Volver a todas las rifas</Link></div>}
+                <RaffleCarousel title="Otras rifas activas" raffles={raffles.filter((item) => item.status === "active" && item.visible && item._id !== raffleActually._id)} />
 
                 {!hasRaffle && (
                   <div className="w-full py-20 flex items-center justify-center">
@@ -1010,6 +1035,7 @@ function HomePage() {
                 ) : null}
               </div>
               <div className="relative z-10">
+                <RaffleCarousel title="Rifas anteriores" raffles={raffles.filter((item) => item.status === "closed")} />
                 <Footer />
               </div>
             </section>
@@ -1030,6 +1056,8 @@ function HomePage() {
       )}
 
       <ConsultModal
+        key={raffleActually._id}
+        raffleId={raffleActually._id || ""}
         isOpen={isConsultModalOpen}
         onClose={() => setIsConsultModalOpen(false)}
         whatsappUrl={whatsappUrl}

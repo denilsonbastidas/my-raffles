@@ -12,7 +12,7 @@ export const fetchAuth = async (navigate: NavigateFunction) => {
 
   try {
     await authentication(tokenStorage);
-    navigate("/admin/panel");
+    if (window.location.pathname === "/admin") navigate("/admin/panel");
   } catch (error) {
     console.error("Error en autenticación:", error);
     navigate("/admin");
