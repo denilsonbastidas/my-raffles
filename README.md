@@ -10,6 +10,9 @@
 - El modal de comprobantes muestra directamente la imagen Base64 o URL entregada por el backend, sin recortar rutas. Si no puede cargarla, muestra un aviso.
 - El admin carga primero la rifa actual; el selector recibe las otras rifas en segundo plano y sus detalles solo al seleccionarlas. Los comprobantes se descargan al abrirlos y se reutilizan durante la sesion de esa rifa.
 - Editar una compra actualiza solo su fila, sin volver a descargar la tabla. Solo las aprobadas muestran Eliminar: requiere confirmacion, libera los numeros y conserva una copia de auditoria en el backend. Las pendientes se rechazan y las rechazadas no aparecen en ningun listado. Las rifas cerradas siguen siendo de solo consulta.
+- El selector esta en el sidebar, antes de Gestion, y queda deshabilitado si solo hay una rifa. La seccion **Rifas** contiene la rifa seleccionada arriba, las anteriores debajo, enlaces para consultar cada una y el boton Crear nueva rifa; ese boton ya no aparece en el header general. `?rifa=ID&seccion=rifas` permite abrir directamente su informacion.
+- Aprobar guarda los numeros y responde sin esperar el correo. El panel muestra correo en cola, enviando, pendiente de reintento, enviado o fallido; el estado se consulta sin descargar de nuevo la tabla. Reenviar tampoco bloquea esperando al proveedor. Los errores de envio no revierten la aprobacion ni generan nuevos numeros.
+- Editar el contacto solo envia cantidad y metodo de pago si cambiaron, para evitar lecturas y recalculos innecesarios. La seccion Rifas no descarga tickets hasta entrar en su listado.
 
 ## Desarrollo
 

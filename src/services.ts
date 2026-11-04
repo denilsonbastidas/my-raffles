@@ -262,11 +262,10 @@ export const authentication = async (token: string) => {
 
 export const tikketApprove = async (id: string, raffleId: string) => {
   try {
-    const { data } = await axios.post(
-      `${API_URL}/api/tickets/approve/${id}`,
-      {},
-      scope(raffleId),
-    );
+    const { data } = await axios.post<{
+      approvalCodes: string[];
+      emailDelivery: TicketType["emailDelivery"];
+    }>(`${API_URL}/api/tickets/approve/${id}`, {}, scope(raffleId));
     return data;
   } catch (error) {
     console.error("Error tikketApprove:", error);
@@ -351,11 +350,9 @@ export const updateParallelDollar = async (newPrice: String) => {
 
 export const resendEmail = async (id: string, raffleId: string) => {
   try {
-    const { data } = await axios.post(
-      `${API_URL}/api/tickets/resend/${id}`,
-      {},
-      scope(raffleId),
-    );
+    const { data } = await axios.post<{
+      emailDelivery: TicketType["emailDelivery"];
+    }>(`${API_URL}/api/tickets/resend/${id}`, {}, scope(raffleId));
     return data;
   } catch (error) {
     console.error("Error resendEmail:", error);
@@ -363,12 +360,32 @@ export const resendEmail = async (id: string, raffleId: string) => {
   }
 };
 
+export const getEmailStatuses = async (
+  ids: string[],
+  raffleId: string,
+  signal?: AbortSignal,
+) => {
+  try {
+    const { data } = await axios.get<{
+      tickets: Pick<TicketType, "_id" | "emailDelivery">[];
+    }>(`${API_URL}/api/tickets/email-status`, {
+      ...scope(raffleId),
+      params: { raffleId, ids: ids.join(",") },
+      signal,
+    });
+    return data.tickets;
+  } catch (error) {
+    if (axios.isCancel(error)) throw error;
+    throw apiError(error);
+  }
+};
+
 export const updatedUser = async (
   id: string,
-  newEmail: string,
-  newPhone: string,
-  numberTickets: number,
-  paymentMethod: string,
+  newEmail: string | undefined,
+  newPhone: string | undefined,
+  numberTickets: number | undefined,
+  paymentMethod: string | undefined,
   raffleId: string,
 ) => {
   try {

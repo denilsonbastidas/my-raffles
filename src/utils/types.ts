@@ -30,6 +30,10 @@ export interface ResponseAuthType {
 }
 
 export interface TicketType {
+  emailDelivery?: {
+    status: "queued" | "sending" | "retrying" | "sent" | "failed";
+    sentAt?: string;
+  };
   numberTickets: number;
   fullName: string;
   email: string;
@@ -46,3 +50,20 @@ export interface TicketType {
   approvalCodes: string[];
   createdAt?: string;
 }
+
+export const emailDeliveryLabel = (delivery: TicketType["emailDelivery"]) => {
+  switch (delivery?.status) {
+    case "queued":
+      return "Correo en cola";
+    case "sending":
+      return "Enviando correo";
+    case "retrying":
+      return "Correo pendiente de reintento";
+    case "sent":
+      return "Correo enviado";
+    case "failed":
+      return "Correo fallido · Reenviar";
+    default:
+      return "";
+  }
+};

@@ -37,6 +37,11 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
     paymentMethod: string;
   }>(currentTikketSelected);
   const [loading, setLoading] = useState<boolean>(false);
+  const hasChanges =
+    selectedTikket.email !== currentTikketSelected.email ||
+    selectedTikket.phone !== currentTikketSelected.phone ||
+    selectedTikket.numberTickets !== currentTikketSelected.numberTickets ||
+    selectedTikket.paymentMethod !== currentTikketSelected.paymentMethod;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +62,18 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
       setLoading(true);
       const { ticket } = await updatedUser(
         selectedTikket.id,
-        selectedTikket.email,
-        selectedTikket.phone,
-        selectedTikket.numberTickets,
-        selectedTikket.paymentMethod,
+        selectedTikket.email !== currentTikketSelected.email
+          ? selectedTikket.email
+          : undefined,
+        selectedTikket.phone !== currentTikketSelected.phone
+          ? selectedTikket.phone
+          : undefined,
+        selectedTikket.numberTickets !== currentTikketSelected.numberTickets
+          ? selectedTikket.numberTickets
+          : undefined,
+        selectedTikket.paymentMethod !== currentTikketSelected.paymentMethod
+          ? selectedTikket.paymentMethod
+          : undefined,
         raffleId,
       );
 
@@ -161,7 +174,13 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
           </select>
         </div>
 
-        <Button type="submit" variant="primary" fullWidth loading={loading}>
+        <Button
+          type="submit"
+          variant="primary"
+          fullWidth
+          loading={loading}
+          disabled={!hasChanges}
+        >
           Guardar Cambios
         </Button>
       </form>

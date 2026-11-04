@@ -1,5 +1,5 @@
 import Modal from "@/components/ui/Modal";
-import { TicketType } from "@/utils/types";
+import { TicketType, emailDeliveryLabel } from "@/utils/types";
 import { FiCheckCircle, FiClock } from "react-icons/fi";
 
 interface Props {
@@ -61,6 +61,12 @@ export default function TicketDetailModal({
       <div>
         <Row label="Nombre" value={ticket.fullName} />
         <Row label="Correo" value={ticket.email} />
+        {ticket.emailDelivery && (
+          <Row
+            label="Envío del correo"
+            value={emailDeliveryLabel(ticket.emailDelivery)}
+          />
+        )}
         <Row label="Teléfono" value={ticket.phone} />
         <Row label="Cantidad de tickets" value={ticket.numberTickets} />
         <Row

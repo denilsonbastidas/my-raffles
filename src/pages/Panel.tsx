@@ -11,11 +11,12 @@ import {
   getAdminRaffle,
   getAdminRaffleCatalog,
   getTicketVoucher,
+  getEmailStatuses,
   deleteTicket,
   closeRaffle,
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
-import { TicketType, RaffleRecord, RaffleOption } from "@/utils/types";
+import { TicketType, RaffleRecord, RaffleOption, emailDeliveryLabel } from "@/utils/types";
 import { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -64,6 +65,10 @@ function Panel() {
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const selectedId = params.get("rifa") || undefined;
+  const activeSection = params.get("seccion") === "rifas" ? "rifa" : "tickets";
+  const openRaffle = (id: string, section = activeSection) => {
+    setParams({ rifa: id, ...(section === "rifa" ? { seccion: "rifas" } : {}) });
+  };
   useEffect(() => {
     fetchAuth(navigate);
   }, [navigate]);
@@ -125,24 +130,40 @@ function Panel() {
   const options = selected && !raffles.some((raffle) => raffle._id === selected._id)
     ? [selected, ...raffles] : raffles;
   const selector = (
-    <div className="flex flex-wrap gap-3 items-center">
-      <label htmlFor="admin-raffle">Rifa:</label>
-      <select id="admin-raffle" className="max-w-xs rounded-lg p-2 bg-white text-gray-900 border" value={selected?._id || ""}
-        onChange={(event) => setParams({ rifa: event.target.value })}>
+    <div className="space-y-2 pb-3">
+      <label htmlFor="admin-raffle" className="block text-xs font-semibold text-gray-500 dark:text-gray-400">Rifa seleccionada</label>
+      <select id="admin-raffle" className="w-full min-w-0 rounded-lg p-2 bg-gray-50 text-gray-900 border border-gray-200 dark:bg-gray-900 dark:text-white dark:border-gray-700 disabled:opacity-60 disabled:cursor-not-allowed text-sm" value={selected?._id || ""}
+        disabled={options.length <= 1}
+        onChange={(event) => openRaffle(event.target.value)}>
         {options.map((raffle) => <option key={raffle._id} value={raffle._id}>{raffle.name} · {raffle.status === "closed" ? "Cerrada" : "Activa"}</option>)}
       </select>
       {catalogLoading && <span role="status" className="h-5 w-5 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin"><span className="sr-only">Cargando otras rifas</span></span>}
       {catalogError && <div role="alert" className="text-red-500">{catalogError} <button type="button" className="underline" onClick={() => setCatalogAttempt((attempt) => attempt + 1)}>Reintentar</button></div>}
-      <Button icon={<FiPlus />} onClick={() => setCreating(true)}>Crear nueva rifa</Button>
     </div>
   );
   return <>
-    {selected ? <RafflePanel key={selected._id} initialRaffle={selected} selector={selector} /> : <div className="p-8">{selector}<p>No hay rifas. Crea la primera.</p></div>}
+    {selected ? <RafflePanel key={selected._id} initialRaffle={selected} selector={selector}
+      raffles={options} activeSection={activeSection} onOpenRaffle={openRaffle}
+      onSectionChange={(section) => setParams({
+        ...(selectedId ? { rifa: selectedId } : {}),
+        ...(section === "rifa" ? { seccion: "rifas" } : {}),
+      })}
+      onCreateRaffle={() => setCreating(true)} /> : <div className="p-8 space-y-4"><h1 className="text-xl font-bold">Rifas</h1><p>No hay rifas. Crea la primera.</p><Button icon={<FiPlus />} onClick={() => setCreating(true)}>Crear nueva rifa</Button></div>}
     {creating && <CreateRaffleModal isOpen={creating} onClose={() => setCreating(false)} />}
   </>;
 }
 
-function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord; selector: React.ReactNode }) {
+type AdminSection = "tickets" | "rifa";
+
+function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectionChange, onOpenRaffle, onCreateRaffle }: {
+  initialRaffle: RaffleRecord;
+  selector: React.ReactNode;
+  raffles: RaffleOption[];
+  activeSection: AdminSection;
+  onSectionChange: (section: AdminSection) => void;
+  onOpenRaffle: (id: string, section: AdminSection) => void;
+  onCreateRaffle: () => void;
+}) {
   const raffleId = initialRaffle._id;
   const isClosed = initialRaffle.status === "closed";
   const navigate = useNavigate();
@@ -154,7 +175,6 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
   const previousQuery = useRef("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [soldNumber, setSoldNumber] = useState<number>(initialRaffle.totalSold || 0);
-  const [modalCreateRaffle, setModalCreateRaffle] = useState(false);
   const [modalUpdateRaffle, setModalUpdateRaffle] = useState(false);
   const [modalEditEmail, setModalEditEmail] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -189,9 +209,6 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
   const orderToSend = filter == "pending" ? "asc" : orderTickets;
 
   const TOTAL_RAFFLE_TICKETS = 10000;
-  const [activeSection, setActiveSection] = useState<"tickets" | "rifa">(
-    "tickets",
-  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(
     () => localStorage.getItem("adminSidebarCollapsed") === "true",
@@ -203,6 +220,34 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
   const statsLoading = false;
   const [detailTicket, setDetailTicket] = useState<TicketType | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [emailStatusError, setEmailStatusError] = useState("");
+  const [emailPollAttempt, setEmailPollAttempt] = useState(0);
+  const queuedEmailIds = tickets.filter((ticket) => ticket.approved &&
+    ["queued", "sending", "retrying"].includes(ticket.emailDelivery?.status || ""))
+    .map((ticket) => ticket._id).slice(0, 150).join(",");
+
+  useEffect(() => {
+    if (!queuedEmailIds || activeSection !== "tickets") return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      try {
+        const statuses = await getEmailStatuses(queuedEmailIds.split(","), raffleId, controller.signal);
+        if (controller.signal.aborted) return;
+        const byId = new Map(statuses.map((ticket) => [ticket._id, ticket.emailDelivery]));
+        setEmailStatusError("");
+        setTickets((items) => items.map((ticket) => byId.has(ticket._id)
+          ? { ...ticket, emailDelivery: byId.get(ticket._id) } : ticket));
+        setDetailTicket((ticket) => ticket && byId.has(ticket._id)
+          ? { ...ticket, emailDelivery: byId.get(ticket._id) } : ticket);
+        timer = setTimeout(poll, 5000);
+      } catch (error) {
+        if (!controller.signal.aborted) setEmailStatusError(error instanceof Error ? error.message : "No se pudo consultar el envío de correos.");
+      }
+    };
+    timer = setTimeout(poll, 1000);
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [queuedEmailIds, raffleId, activeSection, emailPollAttempt]);
 
   useEffect(() => {
     localStorage.setItem("adminTheme", theme);
@@ -272,6 +317,7 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
   };
 
   useEffect(() => {
+    if (activeSection !== "tickets") return;
     const query = `${filter}:${paymentMethod}:${orderTickets}`;
     if (previousQuery.current !== query) {
       previousQuery.current = query;
@@ -289,7 +335,7 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
       requestId.current++;
       ticketsController.current?.abort();
     };
-  }, [filter, paymentMethod, pageTickets, orderTickets]);
+  }, [filter, paymentMethod, pageTickets, orderTickets, activeSection]);
 
   const filteredTickets = tickets.filter((ticket) => {
     const query = search.trim().toLowerCase();
@@ -336,13 +382,14 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
         const approval = await tikketApprove(id, raffleId);
         swalSuccess.fire({
           title: "¡Ticket aprobado!",
+          text: "Los números ya están guardados. El correo se enviará en segundo plano.",
           icon: "success",
           confirmButtonText: "Aceptar",
         });
         setTickets((prevTickets) =>
           prevTickets.map((ticket) =>
             ticket._id === id
-              ? { ...ticket, approved: true, approvalCodes: approval.approvalCodes }
+              ? { ...ticket, approved: true, approvalCodes: approval.approvalCodes, emailDelivery: approval.emailDelivery }
               : ticket,
           ),
         );
@@ -401,9 +448,12 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
     if (result.isConfirmed) {
       try {
         setResendEmailLoading(true);
-        await resendEmail(id, raffleId);
+        const { emailDelivery } = await resendEmail(id, raffleId);
+        setTickets((items) => items.map((ticket) => ticket._id === id ? { ...ticket, emailDelivery } : ticket));
+        setDetailTicket((ticket) => ticket?._id === id ? { ...ticket, emailDelivery } : ticket);
         swalSuccess.fire({
-          title: "¡Ticket! reviando",
+          title: "Correo en cola",
+          text: "Se enviará en segundo plano. Puedes seguir trabajando.",
           icon: "success",
           confirmButtonText: "Aceptar",
         });
@@ -642,12 +692,13 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          <div className={sidebarCollapsed ? "md:hidden" : ""}>{selector}</div>
           <p className={`px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 ${sidebarCollapsed ? "md:hidden" : ""}`}>
             Gestión
           </p>
           <button
             onClick={() => {
-              setActiveSection("tickets");
+              onSectionChange("tickets");
               setSidebarOpen(false);
             }}
             title="Tickets"
@@ -672,17 +723,17 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
           </button>
           <button
             onClick={() => {
-              setActiveSection("rifa");
+              onSectionChange("rifa");
               setSidebarOpen(false);
             }}
-            title="Rifa"
+            title="Rifas"
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${sidebarCollapsed ? "md:justify-center md:px-0" : ""} ${
               activeSection === "rifa"
                 ? "bg-blue-600 text-white"
                 : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
             }`}
           >
-            <FiGift size={18} /> <span className={sidebarCollapsed ? "md:hidden" : ""}>Rifa</span>
+            <FiGift size={18} /> <span className={sidebarCollapsed ? "md:hidden" : ""}>Rifas</span>
           </button>
 
           <p className={`px-3 pt-4 pb-1 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 ${sidebarCollapsed ? "md:hidden" : ""}`}>
@@ -739,7 +790,9 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
       </aside>
 
       {sidebarOpen && (
-        <div
+        <button
+          type="button"
+          aria-label="Cerrar menú"
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -747,10 +800,11 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
 
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="p-4 border-b border-gray-300 dark:border-gray-700">{selector}</div>
         <header className="sticky top-0 z-20 bg-white/90 border-b border-gray-200 dark:bg-gray-800/90 dark:border-gray-700 backdrop-blur px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
+              type="button"
+              aria-label="Abrir menú"
               className="md:hidden text-gray-500 dark:text-gray-300 shrink-0"
               onClick={() => setSidebarOpen(true)}
             >
@@ -759,7 +813,7 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
             <h1 className="text-lg md:text-xl font-bold truncate">
               {activeSection === "tickets"
                 ? "Listado de Tickets"
-                : "Gestión de la Rifa"}
+                : "Rifas"}
             </h1>
           </div>
           <div className="flex items-center flex-wrap gap-2 sm:gap-3">
@@ -802,6 +856,7 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
         <main className="p-4 md:p-6 flex-1">
           {activeSection === "tickets" && (
             <>
+              {emailStatusError && <p role="alert" className="text-red-500 mb-3">{emailStatusError} <button type="button" className="underline" onClick={() => setEmailPollAttempt((attempt) => attempt + 1)}>Reintentar</button></p>}
               {/* Estadísticas */}
               <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
                 <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-xl sm:rounded-2xl p-2.5 sm:p-5">
@@ -1050,6 +1105,11 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
                             >
                               {ticket.email}
                             </span>
+                            {ticket.approved && ticket.emailDelivery && (
+                              <p className={`text-xs mb-1 ${ticket.emailDelivery.status === "failed" ? "text-red-500" : "text-gray-500 dark:text-gray-400"}`}>
+                                {emailDeliveryLabel(ticket.emailDelivery)}
+                              </p>
+                            )}
                           </td>
                           <td className="px-2 md:px-4 py-2">
                             {ticket.numberTickets}
@@ -1251,7 +1311,11 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
           )}
 
           {activeSection === "rifa" && (
-            <div className="max-w-xl mx-auto space-y-6 flex flex-col justify-center min-h-[calc(100vh-160px)]">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-lg font-bold">{isClosed ? "Rifa anterior seleccionada" : "Rifa actual"}</h2>
+                <Button icon={<FiPlus />} onClick={onCreateRaffle}>Crear nueva rifa</Button>
+              </div>
               <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-2xl overflow-hidden">
                 {raffleActually?.images?.[0] && (
                   <div className="w-full h-64 sm:h-80 bg-gray-100 dark:bg-black/40">
@@ -1317,24 +1381,14 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {isClosed && <p className="sm:col-span-2">Rifa cerrada. El historial se conserva en modo de consulta.</p>}
-                {raffleActually?.name ? (
-                  <Button
-                    disabled={isClosed}
-                    variant="primary"
-                    icon={<FiEdit3 />}
-                    onClick={() => setModalUpdateRaffle(true)}
-                  >
-                    Actualizar rifa
-                  </Button>
-                ) : (
-                  <Button
-                    variant="primary"
-                    icon={<FiPlus />}
-                    onClick={() => setModalCreateRaffle(true)}
-                  >
-                    Crear nueva rifa
-                  </Button>
-                )}
+                <Button
+                  disabled={isClosed}
+                  variant="primary"
+                  icon={<FiEdit3 />}
+                  onClick={() => setModalUpdateRaffle(true)}
+                >
+                  Actualizar rifa
+                </Button>
                 <Button
                   disabled={isClosed}
                   variant="danger"
@@ -1355,6 +1409,32 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
                   </Button>
                 )}
               </div>
+              <Button variant="outline" icon={<FiTag />} onClick={() => onSectionChange("tickets")}>
+                Ver compras y números de esta rifa
+              </Button>
+              {[
+                { title: "Otras rifas activas", items: raffles.filter((raffle) => raffle.status === "active" && raffle._id !== raffleId) },
+                { title: "Rifas anteriores", items: raffles.filter((raffle) => raffle.status === "closed") },
+              ].map(({ title, items }) => (
+                <section key={title} className="space-y-3">
+                  <h2 className="text-lg font-bold">{title}</h2>
+                  {items.length ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {items.map((raffle) => (
+                        <button key={raffle._id} type="button" onClick={() => onOpenRaffle(raffle._id, "rifa")}
+                          aria-current={raffle._id === raffleId ? "page" : undefined}
+                          className="flex items-center gap-3 text-left p-4 rounded-xl border border-gray-200 bg-white hover:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-400">
+                          <FiGift className="text-blue-500 shrink-0" size={22} />
+                          <span className="min-w-0 flex-1"><span className="block font-semibold truncate">{raffle.name}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{raffle.status === "closed" ? "Cerrada · Ver historial" : "Activa · Abrir rifa"}</span>
+                          </span>
+                          <FiChevronRight className="shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : <p className="text-sm text-gray-500 dark:text-gray-400">{title === "Rifas anteriores" ? "Aún no hay rifas anteriores." : "No hay otras rifas activas."}</p>}
+                </section>
+              ))}
             </div>
           )}
         </main>
@@ -1376,13 +1456,6 @@ function RafflePanel({ initialRaffle, selector }: { initialRaffle: RaffleRecord;
         isOpen={isModalSummaryOpen}
         onClose={() => setIsModalSummaryOpen(false)}
       />
-
-      {modalCreateRaffle && (
-        <CreateRaffleModal
-          isOpen={modalCreateRaffle}
-          onClose={() => setModalCreateRaffle(false)}
-        ></CreateRaffleModal>
-      )}
 
       {modalUpdateRaffle && (
         <UpdateRaffleModal

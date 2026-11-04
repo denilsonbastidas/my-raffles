@@ -72,7 +72,7 @@ export const CreateRaffleModal = ({
     try {
       setSubmitting(true);
       const { raffle } = await submitCreateRaffle(raffleData);
-      window.location.assign(`/admin/panel?rifa=${raffle._id}`);
+      window.location.assign(`/admin/panel?rifa=${raffle._id}&seccion=rifas`);
     } catch (error) {
       console.error("Error al crear la rifa:", error);
       swal.fire("Error", error instanceof Error ? error.message : "No se pudo crear la rifa.", "error");
