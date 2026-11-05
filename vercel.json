@@ -1,6 +1,5 @@
 {
     "rewrites": [
-      { "source": "/rifas/:path*", "destination": "/index.html" },
       { "source": "/admin", "destination": "/index.html" },
       { "source": "/admin/panel", "destination": "/index.html" },
       { "source": "/admin/:path*", "destination": "/index.html" }

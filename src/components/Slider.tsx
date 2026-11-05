@@ -22,7 +22,7 @@ export default function ImageSlider({ imagesSlider }: Props) {
         {imagesSlider?.map((src, index) => (
           <SwiperSlide key={index}>
             <img
-              src={src.includes("/uploads/data:") ? src.split("/uploads/")[1] : src}
+              src={src.split("uploads/")[1]}
               alt={`Slide ${index}`}
               className="w-full h-[320px] md:h-[420px] object-cover mx-auto"
               loading="lazy"

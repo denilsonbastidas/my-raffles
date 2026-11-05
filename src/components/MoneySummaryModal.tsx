@@ -6,7 +6,6 @@ import Modal from "@/components/ui/Modal";
 import { FiDollarSign } from "react-icons/fi";
 
 interface MoneySummaryModalProps {
-    raffleId: string;
     isOpen: boolean;
     onClose: () => void;
 }
@@ -26,14 +25,14 @@ const accentColors: Record<string, string> = {
     default: "text-success bg-success/10",
 };
 
-const MoneySummaryModal: React.FC<MoneySummaryModalProps> = ({ isOpen, onClose, raffleId }) => {
+const MoneySummaryModal: React.FC<MoneySummaryModalProps> = ({ isOpen, onClose }) => {
     const [breakdown, setBreakdown] = useState<BreakdownItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         if (isOpen) {
             setLoading(true);
-            getMoneySummary(raffleId)
+            getMoneySummary()
                 .then((data) => setBreakdown(data))
                 .catch((err) => {
                     console.error("Error al obtener resumen de dinero:", err);
@@ -41,7 +40,7 @@ const MoneySummaryModal: React.FC<MoneySummaryModalProps> = ({ isOpen, onClose, 
                 })
                 .finally(() => setLoading(false));
         }
-    }, [isOpen, raffleId]);
+    }, [isOpen]);
 
     return (
         <Modal

@@ -3,23 +3,20 @@ import { UpdateRaffleModal } from "@/components/updateRaffleModal";
 import ImageModal from "@/components/imgModal";
 import {
   checkTicket,
+  getSoldNumbers,
   getTickets,
   raffleVisibility,
   resendEmail,
   tikketApprove,
   tikketDenied,
-  getAdminRaffle,
-  getAdminRaffleCatalog,
-  getTicketVoucher,
-  getEmailStatuses,
-  deleteTicket,
-  closeRaffle,
+  getRaffle,
+  deleteRaffle,
 } from "@/services";
 import { fetchAuth } from "@/utils/auth";
-import { TicketType, RaffleRecord, RaffleOption, emailDeliveryLabel } from "@/utils/types";
-import { useEffect, useRef, useState } from "react";
+import { TicketType, RaffleType } from "@/utils/types";
+import { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { swal, swalSuccess, swalDanger } from "@/utils/swal";
 import {
   FiTag,
@@ -55,174 +52,12 @@ import Button from "@/components/ui/Button";
 
 function Panel() {
   const navigate = useNavigate();
-  const [params, setParams] = useSearchParams();
-  const [raffles, setRaffles] = useState<RaffleOption[]>([]);
-  const [selected, setSelected] = useState<RaffleRecord | null>(null);
-  const [catalogError, setCatalogError] = useState("");
-  const [catalogLoading, setCatalogLoading] = useState(false);
-  const [catalogAttempt, setCatalogAttempt] = useState(0);
-  const [catalogRequested, setCatalogRequested] = useState(false);
-  const [catalogLoaded, setCatalogLoaded] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [creating, setCreating] = useState(false);
-  const selectedId = params.get("rifa") || undefined;
-  const activeSection = params.get("seccion") === "rifas" ? "rifa" : "tickets";
-  const openRaffle = (id: string, section = activeSection) => {
-    setParams({ rifa: id, ...(section === "rifa" ? { seccion: "rifas" } : {}) });
-  };
-  useEffect(() => {
-    fetchAuth(navigate);
-  }, [navigate]);
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError("");
-    getAdminRaffle(selectedId).then((raffle) => {
-      if (active) setSelected(raffle);
-    }).catch((err: unknown) => {
-      if (!active) return;
-      setError(err instanceof Error ? err.message : "No se pudieron cargar las rifas.");
-    }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [selectedId]);
-  useEffect(() => {
-    if (loading || error || !catalogRequested || catalogLoaded) return;
-    let active = true;
-    setCatalogLoading(true);
-    setCatalogError("");
-    getAdminRaffleCatalog().then((items) => {
-      if (active) {
-        setCatalogLoading(false);
-        setRaffles(items);
-        setCatalogLoaded(true);
-      }
-    }).catch((err: unknown) => {
-      if (active) {
-        setCatalogLoading(false);
-        setCatalogError(err instanceof Error ? err.message : "No se pudo cargar el catálogo de rifas.");
-      }
-    });
-    return () => { active = false; };
-  }, [loading, error, catalogRequested, catalogLoaded, catalogAttempt]);
-  if (loading) return <PanelSkeleton section={activeSection} />;
-  if (error) return <p role="alert" className="p-8">{error}</p>;
-  const options = selected && !raffles.some((raffle) => raffle._id === selected._id)
-    ? [selected, ...raffles] : raffles;
-  const selector = (
-    <div className="space-y-2 pb-3">
-      <label htmlFor="admin-raffle" className="block text-xs font-semibold text-gray-500 dark:text-gray-400">Rifa seleccionada</label>
-      <select id="admin-raffle" className="w-full min-w-0 rounded-lg p-2 bg-gray-50 text-gray-900 border border-gray-200 dark:bg-gray-900 dark:text-white dark:border-gray-700 disabled:opacity-60 disabled:cursor-not-allowed text-sm" value={selected?._id || ""}
-        disabled={catalogLoaded && options.length <= 1}
-        aria-busy={catalogLoading}
-        onFocus={() => setCatalogRequested(true)}
-        onPointerDown={() => setCatalogRequested(true)}
-        onChange={(event) => openRaffle(event.target.value)}>
-        {options.map((raffle) => <option key={raffle._id} value={raffle._id}>{raffle.name} · {raffle.status === "closed" ? "Cerrada" : "Activa"}</option>)}
-        {!catalogLoaded && <option value="" disabled>{catalogLoading ? "Cargando otras rifas…" : "Abrir para cargar otras rifas"}</option>}
-      </select>
-      {catalogLoading && <span role="status" className="block text-xs text-gray-500 dark:text-gray-400">Cargando otras rifas…</span>}
-      {catalogError && <div role="alert" className="text-red-500">{catalogError} <button type="button" className="underline" onClick={() => setCatalogAttempt((attempt) => attempt + 1)}>Reintentar</button></div>}
-    </div>
-  );
-  return <>
-    {selected ? <RafflePanel key={selected._id} initialRaffle={selected} selector={selector}
-      raffles={options} activeSection={activeSection} onOpenRaffle={openRaffle}
-      catalogLoaded={catalogLoaded}
-      catalogControl={!catalogLoaded && <div className="space-y-2">
-        <Button variant="outline" loading={catalogLoading} onClick={() => {
-          setCatalogRequested(true);
-          if (catalogError) setCatalogAttempt((attempt) => attempt + 1);
-        }}>Cargar otras rifas e historial</Button>
-        {catalogLoading && <p role="status" className="text-sm text-gray-500">Cargando otras rifas…</p>}
-        {catalogError && <p role="alert" className="text-red-500">{catalogError}</p>}
-      </div>}
-      onSectionChange={(section) => setParams({
-        ...(selectedId ? { rifa: selectedId } : {}),
-        ...(section === "rifa" ? { seccion: "rifas" } : {}),
-      })}
-      onCreateRaffle={() => setCreating(true)} /> : <div className="p-8 space-y-4"><h1 className="text-xl font-bold">Rifas</h1><p>No hay rifas. Crea la primera.</p><Button icon={<FiPlus />} onClick={() => setCreating(true)}>Crear nueva rifa</Button></div>}
-    {creating && <CreateRaffleModal isOpen={creating} onClose={() => setCreating(false)} />}
-  </>;
-}
-
-type AdminSection = "tickets" | "rifa";
-
-function PanelSkeleton({ section }: { section: AdminSection }) {
-  const dark = localStorage.getItem("adminTheme") !== "light";
-  const collapsed = localStorage.getItem("adminSidebarCollapsed") === "true";
-  const colors = {
-    baseColor: dark ? "#374151" : "#e5e7eb",
-    highlightColor: dark ? "#4b5563" : "#f3f4f6",
-  };
-  return (
-    <div className={dark ? "dark" : ""} role="status" aria-busy="true">
-      <span className="sr-only">Cargando panel de administración</span>
-      <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white flex" aria-hidden="true">
-        <aside className={`hidden md:flex ${collapsed ? "w-20" : "w-64"} shrink-0 h-screen flex-col bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700`}>
-          <div className="flex items-center gap-3 p-5 border-b border-gray-200 dark:border-gray-700">
-            <img src="/logo-nuevo.png" alt="" className="w-10 h-10 rounded-lg shrink-0" />
-            {!collapsed && <div><p className="font-bebas text-lg leading-none">Denilson Bastidas</p><p className="text-xs text-blue-500 dark:text-blue-300">Panel Admin</p></div>}
-          </div>
-          <div className="p-3 space-y-4">
-            <Skeleton height={40} {...colors} />
-            {!collapsed && <p className="text-[11px] uppercase text-gray-400">Gestión</p>}
-            <Skeleton height={40} count={2} {...colors} />
-            {!collapsed && <p className="text-[11px] uppercase text-gray-400">Herramientas</p>}
-            <Skeleton height={40} count={3} {...colors} />
-          </div>
-        </aside>
-        <div className="flex-1 min-w-0">
-          <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 md:px-6 py-4 flex justify-between items-center gap-3">
-            <h1 className="text-lg md:text-xl font-bold">{section === "tickets" ? "Listado de Tickets" : "Rifas"}</h1>
-            <div className="w-24 sm:w-48"><Skeleton height={28} {...colors} /></div>
-          </header>
-          <main className="p-4 md:p-6">
-            {section === "tickets" ? (
-              <>
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                  {[0, 1, 2].map((item) => <div key={item} className="rounded-xl p-4 bg-white dark:bg-gray-800"><Skeleton width="60%" {...colors} /><Skeleton height={28} width="45%" {...colors} /></div>)}
-                </div>
-                <div className="mb-6"><Skeleton height={40} {...colors} /></div>
-                <div className="rounded-xl p-4 bg-white dark:bg-gray-800"><Skeleton height={38} count={8} {...colors} /></div>
-              </>
-            ) : (
-              <div className="max-w-3xl mx-auto space-y-6">
-                <Skeleton height={32} width="45%" {...colors} />
-                <Skeleton height={320} borderRadius={16} {...colors} />
-                <Skeleton height={24} count={3} {...colors} />
-                <Skeleton height={40} {...colors} />
-              </div>
-            )}
-          </main>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectionChange, onOpenRaffle, onCreateRaffle, catalogLoaded, catalogControl }: {
-  initialRaffle: RaffleRecord;
-  selector: React.ReactNode;
-  raffles: RaffleOption[];
-  activeSection: AdminSection;
-  onSectionChange: (section: AdminSection) => void;
-  onOpenRaffle: (id: string, section: AdminSection) => void;
-  onCreateRaffle: () => void;
-  catalogLoaded: boolean;
-  catalogControl: React.ReactNode;
-}) {
-  const raffleId = initialRaffle._id;
-  const isClosed = initialRaffle.status === "closed";
-  const navigate = useNavigate();
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "pending">(isClosed ? "all" : "pending");
-  const requestId = useRef(0);
-  const ticketsController = useRef<AbortController | null>(null);
-  const previousQuery = useRef("");
+  const [filter, setFilter] = useState<"all" | "pending">("pending");
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [soldNumber, setSoldNumber] = useState<number>(initialRaffle.totalSold || 0);
+  const [soldNumber, setSoldNumber] = useState<number>(0);
+  const [modalCreateRaffle, setModalCreateRaffle] = useState(false);
   const [modalUpdateRaffle, setModalUpdateRaffle] = useState(false);
   const [modalEditEmail, setModalEditEmail] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -231,14 +66,18 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
-  const [voucherLoading, setVoucherLoading] = useState(false);
-  const voucherCache = useRef(new Map<string, string>());
-  const voucherRequest = useRef(0);
   const [resendEmailLoading, setResendEmailLoading] = useState<boolean>(false);
   const [isModalDollarOpen, setIsModalDollarOpen] = useState<boolean>(false);
   const [isModalBuyersOpen, setIsModalBuyersOpen] = useState<boolean>(false);
   const [isModalSummaryOpen, setIsModalSummaryOpen] = useState<boolean>(false);
-  const [raffleActually, setRaffleActually] = useState<RaffleRecord>(initialRaffle);
+  const [raffleActually, setRaffleActually] = useState<RaffleType>({
+    name: "",
+    description: "",
+    images: [],
+    ticketPrice: "",
+    visible: true,
+    minValue: 1,
+  });
   const [currentTikketSelected, setCurrentTikketSelected] = useState<{
     email: string;
     id: string;
@@ -257,6 +96,9 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
   const orderToSend = filter == "pending" ? "asc" : orderTickets;
 
   const TOTAL_RAFFLE_TICKETS = 10000;
+  const [activeSection, setActiveSection] = useState<"tickets" | "rifa">(
+    "tickets",
+  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(
     () => localStorage.getItem("adminSidebarCollapsed") === "true",
@@ -264,38 +106,10 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
   const [theme, setTheme] = useState<"dark" | "light">(
     () => (localStorage.getItem("adminTheme") as "dark" | "light") || "dark",
   );
-  const [pendingCount, setPendingCount] = useState<number>(initialRaffle.pendingCount || 0);
-  const statsLoading = false;
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [detailTicket, setDetailTicket] = useState<TicketType | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [emailStatusError, setEmailStatusError] = useState("");
-  const [emailPollAttempt, setEmailPollAttempt] = useState(0);
-  const queuedEmailIds = tickets.filter((ticket) => ticket.approved &&
-    ["queued", "sending", "retrying"].includes(ticket.emailDelivery?.status || ""))
-    .map((ticket) => ticket._id).slice(0, 150).join(",");
-
-  useEffect(() => {
-    if (!queuedEmailIds || activeSection !== "tickets") return;
-    const controller = new AbortController();
-    let timer: ReturnType<typeof setTimeout>;
-    const poll = async () => {
-      try {
-        const statuses = await getEmailStatuses(queuedEmailIds.split(","), raffleId, controller.signal);
-        if (controller.signal.aborted) return;
-        const byId = new Map(statuses.map((ticket) => [ticket._id, ticket.emailDelivery]));
-        setEmailStatusError("");
-        setTickets((items) => items.map((ticket) => byId.has(ticket._id)
-          ? { ...ticket, emailDelivery: byId.get(ticket._id) } : ticket));
-        setDetailTicket((ticket) => ticket && byId.has(ticket._id)
-          ? { ...ticket, emailDelivery: byId.get(ticket._id) } : ticket);
-        timer = setTimeout(poll, 5000);
-      } catch (error) {
-        if (!controller.signal.aborted) setEmailStatusError(error instanceof Error ? error.message : "No se pudo consultar el envío de correos.");
-      }
-    };
-    timer = setTimeout(poll, 1000);
-    return () => { controller.abort(); clearTimeout(timer); };
-  }, [queuedEmailIds, raffleId, activeSection, emailPollAttempt]);
 
   useEffect(() => {
     localStorage.setItem("adminTheme", theme);
@@ -310,80 +124,60 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
     navigate("/admin");
   };
 
-  const closeVoucher = () => {
-    voucherRequest.current++;
-    setImgModalOpen(false);
-  };
-  useEffect(() => () => { voucherRequest.current++; }, []);
-  const handleOpenModal = async (id: string) => {
-    const request = ++voucherRequest.current;
-    setSelectedImage("");
-    setVoucherLoading(true);
+  const handleOpenModal = (image: string) => {
+    setSelectedImage(image);
     setImgModalOpen(true);
-    try {
-      const image = voucherCache.current.get(id) || await getTicketVoucher(id, raffleId);
-      if (request !== voucherRequest.current) return;
-      voucherCache.current.set(id, image);
-      setSelectedImage(image);
-    } catch (error) {
-      if (request !== voucherRequest.current) return;
-      setImgModalOpen(false);
-      swal.fire("Error", error instanceof Error ? error.message : "No se pudo cargar el comprobante.", "error");
-    } finally {
-      if (request === voucherRequest.current) setVoucherLoading(false);
-    }
   };
 
+  useEffect(() => {
+    fetchAuth(navigate);
+  }, [navigate]);
+
   const fetchGetTikkets = async () => {
-    const request = ++requestId.current;
-    ticketsController.current?.abort();
-    const controller = new AbortController();
-    ticketsController.current = controller;
     setIsLoadingPagination(true);
-    try {
     const responseTikkets: TicketType[] = await getTickets(
-      raffleId,
       filter,
       paymentMethod,
       pageTickets,
       orderToSend,
-      controller.signal,
     );
 
-    if (request === requestId.current) {
-      setTickets((prev) => pageTickets === 1 ? responseTikkets : [...prev, ...responseTikkets.filter((ticket) => !prev.some((item) => item._id === ticket._id))]);
+    if (responseTikkets) {
+      setTickets((prev) => [...prev, ...responseTikkets]);
       setIsLastPage(responseTikkets.length < numberToShow);
     }
-    } catch (error) {
-      if (request === requestId.current) swal.fire("Error", error instanceof Error ? error.message : "No se pudieron cargar las compras.", "error");
-    } finally {
-      if (request === requestId.current) {
-        setIsLoadingPagination(false);
-        setIsChangingTypes(false);
-      }
-    }
+
+    setIsLoadingPagination(false);
+    setIsChangingTypes(false);
   };
 
   useEffect(() => {
-    if (activeSection !== "tickets") return;
-    const query = `${filter}:${paymentMethod}:${orderTickets}`;
-    if (previousQuery.current !== query) {
-      previousQuery.current = query;
-      requestId.current++;
-      setIsChangingTypes(true);
-      setTickets([]);
-      setIsLastPage(false);
-      if (pageTickets !== 1) {
-        setPageTickets(1);
-        return;
-      }
-    }
     fetchGetTikkets();
-    return () => {
-      requestId.current++;
-      ticketsController.current?.abort();
+  }, [filter, paymentMethod, pageTickets, orderTickets]);
+
+  useEffect(() => {
+    setIsChangingTypes(true);
+    setTickets([]);
+    setPageTickets(1);
+    setIsLastPage(false);
+  }, [filter, paymentMethod, orderTickets]);
+
+  useEffect(() => {
+    const fethSoldNumbers = async () => {
+      const responseSoldNumbers = await getSoldNumbers();
+      setSoldNumber(responseSoldNumbers?.totalSold);
+      setStatsLoading(false);
     };
-  }, [filter, paymentMethod, pageTickets, orderTickets, activeSection]);
+    fethSoldNumbers();
+  }, []);
+
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      const res = await getTickets("pending", undefined, 1, "asc");
+      if (Array.isArray(res)) setPendingCount(res.length);
+    };
+    fetchPendingCount();
+  }, []);
 
   const filteredTickets = tickets.filter((ticket) => {
     const query = search.trim().toLowerCase();
@@ -395,7 +189,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
         ticket.email?.toLowerCase().includes(query)
       : true;
 
-    const matchesFilter = filter === "pending" ? !ticket.approved && !ticket.rejected : true;
+    const matchesFilter = filter === "pending" ? !ticket.approved : true;
 
     const matchesDateRange = (() => {
       if (!dateFrom && !dateTo) return true;
@@ -410,9 +204,21 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
       return true;
     })();
 
-    return !ticket.rejected && matchesSearch && matchesFilter && matchesDateRange &&
-      (!paymentMethod || ticket.paymentMethod === paymentMethod);
+    return matchesSearch && matchesFilter && matchesDateRange;
   });
+
+  useEffect(() => {
+    const fetchGetRaffle = async () => {
+      try {
+        const responseRaffle = await getRaffle();
+        setRaffleActually(responseRaffle[0]);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+
+    fetchGetRaffle();
+  }, []);
 
   const submitTikketApprove = async (id: string) => {
     const result = await swalSuccess.fire({
@@ -427,25 +233,22 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
     if (result.isConfirmed) {
       try {
         setLoadingId(id);
-        const approval = await tikketApprove(id, raffleId);
+        await tikketApprove(id);
         swalSuccess.fire({
           title: "¡Ticket aprobado!",
-          text: "Los números ya están guardados. El correo se enviará en segundo plano.",
           icon: "success",
           confirmButtonText: "Aceptar",
         });
         setTickets((prevTickets) =>
           prevTickets.map((ticket) =>
             ticket._id === id
-              ? { ...ticket, approved: true, approvalCodes: approval.approvalCodes, emailDelivery: approval.emailDelivery }
+              ? ({ ...ticket, approved: true } as unknown as TicketType)
               : ticket,
           ),
         );
         setPendingCount((c) => (c !== null ? Math.max(0, c - 1) : c));
-        setSoldNumber((count) => count + approval.approvalCodes.length);
       } catch (error) {
-        swal.fire("Error", error instanceof Error ? error.message : "No se pudo aprobar la compra.", "error");
-        fetchGetTikkets();
+        console.log(error);
       } finally {
         setLoadingId(null);
       }
@@ -465,7 +268,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
     if (result.isConfirmed) {
       try {
         setLoadingId(id);
-        await tikketDenied(id, raffleId);
+        await tikketDenied(id);
         swal.fire({
           title: "¡Ticket rechazado!",
           icon: "success",
@@ -476,7 +279,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
         );
         setPendingCount((c) => (c !== null ? Math.max(0, c - 1) : c));
       } catch (error) {
-        swal.fire("Error", error instanceof Error ? error.message : "No se pudo rechazar la compra.", "error");
+        console.log(error);
       } finally {
         setLoadingId(null);
       }
@@ -496,50 +299,17 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
     if (result.isConfirmed) {
       try {
         setResendEmailLoading(true);
-        const { emailDelivery } = await resendEmail(id, raffleId);
-        setTickets((items) => items.map((ticket) => ticket._id === id ? { ...ticket, emailDelivery } : ticket));
-        setDetailTicket((ticket) => ticket?._id === id ? { ...ticket, emailDelivery } : ticket);
+        await resendEmail(id);
         swalSuccess.fire({
-          title: "Correo en cola",
-          text: "Se enviará en segundo plano. Puedes seguir trabajando.",
+          title: "¡Ticket! reviando",
           icon: "success",
           confirmButtonText: "Aceptar",
         });
       } catch (error) {
-        swal.fire("Error", error instanceof Error ? error.message : "No se pudo reenviar el correo.", "error");
+        console.log(error);
       } finally {
         setResendEmailLoading(false);
       }
-    }
-  };
-
-  const submitDeleteTicket = async (ticket: TicketType) => {
-    const result = await swalDanger.fire({
-      title: "¿Eliminar esta compra?",
-      text: "Se anularán sus boletos aprobados y se liberarán sus números. El cliente no participará con ellos. Se conservará una copia de auditoría.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    });
-    if (!result.isConfirmed) return;
-    try {
-      setLoadingId(ticket._id);
-      const deleted = await deleteTicket(ticket._id, raffleId);
-      requestId.current++;
-      ticketsController.current?.abort();
-      setIsLoadingPagination(false);
-      setIsChangingTypes(false);
-      setTickets((items) => items.filter((item) => item._id !== ticket._id));
-      voucherCache.current.delete(ticket._id);
-      if (deleted.approved) setSoldNumber((count) => Math.max(0, count - deleted.releasedNumbers));
-      else if (!deleted.rejected) setPendingCount((count) => Math.max(0, count - 1));
-      if (detailTicket?._id === ticket._id) setIsDetailModalOpen(false);
-      swalSuccess.fire("Compra eliminada", "Se conservó una copia de auditoría.", "success");
-    } catch (error) {
-      swal.fire("Error", error instanceof Error ? error.message : "No se pudo eliminar la compra.", "error");
-    } finally {
-      setLoadingId(null);
     }
   };
 
@@ -557,8 +327,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
     });
     if (result.isConfirmed) {
       try {
-        const result = await raffleVisibility(raffleId);
-        setRaffleActually((raffle) => ({ ...raffle, visible: result.visible }));
+        await raffleVisibility();
         swalSuccess.fire({
           title: "Success",
           text: isCurrentlyVisible
@@ -568,27 +337,27 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
           confirmButtonText: "Okey",
         });
       } catch (error) {
-        swal.fire("Error", error instanceof Error ? error.message : "No se pudo cambiar la visibilidad.", "error");
+        console.log(error);
       }
     }
   };
 
   const clickedDeleteRaffle = async () => {
     const result = await swalDanger.fire({
-      title: "¿Cerrar esta rifa?",
-      html: "Se conservarán las compras y los números. La rifa pasará al historial de solo consulta. Resuelve primero todas las compras pendientes. No se puede reabrir.",
+      title: "¿Eliminar la rifa actual?",
+      html: "Esta acción <strong>borrará la rifa y TODOS los tickets</strong> (aprobados y pendientes) de forma permanente. No se puede deshacer.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, cerrar rifa",
+      confirmButtonText: "Sí, eliminar todo",
       cancelButtonText: "Cancelar",
     });
 
     if (result.isConfirmed) {
       try {
-        await closeRaffle(raffleId);
+        await deleteRaffle();
         swalSuccess.fire({
-          title: "Rifa cerrada",
-          text: "Se conservó todo su historial. Ya puedes crear otra rifa.",
+          title: "Rifa eliminada",
+          text: "La rifa y todos sus tickets fueron eliminados.",
           icon: "success",
           confirmButtonText: "Okey",
         });
@@ -597,20 +366,16 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
         console.log(error);
         swal.fire({
           title: "Error",
-          text: error instanceof Error ? error.message : "No se pudo cerrar la rifa.",
+          text: "No se pudo eliminar la rifa.",
           icon: "error",
         });
       }
     }
   };
 
-  const handleEmailUpdated = (updated: TicketType) => {
-    requestId.current++;
-    ticketsController.current?.abort();
-    setIsLoadingPagination(false);
-    setIsChangingTypes(false);
-    setTickets((items) => items.map((ticket) => ticket._id === updated._id ? { ...ticket, ...updated } : ticket));
-    setDetailTicket((ticket) => ticket?._id === updated._id ? { ...ticket, ...updated } : ticket);
+  const handleEmailUpdated = () => {
+    setTickets([]);
+    fetchGetTikkets();
   };
 
   const handleOpenDetail = (ticket: TicketType) => {
@@ -632,7 +397,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
     if (!ticketNumber?.trim()) return;
 
     try {
-      const result = await checkTicket(ticketNumber.trim(), raffleId);
+      const result = await checkTicket(ticketNumber.trim());
 
       if (result) {
         swal.fire({
@@ -740,13 +505,12 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          <div className={sidebarCollapsed ? "md:hidden" : ""}>{selector}</div>
           <p className={`px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 ${sidebarCollapsed ? "md:hidden" : ""}`}>
             Gestión
           </p>
           <button
             onClick={() => {
-              onSectionChange("tickets");
+              setActiveSection("tickets");
               setSidebarOpen(false);
             }}
             title="Tickets"
@@ -766,22 +530,23 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                 }`}
               >
                 {pendingCount}
+                {pendingCount >= numberToShow ? "+" : ""}
               </span>
             )}
           </button>
           <button
             onClick={() => {
-              onSectionChange("rifa");
+              setActiveSection("rifa");
               setSidebarOpen(false);
             }}
-            title="Rifas"
+            title="Rifa"
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${sidebarCollapsed ? "md:justify-center md:px-0" : ""} ${
               activeSection === "rifa"
                 ? "bg-blue-600 text-white"
                 : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
             }`}
           >
-            <FiGift size={18} /> <span className={sidebarCollapsed ? "md:hidden" : ""}>Rifas</span>
+            <FiGift size={18} /> <span className={sidebarCollapsed ? "md:hidden" : ""}>Rifa</span>
           </button>
 
           <p className={`px-3 pt-4 pb-1 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 ${sidebarCollapsed ? "md:hidden" : ""}`}>
@@ -838,9 +603,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
       </aside>
 
       {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Cerrar menú"
+        <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -851,8 +614,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
         <header className="sticky top-0 z-20 bg-white/90 border-b border-gray-200 dark:bg-gray-800/90 dark:border-gray-700 backdrop-blur px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
-              type="button"
-              aria-label="Abrir menú"
               className="md:hidden text-gray-500 dark:text-gray-300 shrink-0"
               onClick={() => setSidebarOpen(true)}
             >
@@ -861,7 +622,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
             <h1 className="text-lg md:text-xl font-bold truncate">
               {activeSection === "tickets"
                 ? "Listado de Tickets"
-                : "Rifas"}
+                : "Gestión de la Rifa"}
             </h1>
           </div>
           <div className="flex items-center flex-wrap gap-2 sm:gap-3">
@@ -883,7 +644,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
               <button
                 type="button"
                 onClick={handleSearchTicket}
-                title="Verificar si un número exacto fue vendido en la rifa seleccionada"
+                title="Verificar si un número exacto ya fue vendido en toda la base de datos"
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-gray-700 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap"
               >
                 <FiSearch size={15} /> <span className="hidden sm:inline">Verificar Números</span>
@@ -904,7 +665,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
         <main className="p-4 md:p-6 flex-1">
           {activeSection === "tickets" && (
             <>
-              {emailStatusError && <p role="alert" className="text-red-500 mb-3">{emailStatusError} <button type="button" className="underline" onClick={() => setEmailPollAttempt((attempt) => attempt + 1)}>Reintentar</button></p>}
               {/* Estadísticas */}
               <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
                 <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-xl sm:rounded-2xl p-2.5 sm:p-5">
@@ -1082,7 +842,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                   </div>
                   {(dateFrom || dateTo || search) && (
                     <button
-                      disabled={isClosed}
                       type="button"
                       onClick={() => {
                         setDateFrom("");
@@ -1153,11 +912,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                             >
                               {ticket.email}
                             </span>
-                            {ticket.approved && ticket.emailDelivery && (
-                              <p className={`text-xs mb-1 ${ticket.emailDelivery.status === "failed" ? "text-red-500" : "text-gray-500 dark:text-gray-400"}`}>
-                                {emailDeliveryLabel(ticket.emailDelivery)}
-                              </p>
-                            )}
                           </td>
                           <td className="px-2 md:px-4 py-2">
                             {ticket.numberTickets}
@@ -1177,8 +931,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                           <td className="px-2 md:px-4 py-2">
                             <button
                               type="button"
-                              onClick={() => handleOpenModal(ticket._id)}
-                              disabled={!ticket.hasVoucher}
+                              onClick={() => handleOpenModal(ticket.voucher)}
                               title="Ver comprobante"
                               aria-label="Ver comprobante"
                               className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-blue-600 dark:text-blue-300 hover:bg-blue-500/15 transition"
@@ -1187,18 +940,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                             </button>
                           </td>
                           <td className="px-2 md:px-4 py-2">
-                            {ticket.approved && !ticket.rejected && (
-                              <button
-                                type="button"
-                                disabled={isClosed || loadingId === ticket._id}
-                                onClick={() => submitDeleteTicket(ticket)}
-                                title="Eliminar compra"
-                                aria-label="Eliminar compra"
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-danger hover:bg-danger/15 disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                <FiTrash2 size={16} />
-                              </button>
-                            )}
                             {ticket.approved ? (
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
@@ -1211,7 +952,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                                   <FiInfo size={16} />
                                 </button>
                                 <button
-                                  disabled={isClosed}
                                   type="button"
                                   onClick={() => {
                                     setModalEditEmail(true);
@@ -1228,6 +968,15 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                                   className="w-8 h-8 flex items-center justify-center rounded-lg text-blue-600 dark:text-blue-300 hover:bg-blue-500/15 transition"
                                 >
                                   <FiEdit2 size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => submitTikketDenied(ticket._id)}
+                                  title="Eliminar registro de ticket"
+                                  aria-label="Eliminar registro de ticket"
+                                  className="w-8 h-8 flex items-center justify-center rounded-lg text-danger hover:bg-danger/15 transition"
+                                >
+                                  <FiTrash2 size={16} />
                                 </button>
                                 {resendEmailLoading ? (
                                   <Skeleton
@@ -1257,7 +1006,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                                     />
                                   ) : (
                                     <Button
-                                      disabled={isClosed}
                                       variant="success"
                                       size="sm"
                                       icon={<FiCheck size={16} />}
@@ -1276,7 +1024,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                                     />
                                   ) : (
                                     <Button
-                                      disabled={isClosed}
                                       variant="danger"
                                       size="sm"
                                       icon={<FiX size={16} />}
@@ -1349,7 +1096,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                     onClick={() => {
                       if (!isLastPage) setPageTickets((prev) => prev + 1);
                     }}
-                    disabled={isLastPage || isLoadingPagination}
+                    disabled={isLastPage}
                   >
                     Siguiente
                   </Button>
@@ -1359,17 +1106,15 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
           )}
 
           {activeSection === "rifa" && (
-            <div className="max-w-3xl mx-auto space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-bold">{isClosed ? "Rifa anterior seleccionada" : "Rifa actual"}</h2>
-                <Button icon={<FiPlus />} onClick={onCreateRaffle}>Crear nueva rifa</Button>
-              </div>
+            <div className="max-w-xl mx-auto space-y-6 flex flex-col justify-center min-h-[calc(100vh-160px)]">
               <div className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-2xl overflow-hidden">
                 {raffleActually?.images?.[0] && (
                   <div className="w-full h-64 sm:h-80 bg-gray-100 dark:bg-black/40">
                     <img
                       src={
-                        raffleActually.images[0]
+                        raffleActually.images[0].includes("uploads/")
+                          ? raffleActually.images[0].split("uploads/")[1]
+                          : raffleActually.images[0]
                       }
                       alt={raffleActually.name}
                       className="w-full h-full object-cover"
@@ -1428,17 +1173,24 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {isClosed && <p className="sm:col-span-2">Rifa cerrada. El historial se conserva en modo de consulta.</p>}
+                {raffleActually?.name ? (
+                  <Button
+                    variant="primary"
+                    icon={<FiEdit3 />}
+                    onClick={() => setModalUpdateRaffle(true)}
+                  >
+                    Actualizar rifa
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    icon={<FiPlus />}
+                    onClick={() => setModalCreateRaffle(true)}
+                  >
+                    Crear nueva rifa
+                  </Button>
+                )}
                 <Button
-                  disabled={isClosed}
-                  variant="primary"
-                  icon={<FiEdit3 />}
-                  onClick={() => setModalUpdateRaffle(true)}
-                >
-                  Actualizar rifa
-                </Button>
-                <Button
-                  disabled={isClosed}
                   variant="danger"
                   icon={raffleActually?.visible ? <FiEyeOff /> : <FiEye />}
                   onClick={() => clickedRaffleVisibility()}
@@ -1447,43 +1199,15 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
                 </Button>
                 {raffleActually?.name && (
                   <Button
-                    disabled={isClosed}
                     variant="outline"
                     icon={<FiTrash2 />}
                     className="sm:col-span-2 !text-danger !border-danger/40 hover:!bg-danger/10"
                     onClick={() => clickedDeleteRaffle()}
                   >
-                    Cerrar rifa y conservar historial
+                    Eliminar rifa actual
                   </Button>
                 )}
               </div>
-              <Button variant="outline" icon={<FiTag />} onClick={() => onSectionChange("tickets")}>
-                Ver compras y números de esta rifa
-              </Button>
-              {catalogControl}
-              {catalogLoaded && [
-                { title: "Otras rifas activas", items: raffles.filter((raffle) => raffle.status === "active" && raffle._id !== raffleId) },
-                { title: "Rifas anteriores", items: raffles.filter((raffle) => raffle.status === "closed") },
-              ].map(({ title, items }) => (
-                <section key={title} className="space-y-3">
-                  <h2 className="text-lg font-bold">{title}</h2>
-                  {items.length ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {items.map((raffle) => (
-                        <button key={raffle._id} type="button" onClick={() => onOpenRaffle(raffle._id, "rifa")}
-                          aria-current={raffle._id === raffleId ? "page" : undefined}
-                          className="flex items-center gap-3 text-left p-4 rounded-xl border border-gray-200 bg-white hover:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-400">
-                          <FiGift className="text-blue-500 shrink-0" size={22} />
-                          <span className="min-w-0 flex-1"><span className="block font-semibold truncate">{raffle.name}</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{raffle.status === "closed" ? "Cerrada · Ver historial" : "Activa · Abrir rifa"}</span>
-                          </span>
-                          <FiChevronRight className="shrink-0" />
-                        </button>
-                      ))}
-                    </div>
-                  ) : <p className="text-sm text-gray-500 dark:text-gray-400">{title === "Rifas anteriores" ? "Aún no hay rifas anteriores." : "No hay otras rifas activas."}</p>}
-                </section>
-              ))}
             </div>
           )}
         </main>
@@ -1495,16 +1219,21 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
         onClose={() => setIsModalDollarOpen(false)}
       />
       <TopBuyersModal
-        raffleId={raffleId}
         isOpen={isModalBuyersOpen}
         onClose={() => setIsModalBuyersOpen(false)}
         theme={theme}
       />
       <MoneySummaryModal
-        raffleId={raffleId}
         isOpen={isModalSummaryOpen}
         onClose={() => setIsModalSummaryOpen(false)}
       />
+
+      {modalCreateRaffle && (
+        <CreateRaffleModal
+          isOpen={modalCreateRaffle}
+          onClose={() => setModalCreateRaffle(false)}
+        ></CreateRaffleModal>
+      )}
 
       {modalUpdateRaffle && (
         <UpdateRaffleModal
@@ -1516,8 +1245,6 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
 
       {modalEditEmail && (
         <EditEmailModal
-          raffleId={raffleId}
-          approved={Boolean(tickets.find((ticket) => ticket._id === currentTikketSelected.id)?.approved)}
           currentTikketSelected={currentTikketSelected}
           isOpen={modalEditEmail}
           onClose={() => setModalEditEmail(false)}
@@ -1528,8 +1255,7 @@ function RafflePanel({ initialRaffle, selector, raffles, activeSection, onSectio
       {imgModalOpen && (
         <ImageModal
           imageUrl={selectedImage}
-          loading={voucherLoading}
-          onClose={closeVoucher}
+          onClose={() => setImgModalOpen(false)}
         />
       )}
 

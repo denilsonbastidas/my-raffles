@@ -6,7 +6,6 @@ import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
 import Button from "@/components/ui/Button";
 import PrizesEditor from "@/components/ui/PrizesEditor";
-import { swal } from "@/utils/swal";
 
 export const CreateRaffleModal = ({
   isOpen,
@@ -71,11 +70,10 @@ export const CreateRaffleModal = ({
 
     try {
       setSubmitting(true);
-      const { raffle } = await submitCreateRaffle(raffleData);
-      window.location.assign(`/admin/panel?rifa=${raffle._id}&seccion=rifas`);
+      await submitCreateRaffle(raffleData);
+      window.location.reload();
     } catch (error) {
       console.error("Error al crear la rifa:", error);
-      swal.fire("Error", error instanceof Error ? error.message : "No se pudo crear la rifa.", "error");
       setSubmitting(false);
     }
   };

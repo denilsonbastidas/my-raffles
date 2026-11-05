@@ -1,34 +1,38 @@
-# Rifas Denilson - Frontend
+# Rifas Denilson: una sola rifa
 
-## Rifas e historial
+Restaurado el funcionamiento previo a multiples rifas (base `70bc07e`): una rifa, panel original, sin selector, carousel de historial ni paginas de rifas cerradas. Crear otra requiere eliminar la existente y sus tickets, como antes.
 
-- El inicio presenta una rifa activa y permite entrar a las demas rifas activas.
-- Antes del footer aparece el carrusel de rifas anteriores, incluso si no hay ninguna activa.
-- `/rifas/:raffleId` muestra la rifa seleccionada. Si esta cerrada, solo presenta su informacion, premios y consulta de numeros por correo; no muestra compras ni metodos de pago.
-- El panel permite seleccionar cada rifa y consultar sus compras, pagos y ranking sin mezclar datos. Crear una nueva no reemplaza las anteriores.
-- Cerrar conserva el historial y requiere resolver primero las compras pendientes. Ocultar y cerrar son acciones distintas.
-- El modal de comprobantes muestra directamente la imagen Base64 o URL entregada por el backend, sin recortar rutas. Si no puede cargarla, muestra un aviso.
-- El admin carga primero solo la rifa actual y sus tickets, sin solicitar el catalogo historico. Las otras rifas se consultan al abrir o enfocar el selector (con aviso de carga local) o pulsar Cargar otras rifas e historial en Rifas; el resultado se conserva durante la sesion del panel y sus detalles se descargan solo al seleccionarlas. Si el catalogo confirma que hay una sola rifa, el selector queda deshabilitado. Los comprobantes se descargan al abrirlos y se reutilizan durante la sesion de esa rifa.
-- La carga inicial y el cambio de rifa muestran skeletons de la estructura del panel, sin loader de pantalla completa, respetando el tema y la seccion seleccionada.
-- Editar una compra actualiza solo su fila, sin volver a descargar la tabla. Solo las aprobadas muestran Eliminar: requiere confirmacion, libera los numeros y conserva una copia de auditoria en el backend. Las pendientes se rechazan y las rechazadas no aparecen en ningun listado. Las rifas cerradas siguen siendo de solo consulta.
-- El selector esta en el sidebar, antes de Gestion, y queda deshabilitado si solo hay una rifa. La seccion **Rifas** contiene la rifa seleccionada arriba, las anteriores debajo, enlaces para consultar cada una y el boton Crear nueva rifa; ese boton ya no aparece en el header general. `?rifa=ID&seccion=rifas` permite abrir directamente su informacion.
-- Aprobar guarda los numeros y responde sin esperar el correo. El panel muestra correo en cola, enviando, pendiente de reintento, enviado o fallido; el estado se consulta sin descargar de nuevo la tabla. Reenviar tampoco bloquea esperando al proveedor. Los errores de envio no revierten la aprobacion ni generan nuevos numeros.
-- Editar el contacto solo envia cantidad y metodo de pago si cambiaron, para evitar lecturas y recalculos innecesarios. La seccion Rifas no descarga tickets hasta entrar en su listado.
+Desplegar este frontend junto con el backend de una sola rifa en `master`. Mantener `VITE_API_URL` apuntando al mismo backend; no se requieren variables nuevas. La base no se revierte al cambiar commits: consultar la guia del backend antes del despliegue. Los datos aprobados se conservan y los rechazados migrados siguen ocultos.
 
-## Desarrollo
+Validar con `npm.cmd run build`.
 
-```powershell
-npm.cmd ci
-$env:VITE_API_URL = "http://localhost:5000"
-npm.cmd run dev
+## Plantilla original
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+
+- Configure the top-level `parserOptions` property like this:
+
+```js
+export default {
+  // other rules...
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: ['./tsconfig.json', './tsconfig.node.json'],
+    tsconfigRootDir: __dirname,
+  },
+}
 ```
 
-`VITE_API_URL` es opcional; sin esta variable se usa el backend de Railway configurado en los servicios.
-Para produccion, configurar explicitamente `VITE_API_URL` en Vercel con el origen HTTPS del backend, sin `/api` ni barra final, y volver a desplegar. No poner claves de MongoDB, Brevo ni el token administrador en variables `VITE_`: se publican en el navegador.
-La plantilla `.env.example` no contiene secretos. Vercel debe desplegar la rama `master`, ejecutar `npm run build` y publicar `dist`. Las reglas de `vercel.json` cubren los enlaces directos de `/rifas/:raffleId`.
-Para validar: `npm.cmd run build`.
-El despliegue debe coordinarse con el backend actualizado y su migracion de `raffleId`; consultar la [guia del backend](../my-raffles-back/README.md) antes de habilitar compras.
-
-## Base tecnica
-
-React, TypeScript, Vite, Tailwind, React Router y Swiper.
+- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
+- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list

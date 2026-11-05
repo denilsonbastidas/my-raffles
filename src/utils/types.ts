@@ -4,13 +4,6 @@ export interface PrizeType {
 }
 
 export interface RaffleType {
-  _id?: string;
-  status?: "active" | "closed";
-  createdAt?: string;
-  closedAt?: string;
-  totalSold?: number;
-  totalSoldWithNoAproved?: number;
-  pendingCount?: number;
   name: string;
   description: string;
   images: string[];
@@ -19,51 +12,22 @@ export interface RaffleType {
   minValue: number;
   prizes?: PrizeType[];
 }
-export interface RaffleRecord extends RaffleType {
-  _id: string;
-  status: "active" | "closed";
-}
-export type RaffleOption = Pick<RaffleRecord, "_id" | "name" | "status">;
 export interface ResponseAuthType {
   message: string;
   token: string;
 }
 
 export interface TicketType {
-  emailDelivery?: {
-    status: "queued" | "sending" | "retrying" | "sent" | "failed";
-    sentAt?: string;
-  };
   numberTickets: number;
   fullName: string;
   email: string;
   phone: string;
   reference: string;
-  voucher?: string;
-  hasVoucher?: boolean;
+  voucher: string;
   paymentMethod: string;
   amountPaid: string;
-  approved: boolean;
-  raffleId: string;
-  rejected?: boolean;
+  approved: string;
   _id: string;
   approvalCodes: string[];
   createdAt?: string;
 }
-
-export const emailDeliveryLabel = (delivery: TicketType["emailDelivery"]) => {
-  switch (delivery?.status) {
-    case "queued":
-      return "Correo en cola";
-    case "sending":
-      return "Enviando correo";
-    case "retrying":
-      return "Correo pendiente de reintento";
-    case "sent":
-      return "Correo enviado";
-    case "failed":
-      return "Correo fallido · Reenviar";
-    default:
-      return "";
-  }
-};

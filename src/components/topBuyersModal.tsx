@@ -17,7 +17,6 @@ import Button from "@/components/ui/Button";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface TopBuyersModalProps {
-  raffleId: string;
   isOpen: boolean;
   onClose: () => void;
   theme?: "dark" | "light";
@@ -31,7 +30,7 @@ interface Buyer {
   purchases: number;
 }
 
-const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose, theme = "dark", raffleId }) => {
+const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose, theme = "dark" }) => {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [view, setView] = useState<"info" | "chart">("info");
@@ -45,8 +44,8 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose, theme 
       setLoading(true);
       const data =
         filter === "custom"
-          ? await getTopBuyers(raffleId, "custom", startDate, endDate)
-          : await getTopBuyers(raffleId, "total");
+          ? await getTopBuyers("custom", startDate, endDate)
+          : await getTopBuyers("total");
       setBuyers(data);
     } catch (err) {
       console.error("Error al obtener top de compradores:", err);
@@ -60,7 +59,7 @@ const TopBuyersModal: React.FC<TopBuyersModalProps> = ({ isOpen, onClose, theme 
     if (isOpen) {
       fetchData();
     }
-  }, [isOpen, filter, raffleId]);
+  }, [isOpen, filter]);
 
   const handleApplyFilter = () => {
     if (!startDate || !endDate) {

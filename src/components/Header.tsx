@@ -77,9 +77,8 @@ function HeaderPage({
             </a>
             <button
               type="button"
-              disabled={!hasRaffle}
               onClick={onVerifyClick}
-              className="px-3 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition"
             >
               <FiSearch size={16} /> Consultar Números
             </button>

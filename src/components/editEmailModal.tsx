@@ -4,21 +4,12 @@ import { swal, swalSuccess } from "@/utils/swal";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { TicketType } from "@/utils/types";
 
 interface EditEmailProps {
-  raffleId: string;
-  approved: boolean;
-  currentTikketSelected: {
-    email: string;
-    id: string;
-    phone: string;
-    numberTickets: number;
-    paymentMethod: string;
-  };
+  currentTikketSelected: { email: string; id: string; phone: string, numberTickets: number, paymentMethod: string };
   isOpen: boolean;
   onClose: () => void;
-  onEmailUpdated: (ticket: TicketType) => void;
+  onEmailUpdated: (id: string, newEmail: string, newPhone: string, newNumberTickets: number, newPaymentMethod: string) => void;
 }
 
 const EditEmailModal: React.FC<EditEmailProps> = ({
@@ -26,8 +17,6 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
   onClose,
   currentTikketSelected,
   onEmailUpdated,
-  raffleId,
-  approved,
 }) => {
   const [selectedTikket, setSelectedTikket] = useState<{
     email: string;
@@ -37,11 +26,6 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
     paymentMethod: string;
   }>(currentTikketSelected);
   const [loading, setLoading] = useState<boolean>(false);
-  const hasChanges =
-    selectedTikket.email !== currentTikketSelected.email ||
-    selectedTikket.phone !== currentTikketSelected.phone ||
-    selectedTikket.numberTickets !== currentTikketSelected.numberTickets ||
-    selectedTikket.paymentMethod !== currentTikketSelected.paymentMethod;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,21 +44,12 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
 
     try {
       setLoading(true);
-      const { ticket } = await updatedUser(
+      await updatedUser(
         selectedTikket.id,
-        selectedTikket.email !== currentTikketSelected.email
-          ? selectedTikket.email
-          : undefined,
-        selectedTikket.phone !== currentTikketSelected.phone
-          ? selectedTikket.phone
-          : undefined,
-        selectedTikket.numberTickets !== currentTikketSelected.numberTickets
-          ? selectedTikket.numberTickets
-          : undefined,
-        selectedTikket.paymentMethod !== currentTikketSelected.paymentMethod
-          ? selectedTikket.paymentMethod
-          : undefined,
-        raffleId,
+        selectedTikket.email,
+        selectedTikket.phone,
+        selectedTikket.numberTickets,
+        selectedTikket.paymentMethod
       );
 
       swalSuccess.fire({
@@ -83,17 +58,16 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
         confirmButtonText: "Aceptar",
       });
 
-      onEmailUpdated(ticket);
+      onEmailUpdated(
+        selectedTikket.id,
+        selectedTikket.email,
+        selectedTikket.phone,
+        selectedTikket.numberTickets,
+        selectedTikket.paymentMethod,
+      );
       onClose();
     } catch (error) {
       console.error("Error actualizar Datos:", error);
-      swal.fire(
-        "Error",
-        error instanceof Error
-          ? error.message
-          : "No se pudieron actualizar los datos.",
-        "error",
-      );
     } finally {
       setLoading(false);
     }
@@ -137,7 +111,6 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
           name="numberTickets"
           placeholder="Cantidad de Tickets"
           min="1"
-          disabled={approved}
           value={selectedTikket.numberTickets}
           onChange={(e) =>
             setSelectedTikket({
@@ -160,10 +133,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
             className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-primary transition"
             value={selectedTikket.paymentMethod}
             onChange={(e) =>
-              setSelectedTikket({
-                ...selectedTikket,
-                paymentMethod: e.target.value,
-              })
+              setSelectedTikket({ ...selectedTikket, paymentMethod: e.target.value })
             }
             required
           >
@@ -174,13 +144,7 @@ const EditEmailModal: React.FC<EditEmailProps> = ({
           </select>
         </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          fullWidth
-          loading={loading}
-          disabled={!hasChanges}
-        >
+        <Button type="submit" variant="primary" fullWidth loading={loading}>
           Guardar Cambios
         </Button>
       </form>
