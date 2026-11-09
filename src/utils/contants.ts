@@ -23,5 +23,5 @@ export const banksData = [
   //   nameZelle: "Maykol sierra",
   // },
 ];
-export const PHONE_SUPPORT = "+58422-0106406";
+export const PHONE_SUPPORT = "+58424-3591724";
 export const EXCHANGE_RATE = 135;
